@@ -288,11 +288,43 @@ export default function AgentBuilderPage() {
 
             <div className="relative w-full p-8">
               <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
+                {/* <div className="flex items-center gap-3">
                   <Image src="/riwa-logo.png" height={32} width={32} alt="logo" className="object-contain" style={{ background: "transparent" }} />
                   <div>
                     <h2 className="text-neutral-100 font-light uppercase text-base tracking-[0.12em]">RIWAA</h2>
                     <p className="text-xs tracking-[0.35em] uppercase text-neutral-500 font-medium">Agent Profiler</p>
+                  </div>
+                </div> */}
+                <div className="flex items-center gap-4">
+                  {/* RIWAA */}
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-xl">
+                      <Image
+                        src="/riwa-logo.png"
+                        height={26}
+                        width={26}
+                        alt="RIWAA"
+                        className="object-contain"
+                      />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <h2 className="text-neutral-100 font-light uppercase text-[15px] tracking-[0.28em] leading-none">
+                        RIWAA
+                      </h2>
+                      <span className="text-[9px] tracking-[0.24em] uppercase text-neutral-500 mt-2">
+                        Agent Profiler
+                      </span>
+                    </div>
+                  </div>
+                  {/* Divider */}
+                  <div className="h-8 w-px bg-white/10" />
+                  {/* Powered By */}
+                  <div className="flex flex-col justify-center">
+                    <img
+                      src="https://solvetude.com/wp-content/uploads/2026/04/logo-new-5.webp"
+                      alt="Solvetude"
+                      className="h-8 w-auto object-contain opacity-90"
+                    />
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -305,7 +337,6 @@ export default function AgentBuilderPage() {
                   </button>
                 </div>
               </div>
-
               <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showHistory ? "max-h-64 opacity-100 mb-6" : "max-h-0 opacity-0 mb-0"}`}>
                 <div className="p-4 rounded-2xl bg-black/40 border border-white/5 overflow-y-auto max-h-60 no-scrollbar space-y-1">
                   {history?.length === 0 ? (
