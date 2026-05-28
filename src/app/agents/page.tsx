@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
@@ -575,9 +576,39 @@ export default function AgentBuilderPage() {
             {extractedData.hero && (
               <AgentHero data={extractedData.hero} isEditable={!isFromHistory} onUpdate={(field, value) => { setExtractedData({ ...extractedData, hero: { ...extractedData.hero, [field]: value } }); setHasUnsavedChanges(true); }} />
             )}
-            {extractedData.metrics && <AgentMetrics data={extractedData.metrics} />}
-            {extractedData.timeline && <AgentTimeline timeline={extractedData.timeline} />}
-            {extractedData.expertise && <AgentExpertise data={extractedData.expertise} />}
+
+            {extractedData.metrics && (
+              <AgentMetrics
+                data={extractedData.metrics}
+                isEditable={!isFromHistory}
+                onUpdate={(field, value) => {
+                  setExtractedData({ ...extractedData, metrics: { ...extractedData.metrics, [field]: value } });
+                  setHasUnsavedChanges(true);
+                }}
+              />
+            )}
+
+            {extractedData.timeline && (
+              <AgentTimeline
+                timeline={extractedData.timeline}
+                isEditable={!isFromHistory}
+                onUpdate={(field, value) => {
+                  setExtractedData({ ...extractedData, [field]: value }); // Timeline sends the whole array back to the root 'timeline' key
+                  setHasUnsavedChanges(true);
+                }}
+              />
+            )}
+
+            {extractedData.expertise && (
+              <AgentExpertise
+                data={extractedData.expertise}
+                isEditable={!isFromHistory}
+                onUpdate={(field, value) => {
+                  setExtractedData({ ...extractedData, expertise: { ...extractedData.expertise, [field]: value } });
+                  setHasUnsavedChanges(true);
+                }}
+              />
+            )}
 
             <AgentPartnerships data={extractedData.partnerships} isEditable={!isFromHistory} onUpdate={(field: string, value: any) => { setExtractedData({ ...extractedData, [field]: value }); setHasUnsavedChanges(true); }} />
             <AgentMedia data={extractedData.mediaPresence} isEditable={!isFromHistory} onUpdate={(field: string, value: any) => { setExtractedData({ ...extractedData, [field]: value }); setHasUnsavedChanges(true); }} />
