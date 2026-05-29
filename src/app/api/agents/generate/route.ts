@@ -89,7 +89,7 @@ async function fetchBrokerData(url: string) {
     await page.setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 15000 });
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     const data = await page.evaluate(() => {
       const clean = (value?: string | null) => (value || "").replace(/\s+/g, " ").trim();
@@ -105,8 +105,15 @@ async function fetchBrokerData(url: string) {
 
       const summaryCards = Array.from(document.querySelectorAll('[data-testid="summary"] > div'));
       const summaryStats = summaryCards.map((card) => {
-        const spans = Array.from(card.querySelectorAll("span"));
-        return { value: clean(spans?.[0]?.textContent), title: clean(spans?.[1]?.textContent) };
+        // card.children[0] grabs the entire value block (e.g., "55" or "1 Billion AED")
+        const valueText = card.children[0]?.textContent;
+        // card.children[1] grabs the entire title block (e.g., "Properties for Sale")
+        const titleText = card.children[1]?.textContent;
+
+        return {
+          value: clean(valueText),
+          title: clean(titleText)
+        };
       });
 
       const telLink = document.querySelector('a[href^="tel:"]')?.getAttribute("href");

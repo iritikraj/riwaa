@@ -312,7 +312,7 @@ export default function AgentBuilderPage() {
                         RIWAA
                       </h2>
                       <span className="text-[9px] tracking-[0.24em] uppercase text-neutral-500 mt-2">
-                        Agent Profiler
+                        Powered by
                       </span>
                     </div>
                   </div>
@@ -321,7 +321,7 @@ export default function AgentBuilderPage() {
                   {/* Powered By */}
                   <div className="flex flex-col justify-center">
                     <img
-                      src="https://solvetude.com/wp-content/uploads/2026/04/logo-new-5.webp"
+                      src="solvetude-logo.png"
                       alt="Solvetude"
                       className="h-8 w-auto object-contain opacity-90"
                     />
