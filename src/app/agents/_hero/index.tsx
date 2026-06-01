@@ -176,10 +176,11 @@ export function AgentHero({
             transition={{ duration: 1.2, delay: 0.2, ease: "easeOut" }}
             className="lg:col-span-4 flex justify-center lg:justify-end mt-12 lg:mt-0"
           >
-            <div className="w-full max-w-[200px] sm:max-w-[220px] lg:max-w-[240px] relative group">
+            {/* We removed the strict max-w here so the languages box can breathe */}
+            <div className="w-full sm:w-auto relative group flex flex-col items-center lg:items-end">
 
-              {/* Portrait Container */}
-              <div className="relative z-10">
+              {/* Portrait Container - Max width applied ONLY here */}
+              <div className="relative z-10 w-full max-w-[160px] sm:max-w-[180px] lg:max-w-[200px]">
                 {/* Elegant Offset Frame */}
                 <div className="absolute top-4 -right-4 w-full h-full border border-[#b8924a]/40 z-0 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
 
@@ -240,8 +241,8 @@ export function AgentHero({
                 )}
               </div>
 
-              {/* Bottom Info Cards (Languages) */}
-              <div className="relative z-10 mt-12">
+              {/* Bottom Info Cards (Languages) - Now allowed to be wider than the image */}
+              <div className="relative z-10 mt-12 w-full max-w-[260px] lg:max-w-[280px]">
                 <div className="bg-white/70 backdrop-blur-xl border border-[#e7dccd]/80 p-5 shadow-sm hover:shadow-md transition-shadow duration-300">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">

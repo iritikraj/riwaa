@@ -598,7 +598,7 @@ export default function AgentBuilderPage() {
           <div className="pt-[68px]">
             <header className="w-full bg-[#f9f6f1] py-2 flex items-center justify-center border-b border-[#e0d8cc]/60 relative z-50">
               {extractedData.companyLogo ? (
-                <img src={extractedData.companyLogo} alt="Brokerage Logo" className="h-14 md:h-20 object-contain mix-blend-multiply opacity-90" />
+                <img src={extractedData.companyLogo} alt="Brokerage Logo" className="h-18 md:h-28 object-contain mix-blend-multiply opacity-90" />
               ) : (
                 <h2 className="font-serif text-xl tracking-[0.35em] uppercase text-[#b8924a] font-light">Exclusive Partner</h2>
               )}
