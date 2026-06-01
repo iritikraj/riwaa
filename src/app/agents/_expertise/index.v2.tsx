@@ -174,11 +174,11 @@ export function AgentExpertiseVersionTwo({
                               } transition-colors`}
                           />
 
-                          {isEditable && (
+                          {/* {isEditable && (
                             <p className="mt-2 text-[9px] uppercase tracking-[0.28em] text-slate-500">
                               Clear text to remove
                             </p>
-                          )}
+                          )} */}
                         </div>
 
                         <div className="text-right">
@@ -225,7 +225,7 @@ export function AgentExpertiseVersionTwo({
                 text={safeQuote}
                 isEditable={isEditable}
                 onUpdate={(val) => onUpdate?.("marketQuote", val)}
-                className={`font-sans text-[28px] leading-[1.5] tracking-[-0.03em] text-white md:text-[36px] ${isEditable ? "hover:bg-white/10" : ""
+                className={`font-sans text-[20px] leading-[1.5] tracking-[-0.03em] text-white md:text-[28px] ${isEditable ? "hover:bg-white/10" : ""
                   } rounded transition-colors`}
               />
 
