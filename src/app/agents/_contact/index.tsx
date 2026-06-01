@@ -82,7 +82,7 @@ export function AgentContact({ agentId, agentName, whatsapp }: { agentId?: numbe
               </button>
             </a>
 
-            <div className="border border-white/10 bg-white/[0.02] p-6 mt-8">
+            <div className="border border-white/10 bg-white/2 p-6 mt-8">
               <div className="text-[10px] font-semibold tracking-[0.35em] uppercase text-white/40 mb-3">Headquarters Location</div>
               <p className="text-xs font-light text-white/60 leading-relaxed">
                 Gate Avenue, Executive Tower B<br />
@@ -92,7 +92,7 @@ export function AgentContact({ agentId, agentName, whatsapp }: { agentId?: numbe
             </div>
           </div>
 
-          <div className="bg-white/[0.02] border border-white/10 p-8 rounded-xl relative">
+          <div className="bg-white/2 border border-white/10 p-8 rounded-xl relative">
             {submissionStatus === "success" ? (
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-16 text-center space-y-4">
                 <CheckCircle2 size={48} className="text-[#d4af71] mx-auto animate-bounce" />
@@ -104,12 +104,12 @@ export function AgentContact({ agentId, agentName, whatsapp }: { agentId?: numbe
                 <div className="text-[10px] font-semibold tracking-[0.35em] uppercase text-white/40 mb-4">Registration Dossier</div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <input name="firstName" required type="text" placeholder="First Name" className="w-full bg-white/[0.05] border border-white/10 text-white text-xs font-light px-4 py-3.5 outline-none focus:border-[#d4af71] transition-colors rounded-none" />
-                  <input name="lastName" required type="text" placeholder="Last Name" className="w-full bg-white/[0.05] border border-white/10 text-white text-xs font-light px-4 py-3.5 outline-none focus:border-[#d4af71] transition-colors rounded-none" />
+                  <input name="firstName" required type="text" placeholder="First Name" className="w-full bg-white/5 border border-white/10 text-white text-xs font-light px-4 py-3.5 outline-none focus:border-[#d4af71] transition-colors rounded-none" />
+                  <input name="lastName" required type="text" placeholder="Last Name" className="w-full bg-white/5 border border-white/10 text-white text-xs font-light px-4 py-3.5 outline-none focus:border-[#d4af71] transition-colors rounded-none" />
                 </div>
 
-                <input name="email" required type="email" placeholder="Secure Email Address" className="w-full bg-white/[0.05] border border-white/10 text-white text-xs font-light px-4 py-3.5 outline-none focus:border-[#d4af71] transition-colors rounded-none" />
-                <input name="phone" required type="tel" placeholder="Phone / Encrypted Channel" className="w-full bg-white/[0.05] border border-white/10 text-white text-xs font-light px-4 py-3.5 outline-none focus:border-[#d4af71] transition-colors rounded-none" />
+                <input name="email" required type="email" placeholder="Secure Email Address" className="w-full bg-white/5 border border-white/10 text-white text-xs font-light px-4 py-3.5 outline-none focus:border-[#d4af71] transition-colors rounded-none" />
+                <input name="phone" required type="tel" placeholder="Phone / Encrypted Channel" className="w-full bg-white/5 border border-white/10 text-white text-xs font-light px-4 py-3.5 outline-none focus:border-[#d4af71] transition-colors rounded-none" />
 
                 <select name="interest" required className="w-full bg-[#2d2d2d] border border-white/10 text-white text-xs font-light px-4 py-3.5 outline-none focus:border-[#d4af71] transition-colors rounded-none appearance-none">
                   <option value="" disabled selected>Asset Domain Interest</option>
@@ -127,7 +127,7 @@ export function AgentContact({ agentId, agentName, whatsapp }: { agentId?: numbe
                   <option value="tier4">$100M+</option>
                 </select>
 
-                <textarea name="notes" rows={3} placeholder="Discretionary parameters or transaction notes (Optional)" className="w-full bg-white/[0.05] border border-white/10 text-white text-xs font-light px-4 py-3.5 outline-none focus:border-[#d4af71] transition-colors resize-none rounded-none" />
+                <textarea name="notes" rows={3} placeholder="Discretionary parameters or transaction notes (Optional)" className="w-full bg-white/5 border border-white/10 text-white text-xs font-light px-4 py-3.5 outline-none focus:border-[#d4af71] transition-colors resize-none rounded-none" />
 
                 <button disabled={submissionStatus === "sending"} className="w-full cursor-pointer bg-gradient-to-r from-[#b8924a] to-[#d4af71] text-white text-[11px] font-semibold tracking-widest uppercase py-4 mt-2 hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center gap-2">
                   {submissionStatus === "sending" ? "Processing Clearance..." : "Submit Inquiry"}

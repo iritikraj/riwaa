@@ -90,7 +90,7 @@ export function AgentExpertise({
             <div className="flex flex-col gap-4">
               {safeAreas.map((area, i) => (
                 <div key={i} className="bg-white border border-[#e0d8cc] p-6 relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md group/area">
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#b8924a] to-[#d4af71]" />
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#b8924a] to-[#d4af71]" />
                   <div className="flex gap-5 items-start">
                     <div className="w-11 h-11 shrink-0 bg-[#f0e6d0] border border-[#b8924a]/20 flex items-center justify-center text-[#b8924a]">
                       {i % 2 === 0 ? <Landmark size={18} /> : <Building2 size={18} />}
@@ -102,7 +102,7 @@ export function AgentExpertise({
                         text={area}
                         isEditable={isEditable}
                         onUpdate={(val) => handleAreaUpdate(i, val)}
-                        className={`font-cormorant text-xl mb-2 ${isEditable ? "hover:bg-black/5 transition-colors rounded px-1 -mx-1" : ""} inline-block min-w-[100px]`}
+                        className={`font-cormorant text-xl mb-2 ${isEditable ? "hover:bg-black/5 transition-colors rounded px-1 -mx-1" : ""} inline-block min-w-25`}
                       />
 
                       {isEditable && (
@@ -147,7 +147,7 @@ export function AgentExpertise({
                 {safeTags.map((tag, idx) => (
                   <div
                     key={idx}
-                    className={`group/tag relative flex items-center justify-center font-jost border border-[#e0d8cc] px-4 py-2 min-w-[60px] text-center transition-colors duration-300 ${isEditable ? "hover:border-[#d4af71] hover:text-[#b8924a] hover:bg-[#f0e6d0]" : ""}`}
+                    className={`group/tag relative flex items-center justify-center font-jost border border-[#e0d8cc] px-4 py-2 min-w-15 text-center transition-colors duration-300 ${isEditable ? "hover:border-[#d4af71] hover:text-[#b8924a] hover:bg-[#f0e6d0]" : ""}`}
                   >
                     <EditableText
                       as="span"
@@ -155,7 +155,7 @@ export function AgentExpertise({
                       isEditable={isEditable}
                       onUpdate={(val) => handleTagUpdate(idx, val)}
                       // We use ! to strip away the padding/margins/backgrounds that EditableText forces on it
-                      className="text-xs text-[#6b6560] !p-0 !m-0 !leading-none !bg-transparent !shadow-none outline-none"
+                      className="text-xs text-[#6b6560] p-0! m-0! leading-none! bg-transparent! shadow-none! outline-none"
                     />
 
                     {isEditable && (

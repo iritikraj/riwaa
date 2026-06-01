@@ -7,7 +7,7 @@ export function Footer() {
     <footer className="relative overflow-hidden bg-[#050505] text-white pt-40 pb-16">
 
       {/* Ambient Glow */}
-      <div className="absolute bottom-0 left-1/2 w-[800px] h-[400px] bg-white/[0.03] blur-3xl rounded-full -translate-x-1/2" />
+      <div className="absolute bottom-0 left-1/2 w-[800px] h-[400px] bg-white/3 blur-3xl rounded-full -translate-x-1/2" />
 
       {/* Top Border */}
       <div className="absolute top-0 left-0 w-full h-px bg-white/10" />

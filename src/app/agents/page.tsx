@@ -2,11 +2,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
-import { Upload, Clock, X, ArrowRight, Share2, Check, FileText, Image as ImageIcon, Settings2, Save, Globe, Sparkles } from "lucide-react";
+import { Upload, Clock, X, ArrowRight, Share2, Check, FileText, Image as ImageIcon, Settings2, Save, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { z } from "zod";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
+// Version One
 import { AgentHero } from "./_hero";
 import { AgentMetrics } from "./_metrices";
 import { AgentTimeline } from "./_timeline";
@@ -16,7 +17,18 @@ import { AgentPartnerships } from "./_partnership";
 import { AgentMedia } from "./_media";
 import { AgentTestimonials } from "./_testimonials";
 
+// Version Two
+import { AgentHeroVersionTwo } from "./_hero/index.v2";
+import { AgentMetricsVersionTwo } from "./_metrices/index.v2";
+import { AgentTimelineVersionTwo } from "./_timeline/index.v2";
+import { AgentExpertiseVersionTwo } from "./_expertise/index.v2";
+import { AgentContactVersionTwo } from "./_contact/index.v2";
+import { AgentMediaVersionTwo } from "./_media/index.v2";
+import { AgentTestimonialsVersionTwo } from "./_testimonials/index.v2";
+import { AgentPartnershipsVersionTwo } from "./_partnership/index.v2";
+
 const agentZodSchema = z.object({
+  theme: z.string().optional().describe("Either 'theme1' or 'theme2'. Defaults to 'theme1'"),
   companyLogo: z.string().optional(),
   hero: z.object({
     name: z.string().optional(),
@@ -298,7 +310,7 @@ export default function AgentBuilderPage() {
                 <div className="flex items-center gap-4">
                   {/* RIWAA */}
                   <div className="flex items-center gap-3">
-                    <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-xl">
+                    <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/4 backdrop-blur-xl">
                       <Image
                         src="/riwa-logo.png"
                         height={26}
@@ -365,7 +377,7 @@ export default function AgentBuilderPage() {
                 </div>
               </div>
 
-              <div className="relative overflow-hidden w-full min-h-[300px]">
+              <div className="relative overflow-hidden w-full min-h-75">
                 <AnimatePresence mode="wait">
                   <motion.div key={currentStep} initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} transition={{ duration: 0.3 }} className="w-full">
 
@@ -412,7 +424,7 @@ export default function AgentBuilderPage() {
                             <div className="flex flex-wrap gap-2 mb-2 px-2 pt-2">
                               {links.map((link, idx) => (
                                 <div key={idx} className="flex items-center gap-2 bg-white/10 border border-white/10 rounded-full px-3 py-1 text-xs text-neutral-300">
-                                  <span className="truncate max-w-[150px]">{new URL(link).hostname.replace('www.', '')}</span>
+                                  <span className="truncate max-w-37.5">{new URL(link).hostname.replace('www.', '')}</span>
                                   <button onClick={() => removeLink(link)} className="text-neutral-500 hover:text-white"><X size={12} /></button>
                                 </div>
                               ))}
@@ -569,9 +581,9 @@ export default function AgentBuilderPage() {
 
       {/* STEP 4: Render Full Site */}
       {isFinalOutput && extractedData && (
-        <div className="absolute inset-0 w-full h-full z-[100] bg-[#f9f6f1] overflow-y-auto">
+        <div className="absolute inset-0 w-full h-full z-100 bg-[#f9f6f1] overflow-y-auto">
 
-          <div className="fixed top-0 left-0 right-0 bg-[#1A1A1A] border-b border-white/10 px-6 py-4 flex justify-between items-center z-[110] shadow-xl">
+          <div className="fixed top-0 left-0 right-0 bg-[#1A1A1A] border-b border-white/10 px-6 py-4 flex justify-between items-center z-110 shadow-xl">
             {isFromHistory ? (
               <button onClick={handleResetBuilder} className="text-white/50 hover:text-white cursor-pointer text-[10px] uppercase tracking-[0.2em] font-medium transition-colors flex items-center gap-2">
                 <X size={14} /> Close Archive
@@ -589,13 +601,43 @@ export default function AgentBuilderPage() {
               </div>
             )}
 
+            {/* --- NEW: THEME TOGGLE --- */}
+            {!isFromHistory && (
+              <div className="flex items-center bg-white/5 border border-white/10 rounded-full p-1">
+                <button
+                  onClick={() => {
+                    setExtractedData({ ...extractedData, theme: "theme1" });
+                    setHasUnsavedChanges(true);
+                  }}
+                  className={`px-4 py-1.5 text-[10px] font-semibold uppercase tracking-widest rounded-full transition-all duration-300 ${!extractedData?.theme || extractedData.theme === "theme1"
+                    ? "bg-[#b8924a] text-white shadow-md"
+                    : "text-neutral-400 hover:text-white"
+                    }`}
+                >
+                  Classic UI
+                </button>
+                <button
+                  onClick={() => {
+                    setExtractedData({ ...extractedData, theme: "theme2" });
+                    setHasUnsavedChanges(true);
+                  }}
+                  className={`px-4 py-1.5 text-[10px] font-semibold uppercase tracking-widest rounded-full transition-all duration-300 ${extractedData?.theme === "theme2"
+                    ? "bg-[#b8924a] text-white shadow-md"
+                    : "text-neutral-400 hover:text-white"
+                    }`}
+                >
+                  Modern UI
+                </button>
+              </div>
+            )}
+
             <button onClick={handleCopyLink} className="px-6 py-2 bg-[#b8924a] cursor-pointer hover:bg-[#d4af71] text-white rounded-full text-[10px] font-semibold tracking-widest uppercase transition-all duration-300 flex items-center gap-2">
               {isCopied ? <Check size={12} /> : <Share2 size={12} />}
               {isCopied ? "Copied" : "Copy Share Link"}
             </button>
           </div>
 
-          <div className="pt-[68px]">
+          {/* <div className="pt-17">
             <header className="w-full bg-[#f9f6f1] py-2 flex items-center justify-center border-b border-[#e0d8cc]/60 relative z-50">
               {extractedData.companyLogo ? (
                 <img src={extractedData.companyLogo} alt="Brokerage Logo" className="h-18 md:h-28 object-contain mix-blend-multiply opacity-90" />
@@ -647,6 +689,123 @@ export default function AgentBuilderPage() {
 
             {extractedData.contact && (
               <AgentContact agentId={extractedData.id} agentName={extractedData.hero?.name || "Agent"} whatsapp={extractedData.contact?.whatsapp} />
+            )}
+          </div> */}
+          <div className="pt-17">
+            {/* THEME 1: CLASSIC UI (Default) */}
+            {(!extractedData.theme || extractedData.theme === "theme1") && (
+              <div className="theme-classic">
+                <header className="w-full bg-[#f9f6f1] py-2 flex items-center justify-center border-b border-[#e0d8cc]/60 relative z-50">
+                  {extractedData.companyLogo ? (
+                    <img src={extractedData.companyLogo} alt="Brokerage Logo" className="h-18 md:h-28 object-contain mix-blend-multiply opacity-90" />
+                  ) : (
+                    <h2 className="font-serif text-xl tracking-[0.35em] uppercase text-[#b8924a] font-light">Exclusive Partner</h2>
+                  )}
+                </header>
+
+                {extractedData.hero && (
+                  <AgentHero data={extractedData.hero} isEditable={!isFromHistory} onUpdate={(field, value) => { setExtractedData({ ...extractedData, hero: { ...extractedData.hero, [field]: value } }); setHasUnsavedChanges(true); }} />
+                )}
+
+                {extractedData.metrics && (
+                  <AgentMetrics
+                    data={extractedData.metrics}
+                    isEditable={!isFromHistory}
+                    onUpdate={(field, value) => {
+                      setExtractedData({ ...extractedData, metrics: { ...extractedData.metrics, [field]: value } });
+                      setHasUnsavedChanges(true);
+                    }}
+                  />
+                )}
+
+                {extractedData.timeline && (
+                  <AgentTimeline
+                    timeline={extractedData.timeline}
+                    isEditable={!isFromHistory}
+                    onUpdate={(field, value) => {
+                      setExtractedData({ ...extractedData, [field]: value });
+                      setHasUnsavedChanges(true);
+                    }}
+                  />
+                )}
+
+                {extractedData.expertise && (
+                  <AgentExpertise
+                    data={extractedData.expertise}
+                    isEditable={!isFromHistory}
+                    onUpdate={(field, value) => {
+                      setExtractedData({ ...extractedData, expertise: { ...extractedData.expertise, [field]: value } });
+                      setHasUnsavedChanges(true);
+                    }}
+                  />
+                )}
+
+                <AgentPartnerships data={extractedData.partnerships} isEditable={!isFromHistory} onUpdate={(field: string, value: any) => { setExtractedData({ ...extractedData, [field]: value }); setHasUnsavedChanges(true); }} />
+                <AgentMedia data={extractedData.mediaPresence} isEditable={!isFromHistory} onUpdate={(field: string, value: any) => { setExtractedData({ ...extractedData, [field]: value }); setHasUnsavedChanges(true); }} />
+                <AgentTestimonials data={extractedData.testimonials} isEditable={!isFromHistory} onUpdate={(field: string, value: any) => { setExtractedData({ ...extractedData, [field]: value }); setHasUnsavedChanges(true); }} />
+
+                {extractedData.contact && (
+                  <AgentContact agentId={extractedData.id} agentName={extractedData.hero?.name || "Agent"} whatsapp={extractedData.contact?.whatsapp} />
+                )}
+              </div>
+            )}
+
+            {/* THEME 2: MODERN UI */}
+            {extractedData.theme === "theme2" && (
+              <div className="theme-modern">
+                <header className="w-full bg-[#f9f6f1] py-2 flex items-center justify-center border-b border-[#e0d8cc]/60 relative z-50">
+                  {extractedData.companyLogo ? (
+                    <img src={extractedData.companyLogo} alt="Brokerage Logo" className="h-18 md:h-28 object-contain mix-blend-multiply opacity-90" />
+                  ) : (
+                    <h2 className="font-serif text-xl tracking-[0.35em] uppercase text-[#b8924a] font-light">Exclusive Partner</h2>
+                  )}
+                </header>
+
+                {extractedData.hero && (
+                  <AgentHeroVersionTwo data={extractedData.hero} isEditable={!isFromHistory} onUpdate={(field, value) => { setExtractedData({ ...extractedData, hero: { ...extractedData.hero, [field]: value } }); setHasUnsavedChanges(true); }} />
+                )}
+
+                {extractedData.metrics && (
+                  <AgentMetricsVersionTwo
+                    data={extractedData.metrics}
+                    isEditable={!isFromHistory}
+                    onUpdate={(field, value) => {
+                      setExtractedData({ ...extractedData, metrics: { ...extractedData.metrics, [field]: value } });
+                      setHasUnsavedChanges(true);
+                    }}
+                  />
+                )}
+
+                {extractedData.timeline && (
+                  <AgentTimelineVersionTwo
+                    timeline={extractedData.timeline}
+                    isEditable={!isFromHistory}
+                    onUpdate={(field, value) => {
+                      setExtractedData({ ...extractedData, [field]: value });
+                      setHasUnsavedChanges(true);
+                    }}
+                  />
+                )}
+
+                {extractedData.expertise && (
+                  <AgentExpertiseVersionTwo
+                    data={extractedData.expertise}
+                    isEditable={!isFromHistory}
+                    onUpdate={(field, value) => {
+                      setExtractedData({ ...extractedData, expertise: { ...extractedData.expertise, [field]: value } });
+                      setHasUnsavedChanges(true);
+                    }}
+                  />
+                )}
+
+                <AgentPartnershipsVersionTwo data={extractedData.partnerships} isEditable={!isFromHistory} onUpdate={(field: string, value: any) => { setExtractedData({ ...extractedData, [field]: value }); setHasUnsavedChanges(true); }} />
+                <AgentMediaVersionTwo data={extractedData.mediaPresence} isEditable={!isFromHistory} onUpdate={(field: string, value: any) => { setExtractedData({ ...extractedData, [field]: value }); setHasUnsavedChanges(true); }} />
+                <AgentTestimonialsVersionTwo data={extractedData.testimonials} isEditable={!isFromHistory} onUpdate={(field: string, value: any) => { setExtractedData({ ...extractedData, [field]: value }); setHasUnsavedChanges(true); }} />
+
+                {extractedData.contact && (
+                  <AgentContactVersionTwo agentId={extractedData.id} agentName={extractedData.hero?.name || "Agent"} whatsapp={extractedData.contact?.whatsapp} />
+                )}
+              </div>
             )}
           </div>
         </div>

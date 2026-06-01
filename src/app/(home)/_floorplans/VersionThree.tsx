@@ -31,7 +31,7 @@ export function VersionThree({
   return (
     <section className="relative overflow-hidden bg-[#F8F8F3] py-24 md:py-32 text-[#1A1A1A]">
       {/* Background Glow */}
-      <div className="absolute left-1/2 top-0 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-[#d8c8b0]/20 blur-3xl" />
+      <div className="absolute left-1/2 top-0 h-125 w-125 -translate-x-1/2 rounded-full bg-[#d8c8b0]/20 blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6">
         {/* Heading */}

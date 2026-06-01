@@ -34,7 +34,7 @@ export function VersionTwo({ heading, floorPlans }: { heading?: string; floorPla
                 >
                   Type 0{i + 1}
                   {activeTab === i && (
-                    <motion.div layoutId="activeFloorPlan" className="absolute -bottom-[17px] left-0 right-0 h-[2px] bg-[#B9A089]" />
+                    <motion.div layoutId="activeFloorPlan" className="absolute -bottom-[17px] left-0 right-0 h-0.5 bg-[#B9A089]" />
                   )}
                 </button>
               ))}
@@ -43,7 +43,7 @@ export function VersionTwo({ heading, floorPlans }: { heading?: string; floorPla
         </div>
 
         {/* Blueprint Canvas */}
-        <div className="w-full bg-[#1A1A1A] border border-white/10 rounded-3xl p-6 md:p-16 relative overflow-hidden shadow-2xl min-h-[500px] flex items-center justify-center">
+        <div className="w-full bg-[#1A1A1A] border border-white/10 rounded-3xl p-6 md:p-16 relative overflow-hidden shadow-2xl min-h-125 flex items-center justify-center">
           <AnimatePresence mode="wait">
             <motion.img
               key={activeTab}

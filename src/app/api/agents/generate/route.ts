@@ -15,6 +15,7 @@ const google = createGoogleGenerativeAI({
 
 // 1. Zod Schema (Updated to include images and contact)
 const agentZodSchema = z.object({
+  theme: z.string().optional().describe("Either 'theme1' or 'theme2'. Defaults to 'theme1'"),
   companyLogo: z.string().describe("The exact company logo URL provided in the context").optional(),
   hero: z.object({
     name: z.string().describe("Agent's full name"),
@@ -154,9 +155,8 @@ export async function POST(req: Request) {
 
     console.log("Scraping complete. Preparing context for Gemini...");
 
-    console.log(scrapedResults);
-
-    console.log('---------------------------------------------------------------------------');
+    // console.log(scrapedResults);
+    // console.log('---------------------------------------------------------------------------');
 
     // 4. Construct Highly Structured Context for Gemini
     const mappedScrapedData = scrapedResults.map(data => `

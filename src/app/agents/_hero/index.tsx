@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useRef } from "react";
@@ -73,8 +74,8 @@ export function AgentHero({
     <section className="relative font-jost pb-16 pt-20 overflow-hidden">
       {/* Ambient Background */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-20%] right-[-10%] h-[600px] w-[600px] rounded-full bg-gradient-to-br from-[#c6a46a]/10 to-transparent blur-[100px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-[#b8924a]/10 to-transparent blur-[100px]" />
+        <div className="absolute top-[-20%] right-[-10%] h-150 w-150 rounded-full bg-gradient-to-br from-[#c6a46a]/10 to-transparent blur-[100px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] h-125 w-125 rounded-full bg-gradient-to-tr from-[#b8924a]/10 to-transparent blur-[100px]" />
         <div
           className="absolute inset-0 opacity-[0.02]"
           style={{
@@ -134,7 +135,7 @@ export function AgentHero({
             />
 
             {/* Refined Ornament */}
-            <div className="flex items-center gap-4 mb-8 w-full max-w-[200px]">
+            <div className="flex items-center gap-4 mb-8 w-full max-w-50">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#d8cbb6] to-transparent" />
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b8924a" strokeWidth="1">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -180,7 +181,7 @@ export function AgentHero({
             <div className="w-full sm:w-auto relative group flex flex-col items-center lg:items-end">
 
               {/* Portrait Container - Max width applied ONLY here */}
-              <div className="relative z-10 w-full max-w-[160px] sm:max-w-[180px] lg:max-w-[200px]">
+              <div className="relative z-10 w-full max-w-[160px] sm:max-w-[180px] lg:max-w-50">
                 {/* Elegant Offset Frame */}
                 <div className="absolute top-4 -right-4 w-full h-full border border-[#b8924a]/40 z-0 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
 
@@ -242,7 +243,7 @@ export function AgentHero({
               </div>
 
               {/* Bottom Info Cards (Languages) - Now allowed to be wider than the image */}
-              <div className="relative z-10 mt-12 w-full max-w-[260px] lg:max-w-[280px]">
+              <div className="relative z-10 mt-12 w-full max-w-65 lg:max-w-70">
                 <div className="bg-white/70 backdrop-blur-xl border border-[#e7dccd]/80 p-5 shadow-sm hover:shadow-md transition-shadow duration-300">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
@@ -275,7 +276,7 @@ export function AgentHero({
                           text={language}
                           isEditable={isEditable}
                           onUpdate={(val) => handleLanguageUpdate(i, val)}
-                          className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-[#5c5752] min-w-[60px] text-center"
+                          className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-[#5c5752] min-w-15 text-center"
                         />
 
                         {/* Tooltip hint for deletion */}

@@ -54,7 +54,7 @@ export function VersionOne({ heading, items, imageUrl }: { heading: string; item
             className="relative"
           >
             <div className="bg-white/80 backdrop-blur-md border border-[#D8D6D0]/30 rounded-3xl overflow-hidden shadow-lg p-2">
-              <img src={featureImage} alt="Lifestyle" className="w-full h-[500px] object-cover rounded-2xl grayscale-[10%]" />
+              <img src={featureImage} alt="Lifestyle" className="w-full h-125 object-cover rounded-2xl grayscale-[10%]" />
             </div>
 
             {/* Floating Glass Pillars */}

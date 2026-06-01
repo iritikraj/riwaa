@@ -41,8 +41,8 @@ export function AgentMetrics({
           backgroundSize: "18px 18px",
         }}
       />
-      <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-[#b8924a]/10 blur-3xl" />
-      <div className="absolute bottom-0 left-0 h-[500px] w-[500px] rounded-full bg-[#c6a46a]/10 blur-3xl" />
+      <div className="absolute top-0 right-0 h-125 w-125 rounded-full bg-[#b8924a]/10 blur-3xl" />
+      <div className="absolute bottom-0 left-0 h-125 w-125 rounded-full bg-[#c6a46a]/10 blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6">
         <motion.div

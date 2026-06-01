@@ -39,7 +39,7 @@ export function VersionOne({ heading, subtext, mapsLink }: { heading?: string; s
             transition={{ duration: 1 }}
             className="relative"
           >
-            <div className="bg-white/80 backdrop-blur-xl border border-[#D8D6D0] rounded-3xl overflow-hidden h-[500px] shadow-lg p-2">
+            <div className="bg-white/80 backdrop-blur-xl border border-[#D8D6D0] rounded-3xl overflow-hidden h-125 shadow-lg p-2">
               <iframe
                 src={mapUrl}
                 width="100%"

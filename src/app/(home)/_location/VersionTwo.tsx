@@ -36,7 +36,7 @@ export function VersionTwo({ heading, subtext, mapsLink }: { heading?: string; s
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 1 }}
-          className="w-full bg-[#2D2D2D]/50 backdrop-blur-xl border border-white/10 p-2 md:p-4 rounded-[32px] h-[500px] md:h-[600px] shadow-2xl relative overflow-hidden"
+          className="w-full bg-[#2D2D2D]/50 backdrop-blur-xl border border-white/10 p-2 md:p-4 rounded-[32px] h-125 md:h-150 shadow-2xl relative overflow-hidden"
         >
           {/* Forcing Dark Mode colors on the iframe using CSS filter inversion technique */}
           <iframe

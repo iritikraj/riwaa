@@ -39,7 +39,7 @@ export function AgentMedia({ data, isEditable = false, onUpdate }: any) {
                     rows={2}
                   />
                 ) : (
-                  <h4 className="text-base font-cormorant leading-snug text-neutral-900 mb-4 font-jost">"{item.headline}"</h4>
+                  <h4 className="text-base leading-snug text-neutral-900 mb-4 font-jost">&quot;{item.headline}&quot;</h4>
                 )}
               </div>
               <div className="flex items-center justify-between border-t border-[#e0d8cc] pt-4 mt-4">

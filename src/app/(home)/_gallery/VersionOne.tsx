@@ -44,7 +44,7 @@ export function VersionOne({ heading, galleryImages }: { heading?: string; galle
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: i * 0.1 }}
-            className="flex-shrink-0 w-[300px] md:w-[500px] h-[500px] md:h-[700px] relative overflow-hidden rounded-[32px] group bg-[#D9D5C9]/20"
+            className="flex-shrink-0 w-[300px] md:w-125 h-125 md:h-[700px] relative overflow-hidden rounded-[32px] group bg-[#D9D5C9]/20"
           >
             <img
               src={img}

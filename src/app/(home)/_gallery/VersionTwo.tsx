@@ -20,12 +20,12 @@ export function VersionTwo({
   return (
     <section className="relative overflow-hidden bg-[#111111] py-24 md:py-32 text-[#F8F8F3]">
       {/* Ambient Glow */}
-      <div className="absolute left-1/2 top-0 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-white/[0.03] blur-3xl" />
+      <div className="absolute left-1/2 top-0 h-125 w-125 -translate-x-1/2 rounded-full bg-white/3 blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6">
         {/* Header */}
         <div className="mb-20 text-center">
-          <div className="mb-6 inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-5 py-2 backdrop-blur-xl">
+          <div className="mb-6 inline-flex items-center rounded-full border border-white/10 bg-white/3 px-5 py-2 backdrop-blur-xl">
             <span className="text-[11px] uppercase tracking-[0.35em] text-[#A6A79f]">
               Bespoke Aesthetics
             </span>
@@ -105,8 +105,8 @@ export function VersionTwo({
 
             {/* Decorative Lines */}
             <div className="absolute bottom-6 left-6 flex flex-col gap-2">
-              <div className="h-[2px] w-14 bg-white/60" />
-              <div className="h-[2px] w-8 bg-white/30" />
+              <div className="h-0.5 w-14 bg-white/60" />
+              <div className="h-0.5 w-8 bg-white/30" />
             </div>
           </motion.div>
         </div>

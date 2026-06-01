@@ -31,7 +31,7 @@ export function Hero({ heading, subtext, imageUrl }: any) {
           duration: 8,
           repeat: Infinity
         }}
-        className="absolute top-1/2 left-1/2 w-[700px] h-[700px] bg-white/[0.04] rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"
+        className="absolute top-1/2 left-1/2 w-175 h-175 bg-white/4 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"
       />
 
       {/* Glass Card */}
@@ -41,11 +41,11 @@ export function Hero({ heading, subtext, imageUrl }: any) {
           initial={{ opacity: 0, y: 40, backdropFilter: "blur(0px)" }}
           animate={{ opacity: 1, y: 0, backdropFilter: "blur(20px)" }}
           transition={{ duration: 1.4 }}
-          className="max-w-5xl border border-white/10 bg-white/[0.03] rounded-[40px] p-10 md:p-20 backdrop-blur-2xl shadow-[0_20px_80px_rgba(0,0,0,0.5)]"
+          className="max-w-5xl border border-white/10 bg-white/3 rounded-[40px] p-10 md:p-20 backdrop-blur-2xl shadow-[0_20px_80px_rgba(0,0,0,0.5)]"
         >
 
           <div className="flex justify-center mb-8">
-            <div className="px-4 py-2 rounded-full border border-white/10 bg-white/[0.03] text-[10px] tracking-[0.35em] uppercase text-white/50">
+            <div className="px-4 py-2 rounded-full border border-white/10 bg-white/3 text-[10px] tracking-[0.35em] uppercase text-white/50">
               AI Curated Collection
             </div>
           </div>

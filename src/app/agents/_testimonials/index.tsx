@@ -14,7 +14,7 @@ export function AgentTestimonials({
     <section className="relative overflow-hidden bg-[#171717] py-28 md:py-36 text-white">
       {/* Ambient Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-[#b8924a]/10 blur-3xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-175 h-175 rounded-full bg-[#b8924a]/10 blur-3xl" />
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -82,7 +82,7 @@ export function AgentTestimonials({
                 duration: 0.8,
                 delay: idx * 0.1,
               }}
-              className="relative border border-white/10 bg-white/[0.03] backdrop-blur-xl p-8 md:p-12"
+              className="relative border border-white/10 bg-white/3 backdrop-blur-xl p-8 md:p-12"
             >
 
               {/* Quote Icon */}
@@ -108,10 +108,10 @@ export function AgentTestimonials({
                       );
                     }}
                     rows={4}
-                    className="w-full resize-none bg-transparent outline-none font-cormorant text-[24px] leading-[1.5] tracking-[-0.02em] text-[#f3efe8] font-light"
+                    className="w-full resize-none bg-transparent outline-none font-cormorant text-[24px] leading-normal tracking-[-0.02em] text-[#f3efe8] font-light"
                   />
                 ) : (
-                  <p className="font-cormorant text-[24px] leading-[1.5] tracking-[-0.02em] text-[#f3efe8] font-light pr-12">
+                  <p className="font-cormorant text-[24px] leading-normal tracking-[-0.02em] text-[#f3efe8] font-light pr-12">
                     “{item.quote}”
                   </p>
                 )}
