@@ -145,10 +145,10 @@ export default function BuilderPage() {
                     style={{ background: "transparent" }}
                   />
                   <div>
-                    <h2 className={`text-neutral-100 font-light uppercase transition-all duration-500 ${!site ? "text-base tracking-[0.12em]" : "text-sm tracking-[0.25em]"}`}>
+                    <h2 className={`text-neutral-100 font-jost font-light uppercase transition-all duration-500 ${!site ? "text-base tracking-[0.12em]" : "text-sm tracking-[0.25em]"}`}>
                       RIWAA
                     </h2>
-                    <p className="text-xs tracking-[0.35em] uppercase text-neutral-500 font-medium">
+                    <p className="text-xs font-jost tracking-[0.35em] uppercase text-neutral-500 font-medium">
                       By Solvetude
                     </p>
                   </div>
@@ -174,14 +174,14 @@ export default function BuilderPage() {
                     className={`flex items-center gap-2 rounded-full border transition-all duration-300 hover:bg-white/10 ${!site ? "px-3 py-2" : "px-2.5 py-2"} ${showHistory ? "bg-white/10 border-white/20 text-white" : "border-white/10 bg-white/3 text-neutral-400"}`}
                   >
                     <Clock size={12} />
-                    {!site && <span className="text-[10px] uppercase tracking-[0.25em] hidden sm:block">Archives</span>}
+                    {!site && <span className="text-[10px] uppercase tracking-[0.25em] hidden sm:block font-jost">Archives</span>}
                   </button>
 
                   {/* Existing Online Indicator */}
                   {!site && (
                     <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full border border-white/10 bg-white/3">
                       <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-[10px] uppercase tracking-[0.25em] text-neutral-400">Online</span>
+                      <span className="text-[10px] uppercase tracking-[0.25em] text-neutral-400 font-jost">Online</span>
                     </div>
                   )}
                 </div>
@@ -191,7 +191,7 @@ export default function BuilderPage() {
               <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showHistory ? "max-h-64 opacity-100 mb-6" : "max-h-0 opacity-0 mb-0"}`}>
                 <div className="p-4 rounded-2xl bg-black/40 border border-white/5 overflow-y-auto max-h-60 no-scrollbar space-y-1">
                   {history?.length === 0 ? (
-                    <p className="text-xs text-neutral-500 text-center py-4 uppercase tracking-widest">No archives found</p>
+                    <p className="text-xs text-neutral-500 text-center py-4 uppercase tracking-widest font-jost">No archives found</p>
                   ) : (
                     history?.map((item) => (
                       <button
@@ -199,8 +199,8 @@ export default function BuilderPage() {
                         onClick={() => { setSite(item.content); setShowHistory(false); }}
                         className="w-full text-left p-3 rounded-xl hover:bg-white/5 transition-all group flex justify-between items-center"
                       >
-                        <span className="text-sm text-neutral-300 group-hover:text-white font-light uppercase tracking-wide truncate pr-4">{item.siteTitle || "Untitled Vision"}</span>
-                        <span className="text-[9px] text-neutral-600 tracking-widest uppercase shrink-0">{new Date(item.createdAt).toLocaleDateString()}</span>
+                        <span className="text-sm text-neutral-300 group-hover:text-white font-light uppercase tracking-wide truncate pr-4 font-jost">{item.siteTitle || "Untitled Vision"}</span>
+                        <span className="text-[9px] text-neutral-600 tracking-widest uppercase shrink-0 font-jost">{new Date(item.createdAt).toLocaleDateString()}</span>
                       </button>
                     ))
                   )}
@@ -223,12 +223,12 @@ export default function BuilderPage() {
                       <>
                         <div className="flex gap-1.5 mb-5">
                           {steps.map((_, i) => (
-                            <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${i <= currentStep ? 'bg-white' : 'bg-white/10'}`} />
+                            <div key={i} className={`h-1 flex-1 font-jost rounded-full transition-all duration-500 ${i <= currentStep ? 'bg-white' : 'bg-white/10'}`} />
                           ))}
                         </div>
                         <div className="mb-4">
-                          <p className="text-[10px] tracking-[0.3em] uppercase text-neutral-500 mb-1">Step 0{currentStep + 1}</p>
-                          <h3 className="text-sm text-neutral-200 font-light tracking-widest uppercase">{steps[currentStep].label}</h3>
+                          <p className="text-[10px] tracking-[0.3em] uppercase text-neutral-500 mb-1 font-jost">Step 0{currentStep + 1}</p>
+                          <h3 className="text-sm text-neutral-200 font-light tracking-widest uppercase font-jost">{steps[currentStep].label}</h3>
                         </div>
                       </>
                     )}
@@ -242,7 +242,7 @@ export default function BuilderPage() {
                           value={prompt}
                           onChange={(e) => setPrompt(e.target.value)}
                           placeholder="Describe a luxury property vision..."
-                          className={`w-full resize-none rounded-2xl border border-white/10 bg-white/2.5 px-5 py-5 text-sm leading-relaxed text-neutral-200 placeholder:text-neutral-500 outline-none transition-all duration-500 focus:border-white/20 focus:bg-white/4.5 no-scrollbar ${!site ? "h-32 md:h-40" : "h-24"}`}
+                          className={`w-full resize-none font-jost rounded-2xl border border-white/10 bg-white/2.5 px-5 py-5 text-sm leading-relaxed text-neutral-200 placeholder:text-neutral-500 outline-none transition-all duration-500 focus:border-white/20 focus:bg-white/4.5 no-scrollbar ${!site ? "h-32 md:h-40" : "h-24"}`}
                         />
                       )}
 
@@ -312,7 +312,7 @@ export default function BuilderPage() {
                     ${!site ? "px-8 py-4 w-full sm:w-auto" : "px-5 py-3 w-full"}
                   `}
                 >
-                  <span className="relative z-10 flex items-center justify-center gap-3">
+                  <span className="relative z-10 flex items-center justify-center gap-3 font-jost">
                     {isGenerating ? (
                       <><div className="w-4 h-4 rounded-full border-2 border-black/30 border-t-black animate-spin" /> Synthesizing...</>
                     ) : (

@@ -50,7 +50,7 @@ export default async function PublishedAgentPage({
       {/* HEADER: Dynamically adjusts border, background, and logo blending */}
       <header
         className={`w-full py-2 flex items-center justify-center border-b relative z-50 shrink-0 ${isThemeTwo
-          ? "bg-[#f9f6f1] border-[#e0d8cc]/60 backdrop-blur-md"
+          ? "bg-[#f9f6f1] border-[#e0d8cc]/60"
           : "bg-[#f9f6f1] border-[#e0d8cc]/60"
           }`}
       >
