@@ -289,7 +289,7 @@ export default function BuilderPage() {
                         )}
 
                         {steps[currentStep].type === 'url' && (
-                          <input type="text" value={formData[steps[currentStep].id] || ""} placeholder={steps[currentStep].id === 'maps' ? "Paste Map Link..." : "Paste Video Link..."} onChange={(e) => setFormData({ ...formData, [steps[currentStep].id]: e.target.value })} className="w-full rounded-2xl border border-white/10 bg-white/2.5 px-5 text-sm text-neutral-200 placeholder:text-neutral-500 outline-none transition-all duration-500 focus:border-white/20 focus:bg-white/4.5 py-5" />
+                          <input type="text" value={formData[steps[currentStep].id] || ""} placeholder={steps[currentStep].id === 'maps' ? "Paste Map Embed Code / iFrame" : "Paste Video Link..."} onChange={(e) => setFormData({ ...formData, [steps[currentStep].id]: e.target.value })} className="w-full rounded-2xl border border-white/10 bg-white/2.5 px-5 text-sm text-neutral-200 placeholder:text-neutral-500 outline-none transition-all duration-500 focus:border-white/20 focus:bg-white/4.5 py-5" />
                         )}
                       </div>
                     </motion.div>

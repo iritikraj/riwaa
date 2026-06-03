@@ -35,7 +35,7 @@ export function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1.4 }}
-              className="text-5xl md:text-7xl lg:text-[6rem] leading-[1.2] tracking-normal font-light"
+              className="text-5xl leading-[1.2] tracking-normal font-light"
             >
               Curating Extraordinary Digital Property Experiences.
             </motion.h2>
