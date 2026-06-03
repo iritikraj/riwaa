@@ -25,7 +25,7 @@ export function Footer() {
               whileInView={{ opacity: 1, letterSpacing: "0.35em" }}
               viewport={{ once: true }}
               transition={{ duration: 1.2 }}
-              className="block text-[10px] uppercase tracking-[0.35em] text-white/35 mb-8"
+              className="block text-[10px] uppercase tracking-[0.35em] text-white/35 mb-8 font-jost"
             >
               Artificial Intelligence Meets Luxury Real Estate
             </motion.span>
@@ -35,7 +35,7 @@ export function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1.4 }}
-              className="text-5xl md:text-7xl lg:text-[6rem] leading-[0.92] tracking-[-0.06em] font-light"
+              className="text-5xl md:text-7xl lg:text-[6rem] leading-[1.2] tracking-normal font-light"
             >
               Curating Extraordinary Digital Property Experiences.
             </motion.h2>
@@ -43,7 +43,7 @@ export function Footer() {
           </div>
 
           {/* Right */}
-          <div className="grid grid-cols-2 gap-14">
+          <div className="grid grid-cols-2 gap-14 font-jost">
 
             <div>
               <h3 className="uppercase tracking-[0.35em] text-[10px] text-white/35 mb-8">
@@ -106,12 +106,12 @@ export function Footer() {
               <div className="absolute inset-0 rounded-full bg-white blur-md opacity-50" />
             </div>
 
-            <p className="text-[10px] uppercase tracking-[0.35em] text-white/35">
+            <p className="text-[10px] uppercase tracking-[0.35em] text-white/35 font-jost">
               RIWAA Intelligence © 2026
             </p>
           </div>
 
-          <p className="text-white/25 uppercase tracking-[0.25em] text-[10px]">
+          <p className="text-white/25 uppercase tracking-[0.25em] text-[10px] font-jost">
             Crafted For Visionary Real Estate Brands
           </p>
 

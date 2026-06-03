@@ -11,7 +11,7 @@ export function AgentContact({ agentId, agentName, whatsapp }: { agentId?: numbe
     setSubmissionStatus("sending");
     const formFields = new FormData(e.currentTarget);
 
-    await fetch("/api/agents/leads", { // Make sure this points to the agent leads API
+    await fetch("/api/real-estate-agents/leads", { // Make sure this points to the agent leads API
       method: "POST",
       body: JSON.stringify({
         websiteId: agentId || null,

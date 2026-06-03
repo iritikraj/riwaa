@@ -37,11 +37,11 @@ export function Navbar() {
               />
 
               <div>
-                <h1 className="text-sm md:text-base uppercase tracking-[0.4em] text-white">
+                <h1 className="text-sm md:text-base uppercase tracking-[0.4em] text-white font-jost">
                   RIWAA
                 </h1>
 
-                <p className="text-white/70 text-[9px] tracking-[0.25em] uppercase font-light">
+                <p className="text-white/70 text-[9px] tracking-[0.25em] uppercase font-light font-jost">
                   By Solvetude
                 </p>
               </div>
@@ -72,7 +72,7 @@ export function Navbar() {
               whileTap={{ scale: 0.98 }}
               className="group relative overflow-hidden rounded-full border border-white/10 bg-white px-5 md:px-7 py-3 text-[10px] uppercase tracking-[0.35em] text-black transition-all duration-500 hover:bg-neutral-200"
             >
-              <span className="relative z-10 flex items-center gap-3">
+              <span className="relative z-10 flex items-center gap-3 font-jost">
                 Begin Experience
 
                 <svg

@@ -12,7 +12,7 @@ export function LeadModal({ isOpen, onClose, siteId, siteTitle }: { isOpen: bool
     setStatus("submitting");
     const formData = new FormData(e.currentTarget);
 
-    await fetch("/api/leads", {
+    await fetch("/api/landing-page-builder/leads", {
       method: "POST",
       body: JSON.stringify({
         websiteId: siteId,

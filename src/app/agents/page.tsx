@@ -118,7 +118,7 @@ export default function AgentBuilderPage() {
   const isFinalOutput = currentStep === activeSteps.length;
 
   const { submit, isLoading: isStreaming, object: streamedData } = useObject({
-    api: '/api/agents/generate',
+    api: '/api/real-estate-agents/generate',
     schema: agentZodSchema,
     onFinish({ object }) {
       setExtractedData({
@@ -150,7 +150,7 @@ export default function AgentBuilderPage() {
 
     setIsDiscoveringPR(true);
     try {
-      const res = await fetch("/api/agents/discover-pr", {
+      const res = await fetch("/api/real-estate-agents/discover-pr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: agentName, location: extractedData?.hero?.location }),
@@ -191,7 +191,7 @@ export default function AgentBuilderPage() {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch("/api/agents/history");
+      const res = await fetch("/api/real-estate-agents/history");
       const data = await res.json();
       if (Array.isArray(data)) setHistory(data);
     } catch (e) {
@@ -205,7 +205,7 @@ export default function AgentBuilderPage() {
 
   const handleCopyLink = () => {
     if (!extractedData?.id) return;
-    navigator.clipboard.writeText(`${window.location.origin}/agents/${extractedData.id}`);
+    navigator.clipboard.writeText(`${window.location.origin}/real-estate-agents/${extractedData.id}`);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
@@ -239,7 +239,7 @@ export default function AgentBuilderPage() {
   const saveToDatabase = async () => {
     setIsProcessing(true);
     try {
-      const res = await fetch("/api/agents/save", {
+      const res = await fetch("/api/real-estate-agents/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
