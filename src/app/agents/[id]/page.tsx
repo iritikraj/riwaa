@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import dynamic from 'next/dynamic';
 
 // --- Theme 1 (Classic Light) ---
 import { AgentHero } from "../_hero";
@@ -14,6 +15,7 @@ import { AgentPartnerships } from "../_partnership";
 import { AgentMedia } from "../_media";
 import { AgentTestimonials } from "../_testimonials";
 
+// --- Theme 2 (Modern Dark) ---
 import { AgentHeroVersionTwo } from "../_hero/index.v2";
 import { AgentMetricsVersionTwo } from "../_metrices/index.v2";
 import { AgentTimelineVersionTwo } from "../_timeline/index.v2";
@@ -22,6 +24,10 @@ import { AgentPartnershipsVersionTwo } from "../_partnership/index.v2";
 import { AgentMediaVersionTwo } from "../_media/index.v2";
 import { AgentTestimonialsVersionTwo } from "../_testimonials/index.v2";
 import { AgentContactVersionTwo } from "../_contact/index.v2";
+
+// --- NEW GLOBAL IMPORTS ---
+import { BrokerageFooter } from "../_brokerage-company";
+import { AgentListings } from "../_listings";
 
 export default async function PublishedAgentPage({
   params,
@@ -40,6 +46,7 @@ export default async function PublishedAgentPage({
 
   // Determine the active theme from the database content
   const isThemeTwo = extractedData?.theme === "theme2";
+
   return (
     <div
       className={`min-h-screen overflow-x-hidden flex flex-col transition-colors duration-500 ${isThemeTwo
@@ -124,6 +131,17 @@ export default async function PublishedAgentPage({
             />
           )
         )}
+
+        {/* --- NEW: RENDER LISTINGS AND BROKERAGE INFO --- */}
+        <AgentListings
+          data={extractedData.listings}
+          brokerName={extractedData.contact?.developer}
+        />
+
+        <BrokerageFooter
+          brokerName={extractedData.contact?.developer || ""}
+          logoUrl={extractedData.companyLogo}
+        />
       </main>
 
       {/* BRANDING FOOTER: Adjusted for global dark mode coherence */}

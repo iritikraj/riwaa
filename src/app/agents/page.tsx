@@ -26,6 +26,15 @@ import { AgentContactVersionTwo } from "./_contact/index.v2";
 import { AgentMediaVersionTwo } from "./_media/index.v2";
 import { AgentTestimonialsVersionTwo } from "./_testimonials/index.v2";
 import { AgentPartnershipsVersionTwo } from "./_partnership/index.v2";
+import dynamic from 'next/dynamic';
+
+// --- NEW IMPORTS ---
+import { mockDrivenListings } from '@/app/config/data/mock-driven-listings';
+import { BrokerageFooter } from "./_brokerage-company";
+
+const AgentListings = dynamic(() => import('./_listings').then(mod => mod.AgentListings), {
+  ssr: false, // This is the magic line that prevents Leaflet from crashing Next.js
+});
 
 const agentZodSchema = z.object({
   theme: z.string().optional().describe("Either 'theme1' or 'theme2'. Defaults to 'theme1'"),
@@ -132,7 +141,10 @@ export default function AgentBuilderPage() {
           imageUrl: agentImage || object?.hero?.imageUrl,
           bgImages: bgImages.length > 0 ? bgImages : undefined
         },
-        companyLogo: companyLogo || object?.companyLogo
+        companyLogo: companyLogo || object?.companyLogo,
+
+        // --- NEW: INJECT THE HARDCODED LISTINGS HERE ---
+        listings: mockDrivenListings.agents_active_listings
       });
     },
     onError(error) {
@@ -205,7 +217,7 @@ export default function AgentBuilderPage() {
 
   const handleCopyLink = () => {
     if (!extractedData?.id) return;
-    navigator.clipboard.writeText(`${window.location.origin}/real-estate-agents/${extractedData.id}`);
+    navigator.clipboard.writeText(`${window.location.origin}/agents/${extractedData.id}`);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
@@ -807,6 +819,16 @@ export default function AgentBuilderPage() {
                 )}
               </div>
             )}
+
+            <AgentListings
+              data={extractedData.listings}
+              brokerName={extractedData.contact?.developer}
+            />
+
+            <BrokerageFooter
+              brokerName={extractedData.contact?.developer || ""}
+              logoUrl={extractedData.companyLogo}
+            />
           </div>
         </div>
       )}
