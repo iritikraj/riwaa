@@ -39,9 +39,7 @@ export function AgentListings({ data, brokerName }: { data: any[], brokerName: s
     };
 
     let directUrl = baseDomain;
-    if (item.reference_no) {
-      directUrl = `${baseDomain}/${item.reference_no.toLowerCase()}`;
-    } else if (item.friendly_url) {
+    if (item.friendly_url) {
       directUrl = `${baseDomain}/${item.friendly_url}`;
     }
 
@@ -112,7 +110,7 @@ export function AgentListings({ data, brokerName }: { data: any[], brokerName: s
 
                   <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
                     <p className="text-xl font-cormorant text-white">{listing.price}</p>
-                    <button onClick={() => handleWhatsAppShare(listing)} className="p-2 bg-white/20 backdrop-blur hover:bg-[#25D366] text-white rounded-full transition-colors" title="Share via WhatsApp">
+                    <button onClick={() => handleWhatsAppShare(listing)} className="p-2 bg-white/20 backdrop-blur hover:bg-[#25D366] text-white rounded-full transition-colors cursor-pointer" title="Share via WhatsApp">
                       <Share2 size={14} />
                     </button>
                   </div>
