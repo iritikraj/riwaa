@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { websites } from "@/lib/db/schema";
 import { getUnsplashImage } from "@/lib/images";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 const schema: any = {
   type: SchemaType.OBJECT,
