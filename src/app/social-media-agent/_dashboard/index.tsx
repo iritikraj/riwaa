@@ -27,11 +27,62 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
   const [isEnrichingManual, setIsEnrichingManual] = useState<boolean>(false);
   const [isEscalating, setIsEscalating] = useState<boolean>(false);
 
+
   // DATE FILTER & SORT STATE
   const [dateSortOrder, setDateSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [filterDateStr, setFilterDateStr] = useState<string>(''); // Format: YYYY-MM-DD
 
-  const processedStreamItems = streamItems.filter((item: any) => {
+  const [isFetchingDemoGmaps, setIsFetchingDemoGmaps] = useState(false);
+  const [demoItemsGmaps, setDemoItemsGmaps] = useState<any[]>([]); // Store temporary Apify data
+
+  const handleFetchDemoReviewsGmaps = async () => {
+    setIsFetchingDemoGmaps(true);
+    setActionStatus(null);
+    try {
+      const response = await fetch('/api/social-media-agent/demo-google-maps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          // Send an ARRAY of multiple office locations
+          placeUrls: [
+            "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Main+Branch/@24.4773958,54.3212408,1025m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e5e665a954d9b4b:0xf53d3124c55b2fc9!8m2!3d24.4773958!4d54.3212408!16s%2Fg%2F1tgplhs2", // Relaam HQ (Placeholder)
+            "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Dalma+Mall/@24.3347236,54.5187856,1026m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e5e3900248180b3:0xf45c98c1eccba460!8m2!3d24.3347237!4d54.5236565!16s%2Fg%2F11ysvv6l9f",
+            "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Al+Dhafra/@23.6387005,53.7094663,1032m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e676793960b05bd:0x67a265d11461053f!8m2!3d23.6387005!4d53.7094663!16s%2Fg%2F11lyl66lgy",
+            "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Sharjah+Branch/@25.3443869,55.386703,1018m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e5f5b551fd72ce9:0xcb2c5983bb540f22!8m2!3d25.3443869!4d55.386703!16s%2Fg%2F11y8x06f2r",
+            "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Al+Ain/@24.2162428,55.7591723,1027m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e8ab6ccc2829bb1:0x6d7aebb3689676b0!8m2!3d24.2162428!4d55.7591723!16s%2Fg%2F11h9y4x8yv",
+          ],
+          maxReviews: 15 // It will fetch 15 from EACH location
+        })
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        setDemoItemsGmaps(prev => [...result.data, ...prev]);
+        setFilterPlatform('google_maps');
+      }
+    } catch (err) {
+      console.error("Failed to fetch demo reviews", err);
+    } finally {
+      setIsFetchingDemoGmaps(false);
+    }
+  };
+
+  const combinedItems = [...demoItemsGmaps, ...streamItems];
+
+  // const processedStreamItems = streamItems.filter((item: any) => {
+  //   // If no date is selected, show all
+  //   if (!filterDateStr) return true;
+
+  //   // Compare just the YYYY-MM-DD portion
+  //   const itemDateStr = new Date(item.received_at).toISOString().split('T')[0];
+  //   return itemDateStr === filterDateStr;
+  // }).sort((a: any, b: any) => {
+  //   const dateA = new Date(a.received_at).getTime();
+  //   const dateB = new Date(b.received_at).getTime();
+  //   return dateSortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+  // });
+
+  const processedStreamItems = combinedItems.filter((item: any) => {
     // If no date is selected, show all
     if (!filterDateStr) return true;
 
@@ -44,11 +95,15 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
     return dateSortOrder === 'newest' ? dateB - dateA : dateA - dateB;
   });
 
+
   // DYNAMIC FRONTEND ANALYTICS
   const totalCount = processedStreamItems.length;
   const negativeCount = processedStreamItems.filter((i: any) => i.sentiment === 'negative').length;
-  const positiveCount = streamItems.filter((i: any) => i.sentiment === 'positive').length;
-  const neutralCount = streamItems.filter((i: any) => i.sentiment === 'neutral' || i.sentiment === 'unassigned').length;
+  // const positiveCount = streamItems.filter((i: any) => i.sentiment === 'positive').length;
+  // const neutralCount = streamItems.filter((i: any) => i.sentiment === 'neutral' || i.sentiment === 'unassigned').length;
+
+  const positiveCount = combinedItems.filter((i: any) => i.sentiment === 'positive').length;
+  const neutralCount = combinedItems.filter((i: any) => i.sentiment === 'neutral' || i.sentiment === 'unassigned').length;
 
   const posPct = totalCount ? (positiveCount / totalCount) * 100 : 0;
   const negPct = totalCount ? (negativeCount / totalCount) * 100 : 0;
@@ -150,6 +205,15 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
     }
   };
 
+  const handlePlatformClick = (plat: string) => {
+    setFilterPlatform(plat);
+
+    // Auto-fetch demo data the FIRST time they click the maps filter
+    if (plat === 'google_maps' && demoItemsGmaps.length === 0 && !isFetchingDemoGmaps) {
+      handleFetchDemoReviewsGmaps();
+    }
+  };
+
   if (hasChannels === null) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center h-full bg-[#FCFBF8] font-jost">
@@ -236,8 +300,8 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
 
           {/* List Header & Filters */}
           <div className="p-4 border-b border-zinc-100 bg-zinc-50/50 shrink-0">
-            <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-none">
-              {['all', 'facebook', 'instagram', 'maps'].map((plat) => (
+            {/* <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-none">
+              {['all', 'facebook', 'instagram', 'google_maps'].map((plat) => (
                 <button
                   key={plat}
                   onClick={() => setFilterPlatform(plat)}
@@ -246,7 +310,20 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
                   {plat}
                 </button>
               ))}
+            </div> */}
+
+            <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-none">
+              {['all', 'facebook', 'instagram', 'google_maps'].map((plat) => (
+                <button
+                  key={plat}
+                  onClick={() => handlePlatformClick(plat)}
+                  className={`px-3 py-1.5 text-[11px] font-semibold rounded-lg capitalize transition-all ${filterPlatform === plat ? 'bg-zinc-900 text-white shadow-sm' : 'bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50'}`}
+                >
+                  {plat === 'google_maps' ? 'Maps' : plat}
+                </button>
+              ))}
             </div>
+
             <div className="flex flex-wrap gap-2">
               {['positive', 'neutral', 'negative'].map((sent) => {
                 const isActive = filterSentiment === sent;
@@ -321,8 +398,19 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
           </div>
 
           {/* Scrollable Stream */}
-          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-200 p-2 space-y-1">
+          {/* <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-200 p-2 space-y-1">
             {processedStreamItems.length === 0 ? (
+              <div className="text-center p-8 text-zinc-400 text-sm">Queue empty.</div>
+            ) : ( */}
+          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-200 p-2 space-y-1">
+            {isFetchingDemoGmaps ? (
+              <div className="flex flex-col items-center justify-center h-40 text-center space-y-3">
+                <div className="w-5 h-5 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin"></div>
+                <p className="text-zinc-400 text-xs font-medium uppercase tracking-widest">
+                  Scraping Live Maps Data...
+                </p>
+              </div>
+            ) : processedStreamItems.length === 0 ? (
               <div className="text-center p-8 text-zinc-400 text-sm">Queue empty.</div>
             ) : (
               processedStreamItems.map((item: any) => (
@@ -415,10 +503,25 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0 ml-2">
+                {/* <div className="flex items-center gap-2 shrink-0 ml-2">
                   <a href={`/api/social-media-agent/stream/get-feedback-link?id=${activeItem.id}`} target="_blank" rel="noopener noreferrer" className="px-2 lg:px-3 py-1.5 text-[11px] font-medium rounded-lg bg-zinc-100 text-zinc-600 hover:bg-zinc-200 transition-colors hidden sm:flex items-center justify-center">
                     View External ↗
                   </a>
+                  {activeItem.sentiment === 'negative' && (
+                    <button onClick={handleEscalate} disabled={isEscalating || activeItem.is_escalated} className={`px-2 lg:px-3 py-1.5 text-[11px] font-medium rounded-lg transition-colors ${activeItem.is_escalated ? 'bg-zinc-100 text-zinc-400' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'}`}>
+                      {isEscalating ? '...' : activeItem.is_escalated ? '✓' : 'Flag'}
+                    </button>
+                  )} */}
+                <div className="flex items-center gap-2 shrink-0 ml-2">
+                  <a
+                    href={activeItem.permalink_url ? activeItem.permalink_url : `/api/social-media-agent/stream/get-feedback-link?id=${activeItem.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2 lg:px-3 py-1.5 text-[11px] font-medium rounded-lg bg-zinc-100 text-zinc-600 hover:bg-zinc-200 transition-colors hidden sm:flex items-center justify-center"
+                  >
+                    View External ↗
+                  </a>
+
                   {activeItem.sentiment === 'negative' && (
                     <button onClick={handleEscalate} disabled={isEscalating || activeItem.is_escalated} className={`px-2 lg:px-3 py-1.5 text-[11px] font-medium rounded-lg transition-colors ${activeItem.is_escalated ? 'bg-zinc-100 text-zinc-400' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'}`}>
                       {isEscalating ? '...' : activeItem.is_escalated ? '✓' : 'Flag'}
