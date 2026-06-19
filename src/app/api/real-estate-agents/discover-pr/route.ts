@@ -1,33 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { generateObject } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { z } from 'zod';
+import { withLogger } from '@/lib/logs/withLogger'; // Import your logger
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-export async function POST(req: Request) {
+// Wrap the route with the logger HOC
+export const POST = withLogger('/api/real-estate-agents/discover-pr', async (req: NextRequest, routeLogger) => {
   try {
     const { name, location = "UAE" } = await req.json();
 
     if (!name) {
+      routeLogger.warn({ event: 'pr_discovery_aborted', reason: 'Missing agent name' });
       return NextResponse.json({ error: "Agent name is required" }, { status: 400 });
     }
 
-    // 1. The Parallel Fetch Strategy (Bypasses Free Tier Restrictions)
-    // We break the complex query into three simple ones
+    routeLogger.info({ event: 'pr_discovery_started', agentName: name, location });
+
+    // 1. The Parallel Fetch Strategy
     const targets = [
       `"${name}" "real estate"`,
       `"${name}" "property"`,
       `"${name}" "${location}"`,
       `"${name}" site:abu-dhabi.realestate`,
-      // `"${name}" site:propertyfinder.ae`,
-      // `"${name}" site:bayut.com`
     ];
 
-    // Fetch all three simultaneously
+    routeLogger.info({ event: 'serper_api_fetching', targetsCount: targets.length });
+
     const fetchPromises = targets.map(query =>
       fetch('https://google.serper.dev/search', {
         method: 'POST',
@@ -35,13 +38,13 @@ export async function POST(req: Request) {
           'X-API-KEY': process.env.SERPER_API_KEY!,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ q: query, num: 5 }) // Request fewer per query since we are doing 3
+        body: JSON.stringify({ q: query, num: 5 })
       }).then(res => res.json())
     );
 
     const results = await Promise.all(fetchPromises);
 
-    // Combine all the "organic" results from the 3 queries into one master array
+    // Combine organic results
     let allResults: any[] = [];
     results.forEach(data => {
       if (data.organic) allResults = [...allResults, ...data.organic];
@@ -51,10 +54,17 @@ export async function POST(req: Request) {
     const spamDomains = ["linkedin", "facebook", "instagram", "tiktok", "/agent/"];
     const validResults = allResults
       .filter((result: any) => !spamDomains.some(domain => result.link.includes(domain)))
-      .slice(0, 6); // Keep the top 6 valid news links
+      .slice(0, 6);
 
-    // If no PR was found across any of the sites
+    routeLogger.info({
+      event: 'serper_api_completed',
+      totalRawResults: allResults.length,
+      filteredValidResults: validResults.length
+    });
+
+    // If no PR was found
     if (validResults.length === 0) {
+      routeLogger.info({ event: 'pr_discovery_no_results', agentName: name });
       return NextResponse.json({
         message: "No public PR found, suggesting thought leadership topics.",
         mediaPresence: [
@@ -63,9 +73,11 @@ export async function POST(req: Request) {
       });
     }
 
-    // 3. Use Gemini to parse the messy Google snippets into clean PR headlines
+    routeLogger.info({ event: 'ai_generation_started', model: 'gemini-2.5-flash-lite' });
+
+    // 3. Use Gemini to parse the messy Google snippets
     const { object } = await generateObject({
-      model: google('gemini-flash-latest'),
+      model: google('gemini-2.5-flash-lite'),
       schema: z.object({
         mediaPresence: z.array(z.object({
           headline: z.string().describe("A professional, 1-2 sentence summary of the news snippet"),
@@ -81,10 +93,15 @@ export async function POST(req: Request) {
       prompt: `Format these search results into our PR schema:\n\n${JSON.stringify(validResults, null, 2)}`
     });
 
+    routeLogger.info({
+      event: 'ai_generation_completed',
+      extractedMediaCount: object.mediaPresence.length
+    });
+
     return NextResponse.json(object);
 
   } catch (error: any) {
-    console.error("PR Discovery Error:", error);
+    routeLogger.error({ err: error, event: 'pr_discovery_failed' }, "PR Discovery Error");
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}
+});

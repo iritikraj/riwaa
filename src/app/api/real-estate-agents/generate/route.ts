@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const runtime = "nodejs";
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { streamObject } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { z } from 'zod';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import { withLogger } from '@/lib/logs/withLogger';
 
 puppeteer.use(StealthPlugin());
 
@@ -67,9 +69,9 @@ const agentZodSchema = z.object({
   })
 });
 
-// 2. The Custom Broker Scraper
-async function fetchBrokerData(url: string) {
-  console.log(`Spinning up invisible browser for: ${url}`);
+// 2. The Custom Broker Scraper (Now accepts routeLogger)
+async function fetchBrokerData(url: string, routeLogger: any) {
+  routeLogger.info({ event: 'puppeteer_launching', url }, `Spinning up invisible browser for: ${url}`);
   let browser;
 
   try {
@@ -106,9 +108,7 @@ async function fetchBrokerData(url: string) {
 
       const summaryCards = Array.from(document.querySelectorAll('[data-testid="summary"] > div'));
       const summaryStats = summaryCards.map((card) => {
-        // card.children[0] grabs the entire value block (e.g., "55" or "1 Billion AED")
         const valueText = card.children[0]?.textContent;
-        // card.children[1] grabs the entire title block (e.g., "Properties for Sale")
         const titleText = card.children[1]?.textContent;
 
         return {
@@ -125,9 +125,10 @@ async function fetchBrokerData(url: string) {
       return { brokerName, profileImage, companyName, companyLogo, rating, hasWhatsapp, phoneNumber, summaryStats, fullText };
     });
 
+    routeLogger.info({ event: 'puppeteer_scrape_success', url, brokerName: data.brokerName });
     return data;
   } catch (error: any) {
-    console.error(`Puppeteer failed to scrape ${url}:`, error.message);
+    routeLogger.error({ err: error, url, event: 'puppeteer_scrape_failed' }, `Puppeteer failed to scrape ${url}: ${error.message}`);
     return null;
   } finally {
     if (browser) {
@@ -136,29 +137,35 @@ async function fetchBrokerData(url: string) {
   }
 }
 
-export async function POST(req: Request) {
+// 3. The API Route Wrapped with Logger
+export const POST = withLogger('/api/real-estate-agents/generate', async (req: NextRequest, routeLogger) => {
   try {
     const { sourceText, links } = await req.json();
 
-    // 3. Collect Structured Data
+    routeLogger.info({
+      event: 'agent_generation_started',
+      linksCount: links?.length || 0,
+      hasSourceText: !!sourceText
+    });
+
+    // 4. Collect Structured Data
     const scrapedResults = [];
     if (links && links.length > 0) {
       for (const url of links) {
-        const data = await fetchBrokerData(url);
+        // Pass the logger down into the scraping function
+        const data = await fetchBrokerData(url, routeLogger);
         if (data) scrapedResults.push(data);
       }
     }
 
     if (!sourceText && scrapedResults.length === 0) {
+      routeLogger.warn({ event: 'agent_generation_aborted', reason: 'No valid data extracted' });
       return NextResponse.json({ error: "Could not extract data." }, { status: 400 });
     }
 
-    console.log("Scraping complete. Preparing context for Gemini...");
+    routeLogger.info({ event: 'scraping_complete', successfulScrapes: scrapedResults.length }, "Preparing context for Gemini...");
 
-    // console.log(scrapedResults);
-    // console.log('---------------------------------------------------------------------------');
-
-    // 4. Construct Highly Structured Context for Gemini
+    // 5. Construct Highly Structured Context for Gemini
     const mappedScrapedData = scrapedResults.map(data => `
       BROKER NAME: ${data.brokerName}
       COMPANY/BROKERAGE: ${data.companyName}
@@ -169,15 +176,16 @@ export async function POST(req: Request) {
       FULL PAGE TEXT: ${data.fullText}
     `).join("\n\n--- NEXT PROFILE SOURCE ---\n\n");
 
-    console.log(mappedScrapedData);
-
     const finalContext = `
       RAW BIO TEXT (User Provided): ${sourceText || "None provided."}
       
       SCRAPED EXTERNAL PROFILES: 
       ${mappedScrapedData}
     `;
-    // 5. Stream Generation
+
+    routeLogger.info({ event: 'ai_stream_started', model: 'gemini-flash-latest' });
+
+    // 6. Stream Generation
     const result = await streamObject({
       model: google('gemini-flash-latest'),
       system: `You are the Chief Communications Officer for an ultra-luxury real estate advisory firm. 
@@ -205,12 +213,15 @@ export async function POST(req: Request) {
       `,
       prompt: `Extract and build a profile based on this combined data: \n${finalContext}`,
       schema: agentZodSchema,
+      onFinish: () => {
+        // Optional hook: Log when the AI stream successfully completes
+        routeLogger.info({ event: 'ai_stream_completed' });
+      }
     });
 
-    return result.toTextStreamResponse();
-
+    return result.toTextStreamResponse() as unknown as NextResponse;
   } catch (error: any) {
-    console.error("Agent Generation Error:", error);
+    routeLogger.error({ err: error, event: 'agent_generation_failed' }, "Agent Generation Error");
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}
+});

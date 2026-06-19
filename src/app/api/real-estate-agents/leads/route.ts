@@ -1,10 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { agentLeads } from "@/lib/db/schema";
-import { NextResponse } from "next/server";
+import { withLogger } from "@/lib/logs/withLogger";
 
-export async function POST(req: Request) {
+// Wrap the POST route with your logger
+export const POST = withLogger('/api/real-estate-agents/leads', async (req: NextRequest, routeLogger) => {
   try {
     const data = await req.json();
+
+    routeLogger.info({
+      event: 'agent_lead_capture_started',
+      websiteId: data.websiteId
+    });
 
     // Map the incoming websiteId to agentId for the database
     const payload = {
@@ -15,10 +23,23 @@ export async function POST(req: Request) {
       message: data.message,
     };
 
+    // Execute the database insert
     const [newLead] = await db.insert(agentLeads).values(payload).returning();
+
+    routeLogger.info({
+      event: 'agent_lead_capture_success',
+      leadId: newLead.id
+    });
+
     return NextResponse.json(newLead);
+
   } catch (error: any) {
-    console.error("Agent Lead Error:", error);
+    // Log the error with the event name for easy filtering in your logs
+    routeLogger.error(
+      { err: error, event: 'agent_lead_capture_failed' },
+      "Failed to capture lead"
+    );
+
     return NextResponse.json({ error: "Failed to capture lead" }, { status: 500 });
   }
-}
+});
