@@ -26,7 +26,16 @@ export function AgentMedia({ data, isEditable = false, onUpdate }: any) {
           {data.map((item: any, idx: number) => (
             <div key={idx} className="p-8 border border-[#e0d8cc] rounded-2xl bg-white flex flex-col justify-between">
               <div>
-                <Newspaper size={20} className="text-[#b8924a] mb-6" />
+                <div className="flex items-center justify-between mb-4">
+                  <Newspaper size={20} className="text-[#b8924a]" />
+
+                  <button
+                    className="text-sm font-medium text-[#b8924a] hover:text-[#9a7635] transition-colors cursor-pointer"
+                    onClick={() => window.open(item.link, "_blank")}
+                  >
+                    Read More →
+                  </button>
+                </div>
                 {isEditable ? (
                   <textarea
                     value={item.headline}

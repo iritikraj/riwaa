@@ -70,7 +70,7 @@ export function AgentMediaVersionTwo({
                   <div className="flex items-center gap-2">
                     <Newspaper size={14} className="text-cyan-300" />
                     <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-cyan-200">
-                      Feature 0{idx + 1}
+                      Feature {idx + 1}
                     </span>
                   </div>
 
@@ -126,6 +126,14 @@ export function AgentMediaVersionTwo({
                       “{item.headline}”
                     </h4>
                   )}
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      className="text-sm font-medium text-cyan-300 hover:text-cyan-200 transition-colors cursor-pointer"
+                      onClick={() => window.open(item.link, "_blank")}
+                    >
+                      Read More →
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-6 flex items-center gap-4">

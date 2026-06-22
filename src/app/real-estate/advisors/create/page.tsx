@@ -165,7 +165,8 @@ export default function AgentBuilderPage() {
       const res = await fetch("/api/real-estate-agents/discover-pr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: agentName, location: extractedData?.hero?.location }),
+        body: JSON.stringify({ name: agentName, location: "ae" }),
+        // body: JSON.stringify({ name: agentName, location: extractedData?.hero?.location }),
       });
       const data = await res.json();
 

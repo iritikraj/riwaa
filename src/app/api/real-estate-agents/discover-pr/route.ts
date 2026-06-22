@@ -1,18 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
-import { generateObject } from 'ai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { z } from 'zod';
-import { withLogger } from '@/lib/logs/withLogger'; // Import your logger
+import { withLogger } from '@/lib/logs/withLogger';
 
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
-
-// Wrap the route with the logger HOC
 export const POST = withLogger('/api/real-estate-agents/discover-pr', async (req: NextRequest, routeLogger) => {
   try {
-    const { name, location = "UAE" } = await req.json();
+    const { name, location = "ae" } = await req.json();
 
     if (!name) {
       routeLogger.warn({ event: 'pr_discovery_aborted', reason: 'Missing agent name' });
@@ -21,85 +13,86 @@ export const POST = withLogger('/api/real-estate-agents/discover-pr', async (req
 
     routeLogger.info({ event: 'pr_discovery_started', agentName: name, location });
 
-    // 1. The Parallel Fetch Strategy
+    // 1. Parallel Fetch Strategy using Serper News Endpoint
     const targets = [
       `"${name}" "real estate"`,
-      `"${name}" "property"`,
-      `"${name}" "${location}"`,
-      `"${name}" site:abu-dhabi.realestate`,
+      `"${name}" property`,
+      `"${name}"`,
     ];
 
     routeLogger.info({ event: 'serper_api_fetching', targetsCount: targets.length });
 
     const fetchPromises = targets.map(query =>
-      fetch('https://google.serper.dev/search', {
+      fetch('https://google.serper.dev/news', {
         method: 'POST',
         headers: {
           'X-API-KEY': process.env.SERPER_API_KEY!,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ q: query, num: 5 })
+        body: JSON.stringify({
+          q: query,
+          gl: location,
+          num: 10
+        })
       }).then(res => res.json())
     );
 
     const results = await Promise.all(fetchPromises);
 
-    // Combine organic results
-    let allResults: any[] = [];
+    // 2. Combine results
+    let allNews: any[] = [];
     results.forEach(data => {
-      if (data.organic) allResults = [...allResults, ...data.organic];
+      if (data.news) {
+        allNews = [...allNews, ...data.news];
+      }
     });
 
-    // 2. Filter the combined results
-    const spamDomains = ["linkedin", "facebook", "instagram", "tiktok", "/agent/"];
-    const validResults = allResults
-      .filter((result: any) => !spamDomains.some(domain => result.link.includes(domain)))
-      .slice(0, 6);
+    // Deduplicate identical articles by link URL
+    const uniqueNews = Array.from(new Map(allNews.map(item => [item.link, item])).values());
 
     routeLogger.info({
       event: 'serper_api_completed',
-      totalRawResults: allResults.length,
-      filteredValidResults: validResults.length
+      totalRawResults: allNews.length,
+      filteredValidResults: uniqueNews.length
     });
 
-    // If no PR was found
-    if (validResults.length === 0) {
+    // If no real PR news articles were discovered
+    if (uniqueNews.length === 0) {
       routeLogger.info({ event: 'pr_discovery_no_results', agentName: name });
       return NextResponse.json({
         message: "No public PR found, suggesting thought leadership topics.",
         mediaPresence: [
-          { headline: `Market Outlook: The Shift in ${location} Luxury Real Estate`, publication: "Suggested Personal Blog", year: "2026" }
+          {
+            headline: `Market Outlook: The Shift in ${location} Luxury Real Estate`,
+            publication: "Suggested Personal Blog",
+            year: new Date().getFullYear().toString(),
+            link: "#"
+          }
         ]
       });
     }
 
-    routeLogger.info({ event: 'ai_generation_started', model: 'gemini-2.5-flash-lite' });
+    // 3. Direct Mapping: Pure Native JavaScript parsing instead of LLM
+    const mediaPresence = uniqueNews.map((item: any) => {
+      // Safely extract 4-digit year from strings like "Sep 30, 2022" or "7 Oct 2025"
+      const yearMatch = item.date ? item.date.match(/\d{4}/) : null;
+      const year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
 
-    // 3. Use Gemini to parse the messy Google snippets
-    const { object } = await generateObject({
-      model: google('gemini-2.5-flash-lite'),
-      schema: z.object({
-        mediaPresence: z.array(z.object({
-          headline: z.string().describe("A professional, 1-2 sentence summary of the news snippet"),
-          publication: z.string().describe("The name of the news outlet (e.g., 'Bayut Corporate', 'Abu Dhabi Real Estate')"),
-          year: z.string().describe("The year it was published. Extract from text, default to current year if unknown.")
-        }))
-      }),
-      system: `
-        You are an elite PR Manager for ultra-luxury real estate agents. 
-        You will receive raw Google Search snippets about an agent. 
-        Extract the actual news features, clean up the headlines to sound highly professional, and identify the publication source.
-      `,
-      prompt: `Format these search results into our PR schema:\n\n${JSON.stringify(validResults, null, 2)}`
+      return {
+        headline: item.title || "",
+        publication: item.source || "Media Feature",
+        year: year,
+        link: item.link || "#",
+        imageUrl: item.imageUrl || null
+      };
     });
 
     routeLogger.info({
-      event: 'ai_generation_completed',
-      extractedMediaCount: object.mediaPresence.length
+      event: 'native_parsing_completed',
+      extractedMediaCount: mediaPresence.length
     });
 
-    return NextResponse.json(object);
-
+    return NextResponse.json({ mediaPresence });
   } catch (error: any) {
     routeLogger.error({ err: error, event: 'pr_discovery_failed' }, "PR Discovery Error");
     return NextResponse.json({ error: error.message }, { status: 500 });
