@@ -11,6 +11,8 @@ import { withLogger } from '@/lib/logs/withLogger';
 
 puppeteer.use(StealthPlugin());
 
+const LLM_MODEL = 'gemini-2.5-flash-lite'; // gemini-flash-latest
+
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
@@ -183,11 +185,11 @@ export const POST = withLogger('/api/real-estate-agents/generate', async (req: N
       ${mappedScrapedData}
     `;
 
-    routeLogger.info({ event: 'ai_stream_started', model: 'gemini-flash-latest' });
+    routeLogger.info({ event: 'ai_stream_started', model: LLM_MODEL });
 
     // 6. Stream Generation
     const result = await streamObject({
-      model: google('gemini-flash-latest'),
+      model: google(LLM_MODEL),
       system: `You are the Chief Communications Officer for an ultra-luxury real estate advisory firm. 
         Your sole responsibility is to ingest raw scraped data and synthesize it into an institutional-grade digital portfolio.
 

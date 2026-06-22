@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     const { prompt, assets } = await req.json();
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-flash-latest", // Use gemini-1.5-flash-latest if this exact string throws an error
+      model: "gemini-flash-latest",
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: schema,
