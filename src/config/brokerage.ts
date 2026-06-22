@@ -30,9 +30,18 @@ export const brokerageRegistry: Record<string, any> = {
     awards: "Driven Properties has been recognized as an industry leader, receiving numerous awards from major developers such as Emaar, Damac, Sobha, and Nakheel, acknowledging our excellence in sales performance, customer service, and market leadership. Our accolades serve as a testament to our commitment to delivering exceptional real estate solutions.",
 
     imageries: [
-      "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop", // Sleek office hallway
-      "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1200&auto=format&fit=crop", // Premium meeting room
-      "https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=1200&auto=format&fit=crop", // Desk/Architecture
+      {
+        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop",
+        Address: "Head Office (Downtown Dubai): Office 101, 1st Floor, Emaar Square 3, Downtown Dubai"
+      },
+      {
+        image: "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1200&auto=format&fit=crop",
+        Address: "Business Bay (Bay Square): Office 206, 2nd Floor, Bay Square, Business Bay"
+      },
+      {
+        image: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=1200&auto=format&fit=crop",
+        Address: "Jumeirah Village Circle (JVC): Office No. 15, Chaimaa Premiere District 15, JVC"
+      }
     ],
 
     offices: {
