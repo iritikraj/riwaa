@@ -2,6 +2,66 @@
   "success": true,
   "data": [
     {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xSRGEzVlhXRkJKTkdaU1dGWkhUbGhFV1hCUmQyYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xSRGEzVlhXRkJKTkdaU1dGWkhUbGhFV1hCUmQyYxAB",
+      "sender_username": "UVAIS POTHUVATH",
+      "content": "I am very disappointed with the service. I reported my room AC complaint 3 days ago, but still there is no solution and the AC is not working. The weather conditions are extremely hot, and staying without AC is very difficult.<br><br>This is a very poor response and service quality. My building number is 6537 in Shabiya. I kindly request the management to take immediate action and fix the AC issue as soon as possible.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-23T14:05:22.831Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xSRGEzVlhXRkJKTkdaU1dGWkhUbGhFV1hCUmQyYxAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOlRDa3VXWFBJNGZSWFZHTlhEWXBRd2c%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT21WemNrNHhUelJoVFU1UE1XTk1SVFJqWDBweWNrRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT21WemNrNHhUelJoVFU1UE1XTk1SVFJqWDBweWNrRRAB",
+      "sender_username": "Pastor Prathibha Rao - Ambassador of Christ",
+      "content": "Dhanielyn Stantos",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-22T05:37:14.041Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21WemNrNHhUelJoVFU1UE1XTk1SVFJqWDBweWNrRRAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOmVzck4xTzRhTU5PMWNMRTRjX0pyckE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT21wbVZUUXlVbGh3ZFZGcFVtc3lNMGd4WlhJd1FsRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT21wbVZUUXlVbGh3ZFZGcFVtc3lNMGd4WlhJd1FsRRAB",
+      "sender_username": "theyab alkaabi",
+      "content": "ادارة سيئة لا انصح بالتعامل معهم",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-18T08:55:52.397Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21wbVZUUXlVbGh3ZFZGcFVtc3lNMGd4WlhJd1FsRRAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOmpmVTQyUlhwdVFpUmsyM0gxZXIwQlE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xaUlowMU1TRkl3VDFGdk5YTnJiVVZ5UVVKbmNrRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xaUlowMU1TRkl3VDFGdk5YTnJiVVZ5UVVKbmNrRRAB",
+      "sender_username": "rama chandran",
+      "content": "Very bad experience. Worst customer service. The maintenance of the flat is zero without any immediate actions. No worth the money we spend for rent.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-18T08:00:21.481Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xaUlowMU1TRkl3VDFGdk5YTnJiVVZ5UVVKbmNrRRAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOlZRZ01MSFIwT1FvNXNrbUVyQUJnckE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
       "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xrdGFGVldRalp0Tm5GUVIxWkNZelJLUldaMlRtYxAB",
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xrdGFGVldRalp0Tm5GUVIxWkNZelJLUldaMlRtYxAB",
@@ -36,7 +96,7 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2s5S2IzaElkRmhUYTJWVmVYcElVMjExVXpoa1JGRRAB",
       "sender_username": "ghaith saifo",
-      "content": "ادارة سيئة وتواصل اسوء الي اسبوع بحاول اوصل ل شقة عن طريقهم و ما قدرت بسبب بطئ خدمتهم\nو شكلي راح روح للبروكرز",
+      "content": "ادارة سيئة وتواصل اسوء الي اسبوع بحاول اوصل ل شقة عن طريقهم و ما قدرت بسبب بطئ خدمتهم<br>و شكلي راح روح للبروكرز",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -51,7 +111,7 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2toQ2FFcFFZbWw1VVZCcFJWTnFMV0ZZY25WV1JIYxAB",
       "sender_username": "Jamal Aboshawer",
-      "content": "I would like to say thanks for all people here specifically  Mr. Ashfaq from rent department,he is very cooperative and helps with all people.i wishing for him\nvery best and continued success. Keep up the great work! and other staff good",
+      "content": "I would like to say thanks for all people here specifically  Mr. Ashfaq from rent department,he is very cooperative and helps with all people.i wishing for him<br>very best and continued success. Keep up the great work! and other staff good",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -81,7 +141,7 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xJelExbGxWemRVYkdOdVUyWjZUMDEzWVhWTFVYYxAB",
       "sender_username": "Jickson t thomas",
-      "content": "One of the worst company ever i met\nNo maintenance service and unprofessional behaviour\nJ am wondering why abu dhabi government is not taking any action against these money looting team\nOur building ac has not working since one month all tenants are suffering, we had communicated multiple time and email send but no response\nThe worst team and worst service\nShame of you relaam",
+      "content": "One of the worst company ever i met<br>No maintenance service and unprofessional behaviour<br>J am wondering why abu dhabi government is not taking any action against these money looting team<br>Our building ac has not working since one month all tenants are suffering, we had communicated multiple time and email send but no response<br>The worst team and worst service<br>Shame of you relaam",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -111,7 +171,7 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xaMU1VaFlaWEF3U0ZkSU1XVmhUR2hyWjFCVWMyYxAB",
       "sender_username": "Nagurbasha Shaik",
-      "content": "I was been customer for ADCP properties for 4 years. Overall experience is good. But while I am exiting and handovering the keys back to properties (on 23.04.2026), had a very very WORST experience with one of staff member named Ms. HANA.\n\nHer behaviour is worst and could not handle the customer in proper manner.\nShe is very very arrogant.\n\nThe issue was, I went to handover the keys back to Relaam on 23.04.2026. She denied to receive the keys from me stating that 'flat Maintenence clearance letter' is not received (i double confirmed with Customer care that i received the clearance letter), she arrogantly informed me that I can submit the keys to Relaam only during my contract termination date (11.05.2026).\nI told her politely that I am travelling next week, hence I need to deposit the keys to properties TODAY only. She replied me that, THAT IS YOUR PROBLEM, NOT MY PROBLEM. I didn't expect this behaviour and no one spoken to me in that manner in my entire UAE career. I wholeheartedly hurted and informed to her Supervisor. He came and spoke with her, still she is speaking with him also in the same manner.\n\nDue to her (Ms. Hana) worst behaviour, I visited next day, to the Relaam office and completed my job with other team member.\n\nI recommend not to visit her in any manner. She doesn't know the basic manner, how to speak/handle with customers.\n\nDue to this issue, I am giving less rating.",
+      "content": "I was been customer for ADCP properties for 4 years. Overall experience is good. But while I am exiting and handovering the keys back to properties (on 23.04.2026), had a very very WORST experience with one of staff member named Ms. HANA.<br><br>Her behaviour is worst and could not handle the customer in proper manner.<br>She is very very arrogant.<br><br>The issue was, I went to handover the keys back to Relaam on 23.04.2026. She denied to receive the keys from me stating that 'flat Maintenence clearance letter' is not received (i double confirmed with Customer care that i received the clearance letter), she arrogantly informed me that I can submit the keys to Relaam only during my contract termination date (11.05.2026).<br>I told her politely that I am travelling next week, hence I need to deposit the keys to properties TODAY only. She replied me that, THAT IS YOUR PROBLEM, NOT MY PROBLEM. I didn't expect this behaviour and no one spoken to me in that manner in my entire UAE career. I wholeheartedly hurted and informed to her Supervisor. He came and spoke with her, still she is speaking with him also in the same manner.<br><br>Due to her (Ms. Hana) worst behaviour, I visited next day, to the Relaam office and completed my job with other team member.<br><br>I recommend not to visit her in any manner. She doesn't know the basic manner, how to speak/handle with customers.<br><br>Due to this issue, I am giving less rating.",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -152,61 +212,76 @@
       }
     },
     {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT25oVFJVUlBhblZXTTNCZlNHbGtVbkkyT1hKdk0yYxAB",
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2tJM1dWQTRiakJSU0RGd00xbE1VSGRsYVdaVGVHYxAB",
       "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT25oVFJVUlBhblZXTTNCZlNHbGtVbkkyT1hKdk0yYxAB",
-      "sender_username": "Karam Awad",
-      "content": "I would love to share some great feedback about Anisa Salad at Danat Mall.\nI visited the branch with quite a few inquiries and questions, and Anisa handled everything with outstanding patience, professionalism, and attention to detail. She took the time to explain every step clearly, provided all the guidance and advice I needed, and made the entire experience smooth and comfortable.\nThank you, Anisa. It’s always a pleasure to see someone represent their organization with such care, professionalism, and positive energy.",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2tJM1dWQTRiakJSU0RGd00xbE1VSGRsYVdaVGVHYxAB",
+      "sender_username": "Aslam Asna Adam Ayyub Ahmad",
+      "content": "The month is June, extremely hot summer.<br>It has been 17 days since AC repair requested.<br><br>Despite several follow up on all official channels, no one cares.<br><br>Very unfortunate relaam is authorizing extremely bad facilities maintenance companies to conduct property maintenance.",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
-      "received_at": "2026-05-21T07:31:10.369Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT25oVFJVUlBhblZXTTNCZlNHbGtVbkkyT1hKdk0yYxAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOnhTRURPanVWM3BfSGlkUnI2OXJvM2c%7C%7C?hl=en",
+      "received_at": "2026-06-23T15:47:52.247Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2tJM1dWQTRiakJSU0RGd00xbE1VSGRsYVdaVGVHYxAB!2m1!1s0x0:0xf53d3124c55b2fc9!3m1!1s2@1:CAIQACodChtycF9oOkI3WVA4bjBRSDFwM1lMUHdlaWZTeGc%7C%7C?hl=en",
       "channels": {
         "platform": "google_maps"
       }
     },
     {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT20xbllYUjVXRjlXWDJWa1dubENYMGc0YzI0MVpIYxAB",
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2sxMVJFSTNTVU5WYUc5d1ZYTlJiM0U1WTNoV1NsRRAB",
       "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT20xbllYUjVXRjlXWDJWa1dubENYMGc0YzI0MVpIYxAB",
-      "sender_username": "Sandeep Unni",
-      "content": "Deem in counter was really helpful.. Highly recommended. Hana ibrahim in counter 22 is professional.",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2sxMVJFSTNTVU5WYUc5d1ZYTlJiM0U1WTNoV1NsRRAB",
+      "sender_username": "UVAIS POTHUVATH",
+      "content": "I am very disappointed with the service. I reported my room AC complaint 3 days ago, but still there is no solution and the AC is not working. The weather conditions are extremely hot, and staying without AC is very difficult.<br><br>This is a very poor response and service quality. My building number is 6537 in Shabiya. I kindly request the management to take immediate action and fix the AC issue as soon as possible.",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
-      "received_at": "2026-05-15T05:55:01.621Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT20xbllYUjVXRjlXWDJWa1dubENYMGc0YzI0MVpIYxAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOm1nYXR5WF9WX2VkWnlCX0g4c241ZHc%7C%7C?hl=en",
+      "received_at": "2026-06-23T14:06:33.507Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2sxMVJFSTNTVU5WYUc5d1ZYTlJiM0U1WTNoV1NsRRAB!2m1!1s0x0:0xf53d3124c55b2fc9!3m1!1s2@1:CAIQACodChtycF9oOk11REI3SUNVaG9wVXNRb3E5Y3hWSlE%7C%7C?hl=en",
       "channels": {
         "platform": "google_maps"
       }
     },
     {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT21ZelVGOWFVRkJ4VTNvdFRXMU9VbEpmY0RabVJrRRAB",
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2t0S2JtZEphek5JV21sU2FFRk5lVXh1VG5GTVNHYxAB",
       "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT21ZelVGOWFVRkJ4VTNvdFRXMU9VbEpmY0RabVJrRRAB",
-      "sender_username": "Maheswaran Subbiah",
-      "content": "Poor Maintenaces of building using their new maintenance contractor (IFM). They don't have proper people and no proper response. It is waste of money to book the building with Relaam\nThis will be my last year with such useless property management team who doesn't care about the people and only concentration on money alone",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2t0S2JtZEphek5JV21sU2FFRk5lVXh1VG5GTVNHYxAB",
+      "sender_username": "Mars Archive Beauty Lounge",
+      "content": "I would like to thank Suhaib for helping me previously, especially with reducing my rent. I truly appreciate his support.<br>However, I am very disappointed with the way Relaam has handled my security deposit refund. I have been sending emails and making phone calls repeatedly, but I have received no response at all.<br>More than a month ago, I was promised that my security deposit would be refunded within 15 days. Unfortunately, I am still chasing the return of my own money, and I have not received any update regarding its status.<br>@Relaam, please look into this matter urgently. Also, please review the contact number you have provided, as no one answers when customers call.<br>I would appreciate:<br>1. An update on the status of my refund.<br>2. A clear confirmation of the exact date I can expect to receive the money.<br>3. A working contact number or point of contact that can assist customers with refund-related inquiries.<br><br>I look forward to your prompt response and resolution of this issue.",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
-      "received_at": "2026-05-08T20:39:04.846Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21ZelVGOWFVRkJ4VTNvdFRXMU9VbEpmY0RabVJrRRAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOmYzUF9aUFBxU3otTW1OUlJfcDZmRkE%7C%7C?hl=en",
+      "received_at": "2026-06-23T07:44:42.072Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2t0S2JtZEphek5JV21sU2FFRk5lVXh1VG5GTVNHYxAB!2m1!1s0x0:0xf53d3124c55b2fc9!3m1!1s2@1:CAIQACodChtycF9oOktKbmdJazNIWmlSaEFNeUxuTnFMSGc%7C%7C?hl=en",
       "channels": {
         "platform": "google_maps"
       }
     },
     {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xGamFWbERkVkowYm01RE1UQlNVVWh0VmpWUFVIYxAB",
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xwdVREa3lUVXByVm1vMWJ6SnhXVFUwUzFWUE5FRRAB",
       "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xGamFWbERkVkowYm01RE1UQlNVVWh0VmpWUFVIYxAB",
-      "sender_username": "Hend Selim",
-      "content": "Poor response.. bad customer service.. if you had an issue, you probably had to wait months to be solved. not recommended!",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xwdVREa3lUVXByVm1vMWJ6SnhXVFUwUzFWUE5FRRAB",
+      "sender_username": "Verena Farid",
+      "content": "Scammers!!!<br>I just got my contract signed yesterday and i’ve been promised with maintenance to be done once i sign the contract. I contacted the call center to raise the maintenance request just to get a follow up email saying that my request has been cancelled and i need to carry all the maintenance issues at my own expense and they are not responsible for it!<br>Please watch out when you sign any papers there as they might say things and make you sign on a completely different form!!!",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
-      "received_at": "2026-05-05T05:19:30.863Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xGamFWbERkVkowYm01RE1UQlNVVWh0VmpWUFVIYxAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOlFjaVlDdVJ0bm5DMTBSUUhtVjVPUHc%7C%7C?hl=en",
+      "received_at": "2026-06-23T06:48:48.257Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xwdVREa3lUVXByVm1vMWJ6SnhXVFUwUzFWUE5FRRAB!2m1!1s0x0:0xf53d3124c55b2fc9!3m1!1s2@1:CAIQACodChtycF9oOlpuTDkyTUprVmo1bzJxWTU0S1VPNEE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2twc2NuTktXRlpmWDB0cVIxb3dRVUpJUlVsS1pIYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2twc2NuTktXRlpmWDB0cVIxb3dRVUpJUlVsS1pIYxAB",
+      "sender_username": "Ask Learn",
+      "content": "Very low service , even emergency number not responding we spent one night without electricity",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-22T23:34:05.462Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2twc2NuTktXRlpmWDB0cVIxb3dRVUpJUlVsS1pIYxAB!2m1!1s0x0:0xf53d3124c55b2fc9!3m1!1s2@1:CAIQACodChtycF9oOkpscnNKWFZfX0tqR1owQUJIRUlKZHc%7C%7C?hl=en",
       "channels": {
         "platform": "google_maps"
       }
@@ -216,7 +291,7 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2prelpEZExkRjh3UnpoUGRFRnVRMGwxWlZkT1dVRRAB",
       "sender_username": "Flip Loreto",
-      "content": "Hi Relaam Team,\n\nPlease look into the bldg issues of P/614.\n1. AC issue\n2. Car lift issue\n\nThis problem has been there more than a month now.\nHopefully, you can send an efficient maintenance team.",
+      "content": "Hi Relaam Team,<br><br>Please look into the bldg issues of P/614.<br>1. AC issue<br>2. Car lift issue<br><br>This problem has been there more than a month now.<br>Hopefully, you can send an efficient maintenance team.",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -306,7 +381,7 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT201SWJFWkZaWEJDWkhselJqUlBPRk5ET0ZkeFVsRRAB",
       "sender_username": "sooraj raghav",
-      "content": "I would like to express my sincere thanks to Ms. Dhanielysn Santos, Ms. Shohra, Mr. Shuhaib, Mr. Abdul Rahim and the entire Relaam team.\nI truly appreciate all the effort, dedication, and support you provided in confirming my tenancy contract. Your professionalism, prompt assistance, and commitment throughout the process made everything much smoother.\nThank you once again for your hard work and excellent service. It has been a pleasure working with such a supportive and efficient team.",
+      "content": "I would like to express my sincere thanks to Ms. Dhanielysn Santos, Ms. Shohra, Mr. Shuhaib, Mr. Abdul Rahim and the entire Relaam team.<br>I truly appreciate all the effort, dedication, and support you provided in confirming my tenancy contract. Your professionalism, prompt assistance, and commitment throughout the process made everything much smoother.<br>Thank you once again for your hard work and excellent service. It has been a pleasure working with such a supportive and efficient team.",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -317,86 +392,11 @@
       }
     },
     {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2sxclVGWnZWMUp4WlVOdFdTMTRjVmxuTm1Rd05XYxAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2sxclVGWnZWMUp4WlVOdFdTMTRjVmxuTm1Rd05XYxAB",
-      "sender_username": "Lisbon John Serrao",
-      "content": "I am disappointed with the office’s queueing system. The waiting system does not adhere to a numerical order; instead, it prioritizes personal preferences. And when I reach the counter the person attending is missing from her desk for an hour",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-06-11T07:24:39.919Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2sxclVGWnZWMUp4WlVOdFdTMTRjVmxuTm1Rd05XYxAB!2m1!1s0x0:0xf53d3124c55b2fc9!3m1!1s2@1:CAIQACodChtycF9oOk1rUFZvV1JxZUNtWS14cVlnNmQwNWc%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2s5elNITm1Ua2t0WTJGdU5EWmpkMEUxWWpGUWNHYxAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2s5elNITm1Ua2t0WTJGdU5EWmpkMEUxWWpGUWNHYxAB",
-      "sender_username": "Tarek Kateb",
-      "content": "Very bad not  recommend",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-06-10T16:22:41.990Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2s5elNITm1Ua2t0WTJGdU5EWmpkMEUxWWpGUWNHYxAB!2m1!1s0x0:0xf53d3124c55b2fc9!3m1!1s2@1:CAIQACodChtycF9oOk9zSHNmTkktY2FuNDZjd0E1YjFQcGc%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT21sQmMxOWpVVTlaV0Vac1dERnNaMVZEUjIxT1RrRRAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT21sQmMxOWpVVTlaV0Vac1dERnNaMVZEUjIxT1RrRRAB",
-      "sender_username": "S Z",
-      "content": "سيء جدا لاينصح بالتعامل معهم من تجربة شخصية",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-06-10T14:43:02.422Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21sQmMxOWpVVTlaV0Vac1dERnNaMVZEUjIxT1RrRRAB!2m1!1s0x0:0xf53d3124c55b2fc9!3m1!1s2@1:CAIQACodChtycF9oOmlBc19jUU9ZWEZsWDFsZ1VDR21OTkE%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2s1VVZVcHpSRE52U0VodUxVRktaRWRaTFdkbU5YYxAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2s1VVZVcHpSRE52U0VodUxVRktaRWRaTFdkbU5YYxAB",
-      "sender_username": "Shajid Sheik Basheer",
-      "content": "This is a new facility that was relocated from the city and is now located below Centrepoint in Marina Mall. I arrived at 9:15 AM on a weekday and found that many people were already waiting with tokens. However, I was able to reach the payment-related counter within 15 minutes.",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-06-09T16:14:53.772Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2s1VVZVcHpSRE52U0VodUxVRktaRWRaTFdkbU5YYxAB!2m1!1s0x0:0xf53d3124c55b2fc9!3m1!1s2@1:CAIQACodChtycF9oOk5UVUpzRDNvSEhuLUFKZEdZLWdmNXc%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2kxTGJuZFlUVVZXWVMxQk5rcGlUa1oyVms5dVYyYxAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2kxTGJuZFlUVVZXWVMxQk5rcGlUa1oyVms5dVYyYxAB",
-      "sender_username": "Preetha gayu",
-      "content": "Mr.  Ashfaq Khan and Mr. Mahmoud Elrawy the staff of Relaam Real estate helped to take new contract with your company. I very much appreciate their service. I greatful and sincerely thank them .",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-06-09T08:12:45.059Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2kxTGJuZFlUVVZXWVMxQk5rcGlUa1oyVms5dVYyYxAB!2m1!1s0x0:0xf53d3124c55b2fc9!3m1!1s2@1:CAIQACodChtycF9oOi1LbndYTUVWYS1BNkpiTkZ2Vk9uV2c%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
       "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT25Ca2RuSlZTMUp5UlUxTmExOXhTelpHVG5WMFRsRRAB",
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT25Ca2RuSlZTMUp5UlUxTmExOXhTelpHVG5WMFRsRRAB",
       "sender_username": "Mohamad fahed Kasiba",
-      "content": "تجربة مميزة خدمة احترافية\nالتعامل مع السيد / حسام كان في غاية الزوق و اللباقة",
+      "content": "تجربة مميزة خدمة احترافية<br>التعامل مع السيد / حسام كان في غاية الزوق و اللباقة",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -456,7 +456,7 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT210YVIwUm9Wak0xVldkRU5qSklXVGR0TUdvdFlVRRAB",
       "sender_username": "Mohammad Ibrahim",
-      "content": "I had an excellent experience with Husam Al Bitar, the Leasing Manager for Al Dhafra region (Madinat Zayed). He was extremely helpful, pleasant, and patient throughout the entire process. He guided me clearly, answered all my doubts, and went above and beyond to assist me with my rental contract and TAQA connection, even though I came all the way from Al Ain.\n\nWhat really impressed me was how professionally he handled another customer’s maintenance complaint right in front of us — calmly and with respect, even though it wasn’t his responsibility. His professionalism, courtesy, and dedication truly stand out.\n\nHighly recommended — wishing him all the best in his career!",
+      "content": "I had an excellent experience with Husam Al Bitar, the Leasing Manager for Al Dhafra region (Madinat Zayed). He was extremely helpful, pleasant, and patient throughout the entire process. He guided me clearly, answered all my doubts, and went above and beyond to assist me with my rental contract and TAQA connection, even though I came all the way from Al Ain.<br><br>What really impressed me was how professionally he handled another customer’s maintenance complaint right in front of us — calmly and with respect, even though it wasn’t his responsibility. His professionalism, courtesy, and dedication truly stand out.<br><br>Highly recommended — wishing him all the best in his career!",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -561,7 +561,7 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT25SaGRFUmhkakozWmkxek16VXhTbEoyUzJkNFIxRRAB",
       "sender_username": "imran rashid",
-      "content": "Hospatlity of \"Husam al bitar\" during my visit to ADCP office was amazing.\nHe explained very briefly about terms and condition.",
+      "content": "Hospatlity of \"Husam al bitar\" during my visit to ADCP office was amazing.<br>He explained very briefly about terms and condition.",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -572,11 +572,206 @@
       }
     },
     {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xoSGNXOXVWRmhDU0hKZllUWlNNbVZuUldaTmJXYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xoSGNXOXVWRmhDU0hKZllUWlNNbVZuUldaTmJXYxAB",
+      "sender_username": "yahya guna",
+      "content": "نصابين وكذابين والصيانه اكثر من 20 يوم مستاجر وما استلمت الشقه لانو الصيانه مش جاهزة<br><br>اله شهر بيحكي بدي اجي وبكره واليوم وما برد على تلفون شركه نصابه الله لا يبارك لكم في هالرمضان",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-24T10:38:26.504Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xoSGNXOXVWRmhDU0hKZllUWlNNbVZuUldaTmJXYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOlhHcW9uVFhCSHJfYTZSMmVnRWZNbWc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2tWME9DMUJTa1ZSZGw5R1VqUlVValV5YVZkck5WRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2tWME9DMUJTa1ZSZGw5R1VqUlVValV5YVZkck5WRRAB",
+      "sender_username": "Mahmood Sultan",
+      "content": "خدمة في قمة السوء",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-22T23:24:28.668Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2tWME9DMUJTa1ZSZGw5R1VqUlVValV5YVZkck5WRRAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOkV0OC1BSkVRdl9GUjRUUjUyaVdrNVE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT214SGVtSk5MV0pPYVdzdGJFeEdhbFI0VUZOUlRsRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT214SGVtSk5MV0pPYVdzdGJFeEdhbFI0VUZOUlRsRRAB",
+      "sender_username": "محمد نجيب",
+      "content": "عنجد معامله كتير سيئة الواحد يقضي اليوم كامل عشان يخلص معاملتو وطلع قرار بخصوص عدم رفع الاجار<br>وكانو عاملين حكم محكمه عشان الاخلاء عشان يزيدو الاجار 30بالميه بتكلفهن 700درهم شالوها مني بعد م طلع القرار بعدم رفع الاجار شركه سيئه جدااااا",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-12T06:26:31.782Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT214SGVtSk5MV0pPYVdzdGJFeEdhbFI0VUZOUlRsRRAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOmxHemJNLWJOaWstbExGalR4UFNRTlE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-ChZDSUhNMG9nS0VJQ0FnSUNMLVpUWFRREAE",
+      "channel_id": "demo-google-maps",
+      "external_id": "ChZDSUhNMG9nS0VJQ0FnSUNMLVpUWFRREAE",
+      "sender_username": "Nasser Alhajnasser",
+      "content": "Id rather live on the streets than renting from relaam  customer service supportive , but maintaince is worst ,my whole apartment HVAC is not working , called maintenance  made service request , the maintenance team are very rude , he switch off his phone when i request them to come , its been a week and we are in middle of summer No AC and iam currently using portable AC to cool my room , the whole building plus all apartment has no hvac air conditioning working , dont rent from adcp worst company!!!!",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-10T18:02:17.169Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJQ0FnSUNMLVpUWFRREAE!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CIHM0ogKEICAgICL-ZTXTQ%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT214SVpTMW9UbmhXU1c1NExXZzJlVVJDUlUwNWFIYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT214SVpTMW9UbmhXU1c1NExXZzJlVVJDUlUwNWFIYxAB",
+      "sender_username": "Amber Spa & Beauty Lounge LLC",
+      "content": "Nuha Al Hamaydeh consistently demonstrates exceptional professionalism and dedication. For many years, I always found her extremely helpful. She is an invaluable asset to the Relaam team, blending high-level problem-solving skills with a genuinely warm, customer-centric approach. It is a privilege to have someone of Nuha’s character!",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-10T08:00:07.680Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT214SVpTMW9UbmhXU1c1NExXZzJlVVJDUlUwNWFIYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOmxIZS1oTnhWSW54LWg2eURCRU05aHc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2pORVkwWlFTMVV3Wm05MFdtRTJhbTVVTkVoTU9YYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2pORVkwWlFTMVV3Wm05MFdtRTJhbTVVTkVoTU9YYxAB",
+      "sender_username": "Abdullah Alyafei",
+      "content": "خدمه سيئة من جميع النواحي وعدم حل مشكلة المستأجر ويماطلون ويتاخرون في كل شي ومحد يخلص لك شي الا بعد ماتتصل فيهم 20 مره يومياً",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-08T08:22:47.993Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2pORVkwWlFTMVV3Wm05MFdtRTJhbTVVTkVoTU9YYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOjNEY0ZQS1UwZm90WmE2am5UNEhMOXc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-ChZDSUhNMG9nS0VQdklxNVdBcV9tSGN3EAE",
+      "channel_id": "demo-google-maps",
+      "external_id": "ChZDSUhNMG9nS0VQdklxNVdBcV9tSGN3EAE",
+      "sender_username": "Mutaz Abu Issa",
+      "content": "Perfect customer service..<br>Specially by Amal Alburaidaei.<br>I didn’t face any issues or difficulties,, just few minutes the contract was signed.<br>Thanks Amal..  thanks all",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-03T10:53:58.696Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VQdklxNVdBcV9tSGN3EAE!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CIHM0ogKEPvIq5WAq_mHcw%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-ChdDSUhNMG9nS0VJQ0FnTUR3cTZtV2p3RRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "ChdDSUhNMG9nS0VJQ0FnTUR3cTZtV2p3RRAB",
+      "sender_username": "RAM",
+      "content": "ممتاز",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-05-27T11:49:59.599Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChdDSUhNMG9nS0VJQ0FnTUR3cTZtV2p3RRAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CIHM0ogKEICAgMDwq6mWjwE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xoWVV6UnFTM1k1VWxoMFJsb3RSMUJSUkVkeFZYYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xoWVV6UnFTM1k1VWxoMFJsb3RSMUJSUkVkeFZYYxAB",
+      "sender_username": "م.صلاح الشرفي",
+      "content": "لا انصح بالتعامل معهم اسلوبهم مستفز وشققهم تعبانه وصيانتهم متعبه بشكل غير عادي.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-05-21T10:17:16.888Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xoWVV6UnFTM1k1VWxoMFJsb3RSMUJSUkVkeFZYYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOlhYUzRqS3Y5Ulh0RlotR1BRREdxVXc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT204eVkzZ3piV0paVUZsR1VXUnpPV05uTm5sVmFWRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT204eVkzZ3piV0paVUZsR1VXUnpPV05uTm5sVmFWRRAB",
+      "sender_username": "Anonymous",
+      "content": "اسوء تجربة بحياتي بالايجارات - كنت بدي اطلع من البيت وطلبوا شهرين اجار ورسوم 1050 كمان لحتى اطلع او لاقي مستاجر ومع اني لقيت المستاجر بس طلبوا كمان رسوم تحويل 2100 وعمولة مع انو انا يلي لقيت المستاجر ورسوم شيك ورسوم عقد جديد وتامين 3000 / وصلولي الرسوم بس من غير دفعة البيت حوالي 8500 درهم",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-05-18T12:08:35.123Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT204eVkzZ3piV0paVUZsR1VXUnpPV05uTm5sVmFWRRAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOm8yY3gzbWJZUFlGUWRzOWNnNnlVaVE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT21vdGMzQnFXRVl5UWpoeFJrSndSbG95Ylc5bWFYYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT21vdGMzQnFXRVl5UWpoeFJrSndSbG95Ylc5bWFYYxAB",
+      "sender_username": "Professional Homes Real Estate",
+      "content": "أود أن أتقدم بجزيل الشكر للأستاذة نهى والأستاذة أحلام على جهودهما الاستثنائية. لقد تم التعامل مع طلباتي العقارية بكل احترافية ودقة، وكان تواصلهما راقياً وسريعاً. أنصح بشدة بالتعامل معهما لمن يبحث عن التميز والمصداقية. شكراً جزيلاً لكم",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-05-15T09:26:17.450Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21vdGMzQnFXRVl5UWpoeFJrSndSbG95Ylc5bWFYYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOmotc3BqWEYyQjhxRkJwRloybW9maXc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT21sWlFrOUZlRlJuVEZsT1RESm5kMVI0Tms1MWNuYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT21sWlFrOUZlRlJuVEZsT1RESm5kMVI0Tms1MWNuYxAB",
+      "sender_username": "hassan mohammed",
+      "content": "Want to thanks Ms.Amal Alburaidaei, Shadi and Rabai",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-05-12T07:12:55.918Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21sWlFrOUZlRlJuVEZsT1RESm5kMVI0Tms1MWNuYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOmlZQk9FeFRnTFlOTDJnd1R4Nk51cnc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT21KaVJqZDRiMGxOY0ZwM2RYaEVWR1psUzFFdE9IYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT21KaVJqZDRiMGxOY0ZwM2RYaEVWR1psUzFFdE9IYxAB",
+      "sender_username": "Ahmed Alabadla",
+      "content": "أود شكر الأخت شمّة علي لمساعدتي في حل مشكلة تجديد العقد، حيث تعاملت معي بأسلوب رائع و محترم، حيث أنها إتصلت بي وأخبرتني شخصيا بان المشكلة قد تم حلُّها وقد ساعدتي بتقديم طلب التجديد لديها. أشرك الادارة لتواجد موظفين يستقبلونا بابتسامة واحترام.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-05-06T05:48:35.802Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21KaVJqZDRiMGxOY0ZwM2RYaEVWR1psUzFFdE9IYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOmJiRjd4b0lNcFp3dXhEVGZlS1EtOHc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
       "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT205dk1tOWxlV1JsU0MxWGQyTk5lWGt5TFRGR00wRRAB",
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT205dk1tOWxlV1JsU0MxWGQyTk5lWGt5TFRGR00wRRAB",
       "sender_username": "Md Sajid",
-      "content": "Not recommended very bad experience with leasing department waste of time\nDisappointed with service",
+      "content": "Not recommended very bad experience with leasing department waste of time<br>Disappointed with service",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -606,7 +801,7 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT25ObVRsVjZRMWRmVHpCUlJuRlJiemw1YlRGRU4wRRAB",
       "sender_username": "kpz thoufeeque",
-      "content": "Hello brothers\nPlease dont go any one to this realeatate.. dont take properties of them….totally worst services especially their sharjah branch (crystal plaza building) not considering customers not behaving properly , making customers waiting without anyreason… totally very cheap behavior …. They are drinking tea talking to others even lot of customers waiting them… giving zero star out of 100\nPlease  brothers dont take their properties…",
+      "content": "Hello brothers<br>Please dont go any one to this realeatate.. dont take properties of them….totally worst services especially their sharjah branch (crystal plaza building) not considering customers not behaving properly , making customers waiting without anyreason… totally very cheap behavior …. They are drinking tea talking to others even lot of customers waiting them… giving zero star out of 100<br>Please  brothers dont take their properties…",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -636,7 +831,7 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT21oVmFXWkZXVzgxVjNjd1ZGZEhWVTlMVVVoWWNFRRAB",
       "sender_username": "sunbin binoy",
-      "content": "Had a great experience with mr. Shahab mohammed.\nThank you.",
+      "content": "Had a great experience with mr. Shahab mohammed.<br>Thank you.",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -696,7 +891,7 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT25kV1pWVkhkRGRCT0c5ZlpGVkpVbVpzUlU5blVVRRAB",
       "sender_username": "renjith renji",
-      "content": "Mr. Shahab Mohammed assist me to renew my contract and I am very satisfied with his service\n\nThank you",
+      "content": "Mr. Shahab Mohammed assist me to renew my contract and I am very satisfied with his service<br><br>Thank you",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -711,7 +906,7 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT25GUFZsRkRSMDlHV2tacFEyMUZiVmxSVjAxclUyYxAB",
       "sender_username": "hameed alkot",
-      "content": "Shahab Mohammed\nAmazing staff and we renewing with him since ten years , hard worker from heart",
+      "content": "Shahab Mohammed<br>Amazing staff and we renewing with him since ten years , hard worker from heart",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
@@ -786,222 +981,12 @@
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2tkSFIxY3ljVVJUWkZaVU5XOUZkVU5TTkRKSlExRRAB",
       "sender_username": "Prasadi Nisanshala",
-      "content": "The worst company i have ever work with.\n\nWe had lease in Al roda tower and still struggling to get our deposit back from the company its been 3 month now.\n\nShahab only responding to the email after so many follow ups and still no proper information about deposit.",
+      "content": "The worst company i have ever work with.<br><br>We had lease in Al roda tower and still struggling to get our deposit back from the company its been 3 month now.<br><br>Shahab only responding to the email after so many follow ups and still no proper information about deposit.",
       "sentiment": "unassigned",
       "ai_suggestion": null,
       "is_replied": false,
       "received_at": "2025-08-11T09:57:44.390Z",
       "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2tkSFIxY3ljVVJUWkZaVU5XOUZkVU5TTkRKSlExRRAB!2m1!1s0x0:0xcb2c5983bb540f22!3m1!1s2@1:CAIQACodChtycF9oOkdHR1cycURTZFZUNW9FdUNSNDJJQ1E%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT214SGVtSk5MV0pPYVdzdGJFeEdhbFI0VUZOUlRsRRAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT214SGVtSk5MV0pPYVdzdGJFeEdhbFI0VUZOUlRsRRAB",
-      "sender_username": "محمد نجيب",
-      "content": "عنجد معامله كتير سيئة الواحد يقضي اليوم كامل عشان يخلص معاملتو وطلع قرار بخصوص عدم رفع الاجار\nوكانو عاملين حكم محكمه عشان الاخلاء عشان يزيدو الاجار 30بالميه بتكلفهن 700درهم شالوها مني بعد م طلع القرار بعدم رفع الاجار شركه سيئه جدااااا",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-06-12T06:26:31.782Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT214SGVtSk5MV0pPYVdzdGJFeEdhbFI0VUZOUlRsRRAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOmxHemJNLWJOaWstbExGalR4UFNRTlE%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-ChZDSUhNMG9nS0VJQ0FnSUNMLVpUWFRREAE",
-      "channel_id": "demo-google-maps",
-      "external_id": "ChZDSUhNMG9nS0VJQ0FnSUNMLVpUWFRREAE",
-      "sender_username": "Nasser Alhajnasser",
-      "content": "Id rather live on the streets than renting from relaam  customer service supportive , but maintaince is worst ,my whole apartment HVAC is not working , called maintenance  made service request , the maintenance team are very rude , he switch off his phone when i request them to come , its been a week and we are in middle of summer No AC and iam currently using portable AC to cool my room , the whole building plus all apartment has no hvac air conditioning working , dont rent from adcp worst company!!!!",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-06-10T18:02:17.169Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJQ0FnSUNMLVpUWFRREAE!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CIHM0ogKEICAgICL-ZTXTQ%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT214SVpTMW9UbmhXU1c1NExXZzJlVVJDUlUwNWFIYxAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT214SVpTMW9UbmhXU1c1NExXZzJlVVJDUlUwNWFIYxAB",
-      "sender_username": "Amber Spa & Beauty Lounge LLC",
-      "content": "Nuha Al Hamaydeh consistently demonstrates exceptional professionalism and dedication. For many years, I always found her extremely helpful. She is an invaluable asset to the Relaam team, blending high-level problem-solving skills with a genuinely warm, customer-centric approach. It is a privilege to have someone of Nuha’s character!",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-06-10T08:00:07.680Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT214SVpTMW9UbmhXU1c1NExXZzJlVVJDUlUwNWFIYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOmxIZS1oTnhWSW54LWg2eURCRU05aHc%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2pORVkwWlFTMVV3Wm05MFdtRTJhbTVVTkVoTU9YYxAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2pORVkwWlFTMVV3Wm05MFdtRTJhbTVVTkVoTU9YYxAB",
-      "sender_username": "Abdullah Alyafei",
-      "content": "خدمه سيئة من جميع النواحي وعدم حل مشكلة المستأجر ويماطلون ويتاخرون في كل شي ومحد يخلص لك شي الا بعد ماتتصل فيهم 20 مره يومياً",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-06-08T08:22:47.993Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2pORVkwWlFTMVV3Wm05MFdtRTJhbTVVTkVoTU9YYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOjNEY0ZQS1UwZm90WmE2am5UNEhMOXc%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-ChZDSUhNMG9nS0VQdklxNVdBcV9tSGN3EAE",
-      "channel_id": "demo-google-maps",
-      "external_id": "ChZDSUhNMG9nS0VQdklxNVdBcV9tSGN3EAE",
-      "sender_username": "Mutaz Abu Issa",
-      "content": "Perfect customer service..\nSpecially by Amal Alburaidaei.\nI didn’t face any issues or difficulties,, just few minutes the contract was signed.\nThanks Amal..  thanks all",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-06-03T10:53:58.696Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VQdklxNVdBcV9tSGN3EAE!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CIHM0ogKEPvIq5WAq_mHcw%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-ChdDSUhNMG9nS0VJQ0FnTUR3cTZtV2p3RRAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "ChdDSUhNMG9nS0VJQ0FnTUR3cTZtV2p3RRAB",
-      "sender_username": "sinjel",
-      "content": "ممتاز",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-05-27T11:49:59.599Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChdDSUhNMG9nS0VJQ0FnTUR3cTZtV2p3RRAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CIHM0ogKEICAgMDwq6mWjwE%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xoWVV6UnFTM1k1VWxoMFJsb3RSMUJSUkVkeFZYYxAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xoWVV6UnFTM1k1VWxoMFJsb3RSMUJSUkVkeFZYYxAB",
-      "sender_username": "م.صلاح الشرفي",
-      "content": "لا انصح بالتعامل معهم اسلوبهم مستفز وشققهم تعبانه وصيانتهم متعبه بشكل غير عادي.",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-05-21T10:17:16.888Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xoWVV6UnFTM1k1VWxoMFJsb3RSMUJSUkVkeFZYYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOlhYUzRqS3Y5Ulh0RlotR1BRREdxVXc%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT204eVkzZ3piV0paVUZsR1VXUnpPV05uTm5sVmFWRRAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT204eVkzZ3piV0paVUZsR1VXUnpPV05uTm5sVmFWRRAB",
-      "sender_username": "Anonymous",
-      "content": "اسوء تجربة بحياتي بالايجارات - كنت بدي اطلع من البيت وطلبوا شهرين اجار ورسوم 1050 كمان لحتى اطلع او لاقي مستاجر ومع اني لقيت المستاجر بس طلبوا كمان رسوم تحويل 2100 وعمولة مع انو انا يلي لقيت المستاجر ورسوم شيك ورسوم عقد جديد وتامين 3000 / وصلولي الرسوم بس من غير دفعة البيت حوالي 8500 درهم",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-05-18T12:08:35.123Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT204eVkzZ3piV0paVUZsR1VXUnpPV05uTm5sVmFWRRAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOm8yY3gzbWJZUFlGUWRzOWNnNnlVaVE%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT21vdGMzQnFXRVl5UWpoeFJrSndSbG95Ylc5bWFYYxAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT21vdGMzQnFXRVl5UWpoeFJrSndSbG95Ylc5bWFYYxAB",
-      "sender_username": "Professional Homes Real Estate",
-      "content": "أود أن أتقدم بجزيل الشكر للأستاذة نهى والأستاذة أحلام على جهودهما الاستثنائية. لقد تم التعامل مع طلباتي العقارية بكل احترافية ودقة، وكان تواصلهما راقياً وسريعاً. أنصح بشدة بالتعامل معهما لمن يبحث عن التميز والمصداقية. شكراً جزيلاً لكم",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-05-15T09:26:17.450Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21vdGMzQnFXRVl5UWpoeFJrSndSbG95Ylc5bWFYYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOmotc3BqWEYyQjhxRkJwRloybW9maXc%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT21sWlFrOUZlRlJuVEZsT1RESm5kMVI0Tms1MWNuYxAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT21sWlFrOUZlRlJuVEZsT1RESm5kMVI0Tms1MWNuYxAB",
-      "sender_username": "hassan mohammed",
-      "content": "Want to thanks Ms.Amal Alburaidaei, Shadi and Rabai",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-05-12T07:12:55.918Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21sWlFrOUZlRlJuVEZsT1RESm5kMVI0Tms1MWNuYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOmlZQk9FeFRnTFlOTDJnd1R4Nk51cnc%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT21GMVJrbENjVWR6V1ZSNU1saDZVa0V5UXpad1MxRRAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT21GMVJrbENjVWR6V1ZSNU1saDZVa0V5UXpad1MxRRAB",
-      "sender_username": "A Google User",
-      "content": "خدمه سيئه منحكي معاكم عن النظافه المصعد صرلو اكتر من شهر لايعمل ماحدا برد رح نشكي عليكم كل الجيران اسؤا شركه وتعامل",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-05-08T05:14:30.624Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21GMVJrbENjVWR6V1ZSNU1saDZVa0V5UXpad1MxRRAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOmF1RklCcUdzWVR5Mlh6UkEyQzZwS1E%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT21KaVJqZDRiMGxOY0ZwM2RYaEVWR1psUzFFdE9IYxAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT21KaVJqZDRiMGxOY0ZwM2RYaEVWR1psUzFFdE9IYxAB",
-      "sender_username": "Ahmed Alabadla",
-      "content": "أود شكر الأخت شمّة علي لمساعدتي في حل مشكلة تجديد العقد، حيث تعاملت معي بأسلوب رائع و محترم، حيث أنها إتصلت بي وأخبرتني شخصيا بان المشكلة قد تم حلُّها وقد ساعدتي بتقديم طلب التجديد لديها. أشرك الادارة لتواجد موظفين يستقبلونا بابتسامة واحترام.",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-05-06T05:48:35.802Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21KaVJqZDRiMGxOY0ZwM2RYaEVWR1psUzFFdE9IYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOmJiRjd4b0lNcFp3dXhEVGZlS1EtOHc%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xoZlVFZ3RiVk40VVV4M2NrdDVjMGhMVFRGVlNIYxAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xoZlVFZ3RiVk40VVV4M2NrdDVjMGhMVFRGVlNIYxAB",
-      "sender_username": "Ahmad Issakhawaldeh",
-      "content": "كل شكر والاحترام للموظف سالم يعكس صوره رائعه",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-05-01T13:35:44.756Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xoZlVFZ3RiVk40VVV4M2NrdDVjMGhMVFRGVlNIYxAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOlhfUEgtbVN4UUx3ckt5c0hLTTFVSHc%7C%7C?hl=en",
-      "channels": {
-        "platform": "google_maps"
-      }
-    },
-    {
-      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT25RNVVDMXpXRkJIUkc5NmRrNUVObXhhVEU1dlRrRRAB",
-      "channel_id": "demo-google-maps",
-      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT25RNVVDMXpXRkJIUkc5NmRrNUVObXhhVEU1dlRrRRAB",
-      "sender_username": "Amel Dhibi",
-      "content": "مصعد اكثر من شهرين معطل وكل ما بنتصل بيدرو حيرفعو الأمر للإدارة للأسف كانت احسن شركة وكانت الصيانة سريعة جدا لكن بعد التغير صارت سئية جدا",
-      "sentiment": "unassigned",
-      "ai_suggestion": null,
-      "is_replied": false,
-      "received_at": "2026-04-30T09:05:05.165Z",
-      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT25RNVVDMXpXRkJIUkc5NmRrNUVObXhhVEU1dlRrRRAB!2m1!1s0x0:0x6d7aebb3689676b0!3m1!1s2@1:CAIQACodChtycF9oOnQ5UC1zWFBHRG96dk5ENmxaTE5vTkE%7C%7C?hl=en",
       "channels": {
         "platform": "google_maps"
       }

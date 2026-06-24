@@ -3,9 +3,10 @@
 export default function ConnectMetaButton({ workspaceId }: { workspaceId: string }) {
   const handleConnect = () => {
     const appId = process.env.NEXT_PUBLIC_META_APP_ID;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
-    // 1. This MUST point to our backend route so it can exchange the token
-    const redirectUri = `https://appliance-upswing-bottle.ngrok-free.dev/api/social-media-agent/auth/meta/callback`;
+    // 1. Dynamically build the URI using the env variable
+    const redirectUri = `${appUrl}/api/social-media-agent/auth/meta/callback`;
 
     // 2. Paste your new Configuration ID here
     const configId = "1029130432906146";
