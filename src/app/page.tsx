@@ -83,8 +83,8 @@ export default function RiwaaHomePage() {
                     <UserCircle size={28} className="text-[#b8924a]" />
                   </div>
 
-                  <h3 className="font-cormorant text-3xl mb-4 text-white group-hover:text-[#b8924a] transition-colors duration-500">
-                    Advisor Portfolio Studio
+                  <h3 className="font-jost text-3xl mb-4 text-white group-hover:text-[#b8924a] transition-colors duration-500">
+                    RIWAA: Advisor Portfolio
                   </h3>
 
                   <p className="text-white/50 text-sm font-light leading-relaxed mb-12 grow font-jost">
@@ -116,8 +116,8 @@ export default function RiwaaHomePage() {
                     <Globe size={28} className="text-[#b8924a]" />
                   </div>
 
-                  <h3 className="font-cormorant text-3xl mb-4 text-white group-hover:text-[#b8924a] transition-colors duration-500">
-                    Brokerage Web Studio
+                  <h3 className="text-3xl mb-4 text-white group-hover:text-[#b8924a] transition-colors duration-500 font-jost">
+                    RIWAA: Website Builder
                   </h3>
 
                   <p className="text-white/50 text-sm font-light leading-relaxed mb-12 grow font-jost">
@@ -125,7 +125,7 @@ export default function RiwaaHomePage() {
                   </p>
 
                   <div className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-[#b8924a] font-semibold font-jost">
-                    <span>Launch Platform</span>
+                    <span>View More</span>
                     <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform duration-500" />
                   </div>
                 </div>

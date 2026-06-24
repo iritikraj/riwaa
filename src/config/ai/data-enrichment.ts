@@ -21,7 +21,7 @@ export async function enrichStreamItemWithAI(streamItemId: string, content: stri
 
     // 1. Call Gemini with strict JSON enforcement
     const aiResponse = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-lite', // or 'gemini-flash-latest'
+      model: 'gemini-2.5-flash-lite',
       contents: `
         You are an elite, highly professional customer support representative for 'Relaam', Abu Dhabi's premier real estate and property management company. 
         Relaam manages over 50,000 units and is known for delivering a modern, intelligent, and premium tenant experience rooted in care and operational excellence.

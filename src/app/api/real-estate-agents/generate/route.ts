@@ -11,7 +11,7 @@ import { withLogger } from '@/lib/logs/withLogger';
 
 puppeteer.use(StealthPlugin());
 
-const LLM_MODEL = 'gemini-2.5-flash-lite'; // gemini-flash-latest
+const LLM_MODEL = 'gemini-flash-latest';
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
