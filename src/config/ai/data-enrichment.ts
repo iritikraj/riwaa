@@ -73,3 +73,46 @@ export async function enrichStreamItemWithAI(streamItemId: string, content: stri
     throw error;
   }
 }
+
+export async function enrichBatchWithAI(reviews: { id: string; content: string }[]) {
+  const prompt = `
+    You are an expert customer experience analyzer. I am providing you with a JSON array of ${reviews.length} social media comments/reviews.
+    
+    For each review, determine the sentiment (positive, neutral, negative, or inquiry) and draft a highly professional, contextual 1-2 sentence response.
+
+    You must return a JSON array of objects. Each object MUST contain:
+    - "id": The exact ID provided in the input.
+    - "sentiment": The determined sentiment.
+    - "ai_suggestion": The drafted response.
+
+    Input Data:
+    ${JSON.stringify(reviews)}
+  `;
+
+  try {
+    // New SDK syntax: ai.models.generateContent
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-lite',
+      contents: prompt,
+      config: {
+        // CRITICAL: Forces the new SDK to return pure JSON
+        responseMimeType: 'application/json',
+      }
+    });
+
+    // The new SDK exposes the text directly via .text (no function call needed)
+    const responseText = response.text;
+
+    // Parse the pure JSON string directly into a TypeScript array
+    if (!responseText) {
+      throw new Error("Gemini returned an empty response");
+    }
+
+    const enrichedData = JSON.parse(responseText);
+    return enrichedData;
+
+  } catch (error) {
+    console.error("Gemini Batch Enrichment Error:", error);
+    throw error;
+  }
+}

@@ -2,11 +2,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
-import { Upload, Clock, X, ArrowRight, Share2, Check, FileText, Image as ImageIcon, Settings2, Save, Globe } from "lucide-react";
+import { Upload, Clock, X, ArrowRight, Share2, Check, FileText, Image as ImageIcon, Settings2, Save, Globe, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { z } from "zod";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
+
 // Version One
 import { AgentHero } from "../_hero";
 import { AgentMetrics } from "../_metrices";
@@ -33,7 +34,7 @@ import { mockDrivenListings } from '@/config/data/mock-driven-listings';
 import { BrokerageFooter } from "../_brokerage-company";
 
 const AgentListings = dynamic(() => import('../_listings').then(mod => mod.AgentListings), {
-  ssr: false, // This is the magic line that prevents Leaflet from crashing Next.js
+  ssr: false,
 });
 
 const agentZodSchema = z.object({
@@ -89,7 +90,6 @@ const agentZodSchema = z.object({
   }).optional(),
 });
 
-// Define base steps to pull from dynamically
 const baseSteps = [
   { id: 'ingestion', label: 'Data Ingestion', icon: FileText },
   { id: 'visuals', label: 'Visual Assets', icon: ImageIcon },
@@ -102,6 +102,9 @@ export default function AgentBuilderPage() {
   const [isDiscoveringPR, setIsDiscoveringPR] = useState(false);
   const [isFromHistory, setIsFromHistory] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // --- NEW: ERROR STATE ---
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
   const [sourceText, setSourceText] = useState("");
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -117,8 +120,6 @@ export default function AgentBuilderPage() {
   const [history, setHistory] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
 
-  // --- NEW: DYNAMIC STEP LOGIC ---
-  // If user pasted a link, we skip the 'visuals' step because Puppeteer will grab the images.
   const activeSteps = links.length > 0
     ? baseSteps.filter(step => step.id !== 'visuals')
     : baseSteps;
@@ -130,6 +131,14 @@ export default function AgentBuilderPage() {
     api: '/api/real-estate-agents/generate',
     schema: agentZodSchema,
     onFinish({ object }) {
+      // --- NEW: VALIDATION CHECK ---
+      // If the object is empty or missing the core name, the AI failed mid-stream.
+      if (!object || !object.hero || !object.hero.name) {
+        setGenerationError("This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.");
+        setCurrentStep(prev => Math.max(0, prev - 1)); // Step back so they can try again
+        return;
+      }
+
       setExtractedData({
         ...object,
         contact: {
@@ -142,14 +151,14 @@ export default function AgentBuilderPage() {
           bgImages: bgImages.length > 0 ? bgImages : undefined
         },
         companyLogo: companyLogo || object?.companyLogo,
-
-        // --- NEW: INJECT THE HARDCODED LISTINGS HERE ---
         listings: mockDrivenListings.agents_active_listings
       });
     },
     onError(error) {
       console.error("Stream error:", error);
-      alert("Something went wrong during generation. Please try again.");
+      // --- NEW: TRIGGER POPUP ON HTTP/SDK ERROR ---
+      setGenerationError("The Server encountered an unexpected error. It may be overloaded. Please try again.");
+      setCurrentStep(prev => Math.max(0, prev - 1));
     }
   });
 
@@ -166,7 +175,6 @@ export default function AgentBuilderPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: agentName, location: "ae" }),
-        // body: JSON.stringify({ name: agentName, location: extractedData?.hero?.location }),
       });
       const data = await res.json();
 
@@ -245,8 +253,9 @@ export default function AgentBuilderPage() {
   };
 
   const runAiExtraction = () => {
+    setGenerationError(null); // Clear previous errors
     submit({ sourceText, links });
-    setCurrentStep(activeSteps.length - 1); // Jumps dynamically to Verification step
+    setCurrentStep(activeSteps.length - 1);
   };
 
   const saveToDatabase = async () => {
@@ -283,7 +292,7 @@ export default function AgentBuilderPage() {
 
   const handleNext = async () => {
     if (currentStepId === 'ingestion') {
-      if (activeSteps.length === 2) runAiExtraction(); // Skips visual step
+      if (activeSteps.length === 2) runAiExtraction();
       else setCurrentStep(1);
     }
     else if (currentStepId === 'visuals') {
@@ -292,7 +301,7 @@ export default function AgentBuilderPage() {
     else if (currentStepId === 'verification') {
       if (isStreaming || isDiscoveringPR) return;
       await saveToDatabase();
-      setCurrentStep(activeSteps.length); // Jump to final output
+      setCurrentStep(activeSteps.length);
     }
   };
 
@@ -306,6 +315,42 @@ export default function AgentBuilderPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white w-full relative overflow-x-hidden flex items-center justify-center font-jost">
+
+      {/* --- NEW: ERROR MODAL OVERLAY --- */}
+      <AnimatePresence>
+        {generationError && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="w-full max-w-md bg-[#111111] border border-red-500/20 rounded-2xl overflow-hidden shadow-2xl"
+            >
+              <div className="p-6 flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-6">
+                  <AlertTriangle className="text-red-400" size={28} />
+                </div>
+                <h3 className="font-jost text-2xl text-white mb-2">Generation Interrupted</h3>
+                <p className="text-white/60 font-light text-sm leading-relaxed mb-8">
+                  {generationError}
+                </p>
+                <button
+                  onClick={() => setGenerationError(null)}
+                  className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs uppercase tracking-widest text-white transition-colors"
+                >
+                  Dismiss & Try Again
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {!isFinalOutput && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl p-6 relative z-10">
           <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#0b0b0c]/90 backdrop-blur-3xl w-full shadow-[0_20px_80px_rgba(0,0,0,0.55)]">
@@ -313,13 +358,6 @@ export default function AgentBuilderPage() {
 
             <div className="relative w-full p-8">
               <div className="flex items-center justify-between mb-8">
-                {/* <div className="flex items-center gap-3">
-                  <Image src="/riwa-logo.png" height={32} width={32} alt="logo" className="object-contain" style={{ background: "transparent" }} />
-                  <div>
-                    <h2 className="text-neutral-100 font-light uppercase text-base tracking-[0.12em]">RIWAA</h2>
-                    <p className="text-xs tracking-[0.35em] uppercase text-neutral-500 font-medium">Agent Profiler</p>
-                  </div>
-                </div> */}
                 <div className="flex items-center gap-4">
                   {/* RIWAA */}
                   <div className="flex items-center gap-3">
@@ -650,60 +688,6 @@ export default function AgentBuilderPage() {
             </button>
           </div>
 
-          {/* <div className="pt-17">
-            <header className="w-full bg-[#f9f6f1] py-2 flex items-center justify-center border-b border-[#e0d8cc]/60 relative z-50">
-              {extractedData.companyLogo ? (
-                <img src={extractedData.companyLogo} alt="Brokerage Logo" className="h-18 md:h-28 object-contain mix-blend-multiply opacity-90" />
-              ) : (
-                <h2 className="font-serif text-xl tracking-[0.35em] uppercase text-[#b8924a] font-light">Exclusive Partner</h2>
-              )}
-            </header>
-
-            {extractedData.hero && (
-              <AgentHero data={extractedData.hero} isEditable={!isFromHistory} onUpdate={(field, value) => { setExtractedData({ ...extractedData, hero: { ...extractedData.hero, [field]: value } }); setHasUnsavedChanges(true); }} />
-            )}
-
-            {extractedData.metrics && (
-              <AgentMetrics
-                data={extractedData.metrics}
-                isEditable={!isFromHistory}
-                onUpdate={(field, value) => {
-                  setExtractedData({ ...extractedData, metrics: { ...extractedData.metrics, [field]: value } });
-                  setHasUnsavedChanges(true);
-                }}
-              />
-            )}
-
-            {extractedData.timeline && (
-              <AgentTimeline
-                timeline={extractedData.timeline}
-                isEditable={!isFromHistory}
-                onUpdate={(field, value) => {
-                  setExtractedData({ ...extractedData, [field]: value }); // Timeline sends the whole array back to the root 'timeline' key
-                  setHasUnsavedChanges(true);
-                }}
-              />
-            )}
-
-            {extractedData.expertise && (
-              <AgentExpertise
-                data={extractedData.expertise}
-                isEditable={!isFromHistory}
-                onUpdate={(field, value) => {
-                  setExtractedData({ ...extractedData, expertise: { ...extractedData.expertise, [field]: value } });
-                  setHasUnsavedChanges(true);
-                }}
-              />
-            )}
-
-            <AgentPartnerships data={extractedData.partnerships} isEditable={!isFromHistory} onUpdate={(field: string, value: any) => { setExtractedData({ ...extractedData, [field]: value }); setHasUnsavedChanges(true); }} />
-            <AgentMedia data={extractedData.mediaPresence} isEditable={!isFromHistory} onUpdate={(field: string, value: any) => { setExtractedData({ ...extractedData, [field]: value }); setHasUnsavedChanges(true); }} />
-            <AgentTestimonials data={extractedData.testimonials} isEditable={!isFromHistory} onUpdate={(field: string, value: any) => { setExtractedData({ ...extractedData, [field]: value }); setHasUnsavedChanges(true); }} />
-
-            {extractedData.contact && (
-              <AgentContact agentId={extractedData.id} agentName={extractedData.hero?.name || "Agent"} whatsapp={extractedData.contact?.whatsapp} />
-            )}
-          </div> */}
           <div className="pt-17">
             {/* THEME 1: CLASSIC UI (Default) */}
             {(!extractedData.theme || extractedData.theme === "theme1") && (

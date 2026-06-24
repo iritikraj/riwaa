@@ -1,66 +1,69 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { enrichStreamItemWithAI } from '@/config/ai/data-enrichment';
+import { enrichBatchWithAI } from '@/config/ai/data-enrichment';
 import { withLogger } from '@/lib/logs/withLogger';
 
-// CRITICAL: Use the SERVICE_ROLE key to bypass Row Level Security (RLS) for background jobs
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Vercel Cron uses GET requests by default
-export const GET = withLogger('/api/social-media-agent/cron/auto-enrich', async (req, routeLogger) => {
-
-  // 1. (Optional but recommended) Security Check
-  // Ensure only your cron scheduler can trigger this endpoint
+export const GET = withLogger('/api/cron/auto-enrich', async (req, routeLogger) => {
+  // Security Check
   const authHeader = req.headers.get('authorization');
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    routeLogger.warn('Unauthorized cron invocation attempted');
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
-  routeLogger.info({ event: 'cron_enrichment_started' });
+  routeLogger.info({ event: 'cron_batch_enrichment_started' });
 
   try {
-    // 2. Fetch a batch of 15 unenriched items
-    // Assuming your table is named 'stream_items' and default sentiment is 'unassigned'
-    const { data: unenrichedItems, error } = await supabaseAdmin
+    // 1. Fetch up to 50 unenriched items
+    const { data: unenrichedItems, error: fetchError } = await supabaseAdmin
       .from('stream_items')
       .select('id, content')
       .eq('sentiment', 'unassigned')
-      .limit(15);
+      .limit(50); // Increased batch size!
 
-    if (error) throw error;
+    if (fetchError) throw fetchError;
 
-    // 3. Exit early if the queue is empty
     if (!unenrichedItems || unenrichedItems.length === 0) {
       routeLogger.info({ event: 'cron_enrichment_empty_queue' });
-      return NextResponse.json({ success: true, message: 'All caught up! No items to enrich.' });
+      return NextResponse.json({ success: true, message: 'No items to enrich.' });
     }
 
-    routeLogger.info({ event: 'cron_processing_batch', count: unenrichedItems.length });
+    routeLogger.info({ event: 'ai_batch_processing_started', count: unenrichedItems.length });
 
-    const results = [];
+    // 2. Make exactly ONE call to Gemini for all 50 items
+    const enrichedResults = await enrichBatchWithAI(unenrichedItems);
 
-    // 4. Process sequentially to respect OpenAI/Claude rate limits
-    for (const item of unenrichedItems) {
-      try {
-        // We use your existing function that calls the AI AND saves to Supabase
-        await enrichStreamItemWithAI(item.id, item.content);
-        results.push({ id: item.id, status: 'success' });
+    routeLogger.info({ event: 'ai_batch_processing_completed', parsedCount: enrichedResults.length });
 
-        // Optional: Add a tiny 1-second delay between calls to be extra safe against rate limits
-        await new Promise(resolve => setTimeout(resolve, 1000));
+    // 3. Update Supabase with the new data
+    // We use Promise.all to run all the database updates concurrently, making it lightning fast
+    const dbUpdateResults = await Promise.all(
+      enrichedResults.map(async (item: any) => {
+        try {
+          const { error: updateErr } = await supabaseAdmin
+            .from('stream_items')
+            .update({
+              sentiment: item.sentiment,
+              ai_suggestion: item.ai_suggestion,
+            })
+            .eq('id', item.id);
 
-      } catch (err) {
-        routeLogger.error({ err, streamItemId: item.id, event: 'cron_item_failed' });
-        results.push({ id: item.id, status: 'failed' });
-      }
-    }
+          if (updateErr) throw updateErr;
+          return { id: item.id, status: 'success' };
+        } catch (dbErr) {
+          routeLogger.error({ err: dbErr, streamItemId: item.id, event: 'db_update_failed' });
+          return { id: item.id, status: 'failed' };
+        }
+      })
+    );
 
-    routeLogger.info({ event: 'cron_enrichment_completed', results });
-    return NextResponse.json({ success: true, processed: results.length, results });
+    routeLogger.info({ event: 'cron_batch_enrichment_completed', results: dbUpdateResults });
+    return NextResponse.json({ success: true, processed: dbUpdateResults.length, results: dbUpdateResults });
 
   } catch (error) {
     routeLogger.error({ err: error, event: 'cron_fatal_error' });
