@@ -98,7 +98,8 @@ export async function GET(req: NextRequest) {
           if (channel.platform === 'facebook') {
             // FB Graph API: Get recent posts and their comments
             // FB Graph API: Get last 25 posts and up to 100 comments per post
-            const fbUrl = `https://graph.facebook.com/v21.0/${channel.platform_account_id}/feed?fields=id,message,created_time,comments.limit(100){id,message,created_time,from}&limit=25&access_token=${channel.encrypted_access_token}`;
+            // const fbUrl = `https://graph.facebook.com/v21.0/${channel.platform_account_id}/feed?fields=id,message,created_time,comments.limit(100){id,message,created_time,from}&limit=25&access_token=${channel.encrypted_access_token}`;
+            const fbUrl = `https://graph.facebook.com/v21.0/${channel.platform_account_id}/feed?fields=id,message,created_time,comments.limit(200){id,message,created_time,from}&limit=100&access_token=${channel.encrypted_access_token}`;
             const fbRes = await fetch(fbUrl);
             const fbData = await fbRes.json();
 
@@ -125,7 +126,8 @@ export async function GET(req: NextRequest) {
             // IG Graph API: Get recent media objects and their comments
             // Note: IG uses 'text' instead of 'message', and 'timestamp' instead of 'created_time'
             // IG Graph API: Get last 25 media objects and up to 100 comments per media
-            const igUrl = `https://graph.facebook.com/v21.0/${channel.platform_account_id}/media?fields=id,caption,timestamp,comments.limit(100){id,text,timestamp,from,username}&limit=25&access_token=${channel.encrypted_access_token}`;
+            // const igUrl = `https://graph.facebook.com/v21.0/${channel.platform_account_id}/media?fields=id,caption,timestamp,comments.limit(100){id,text,timestamp,from,username}&limit=25&access_token=${channel.encrypted_access_token}`;
+            const igUrl = `https://graph.facebook.com/v21.0/${channel.platform_account_id}/media?fields=id,caption,timestamp,comments.limit(200){id,text,timestamp,from,username}&limit=100&access_token=${channel.encrypted_access_token}`;
             const igRes = await fetch(igUrl);
             const igData = await igRes.json();
 
