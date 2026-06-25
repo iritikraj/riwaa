@@ -13,9 +13,9 @@ puppeteer.use(StealthPlugin());
 
 // Define our fallback cascade (Ordered by preference)
 const FALLBACK_MODELS = [
-  'gemini-flash-latest',
   'gemini-2.5-flash',
-  'gemini-2.5-flash-lite'
+  'gemini-2.5-flash-lite',
+  'gemini-flash-latest',
 ];
 
 const google = createGoogleGenerativeAI({
