@@ -11,13 +11,18 @@ import { withLogger } from '@/lib/logs/withLogger';
 
 puppeteer.use(StealthPlugin());
 
-const LLM_MODEL = 'gemini-flash-latest';
+// Define our fallback cascade (Ordered by preference)
+const FALLBACK_MODELS = [
+  'gemini-flash-latest',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite'
+];
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-// 1. Zod Schema (Updated to include images and contact)
+// 1. Zod Schema
 const agentZodSchema = z.object({
   theme: z.string().optional().describe("Either 'theme1' or 'theme2'. Defaults to 'theme1'"),
   companyLogo: z.string().describe("The exact company logo URL provided in the context").optional(),
@@ -154,7 +159,6 @@ export const POST = withLogger('/api/real-estate-agents/generate', async (req: N
     const scrapedResults = [];
     if (links && links.length > 0) {
       for (const url of links) {
-        // Pass the logger down into the scraping function
         const data = await fetchBrokerData(url, routeLogger);
         if (data) scrapedResults.push(data);
       }
@@ -167,7 +171,6 @@ export const POST = withLogger('/api/real-estate-agents/generate', async (req: N
 
     routeLogger.info({ event: 'scraping_complete', successfulScrapes: scrapedResults.length }, "Preparing context for Gemini...");
 
-    // 5. Construct Highly Structured Context for Gemini
     const mappedScrapedData = scrapedResults.map(data => `
       BROKER NAME: ${data.brokerName}
       COMPANY/BROKERAGE: ${data.companyName}
@@ -185,12 +188,17 @@ export const POST = withLogger('/api/real-estate-agents/generate', async (req: N
       ${mappedScrapedData}
     `;
 
-    routeLogger.info({ event: 'ai_stream_started', model: LLM_MODEL });
+    // 4. MULTI-MODEL FALLBACK LOOP
+    let result;
+    let lastError;
 
-    // 6. Stream Generation
-    const result = await streamObject({
-      model: google(LLM_MODEL),
-      system: `You are the Chief Communications Officer for an ultra-luxury real estate advisory firm. 
+    for (const modelName of FALLBACK_MODELS) {
+      try {
+        routeLogger.info({ event: 'ai_stream_attempt', model: modelName });
+
+        result = await streamObject({
+          model: google(modelName),
+          system: `You are the Chief Communications Officer for an ultra-luxury real estate advisory firm. 
         Your sole responsibility is to ingest raw scraped data and synthesize it into an institutional-grade digital portfolio.
 
         --- ZONE 1: THE STRICT FACT LOCK (CRITICAL FOR DATA INTEGRITY) ---
@@ -213,13 +221,32 @@ export const POST = withLogger('/api/real-estate-agents/generate', async (req: N
         - hero.bio: Exactly 2-3 sentences summarizing their market position and advisory presence using their real tenure numbers.
         - expertise.marketQuote: Generate a brilliant, Wall Street Journal-level quote reflecting capital growth, structural architecture, and wealth preservation strategies in their specific target city/location (e.g., focus on Abu Dhabi if location is Abu Dhabi, or Dubai if location is Dubai).
       `,
-      prompt: `Extract and build a profile based on this combined data: \n${finalContext}`,
-      schema: agentZodSchema,
-      onFinish: () => {
-        // Optional hook: Log when the AI stream successfully completes
-        routeLogger.info({ event: 'ai_stream_completed' });
+          prompt: `Extract and build a profile based on this combined data: \n${finalContext}`,
+          schema: agentZodSchema,
+          onFinish: () => {
+            routeLogger.info({ event: 'ai_stream_completed', model: modelName });
+          }
+        });
+
+        // If no error is thrown during initialization, the connection succeeded!
+        routeLogger.info({ event: 'ai_stream_connected', model: modelName });
+        break; // Exit the loop because we found a working model
+
+      } catch (error: any) {
+        routeLogger.warn({
+          event: 'ai_stream_model_failed',
+          model: modelName,
+          error: error.message
+        }, `Model ${modelName} failed. Trying next model...`);
+        lastError = error;
       }
-    });
+    }
+
+    // If ALL models failed, we throw the last error back to the frontend
+    if (!result) {
+      routeLogger.error({ event: 'ai_stream_all_models_failed', error: lastError?.message });
+      throw lastError || new Error("All AI models are currently overloaded. Please try again in a few moments.");
+    }
 
     return result.toTextStreamResponse() as unknown as NextResponse;
   } catch (error: any) {
