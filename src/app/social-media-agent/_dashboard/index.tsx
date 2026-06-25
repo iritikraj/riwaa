@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ConnectMetaButton from '../_connect-meta';
 import PlatformIcon from '../_icon';
 import useLiveWorkspaceStream from '@/hooks/useLiveWorkspaceStream';
@@ -35,37 +35,40 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
   const [isFetchingDemoGmaps, setIsFetchingDemoGmaps] = useState(false);
   const [demoItemsGmaps, setDemoItemsGmaps] = useState<any[]>([]); // Store temporary Apify data
 
-  const handleFetchDemoReviewsGmaps = async () => {
-    setIsFetchingDemoGmaps(true);
-    setActionStatus(null);
-    try {
-      const response = await fetch('/api/social-media-agent/demo-google-maps', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          // Send an ARRAY of multiple office locations
-          placeUrls: [
-            "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Main+Branch/@24.4773958,54.3212408,1025m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e5e665a954d9b4b:0xf53d3124c55b2fc9!8m2!3d24.4773958!4d54.3212408!16s%2Fg%2F1tgplhs2", // Relaam HQ (Placeholder)
-            "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Dalma+Mall/@24.3347236,54.5187856,1026m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e5e3900248180b3:0xf45c98c1eccba460!8m2!3d24.3347237!4d54.5236565!16s%2Fg%2F11ysvv6l9f",
-            "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Al+Dhafra/@23.6387005,53.7094663,1032m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e676793960b05bd:0x67a265d11461053f!8m2!3d23.6387005!4d53.7094663!16s%2Fg%2F11lyl66lgy",
-            "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Sharjah+Branch/@25.3443869,55.386703,1018m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e5f5b551fd72ce9:0xcb2c5983bb540f22!8m2!3d25.3443869!4d55.386703!16s%2Fg%2F11y8x06f2r",
-            "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Al+Ain/@24.2162428,55.7591723,1027m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e8ab6ccc2829bb1:0x6d7aebb3689676b0!8m2!3d24.2162428!4d55.7591723!16s%2Fg%2F11h9y4x8yv",
-          ],
-          maxReviews: 15 // It will fetch 15 from EACH location
-        })
-      });
-      const result = await response.json();
+  useEffect(() => {
+    const fetchReviews = async () => {
+      setIsFetchingDemoGmaps(true);
 
-      if (result.success) {
-        setDemoItemsGmaps(prev => [...result.data, ...prev]);
-        setFilterPlatform('google_maps');
+      try {
+        const response = await fetch('/api/social-media-agent/demo-google-maps', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            placeUrls: [
+              "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Main+Branch/@24.4773958,54.3212408,1025m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e5e665a954d9b4b:0xf53d3124c55b2fc9!8m2!3d24.4773958!4d54.3212408!16s%2Fg%2F1tgplhs2",
+              "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Dalma+Mall/@24.3347236,54.5187856,1026m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e5e3900248180b3:0xf45c98c1eccba460!8m2!3d24.3347237!4d54.5236565!16s%2Fg%2F11ysvv6l9f",
+              "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Al+Dhafra/@23.6387005,53.7094663,1032m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e676793960b05bd:0x67a265d11461053f!8m2!3d23.6387005!4d53.7094663!16s%2Fg%2F11lyl66lgy",
+              "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Sharjah+Branch/@25.3443869,55.386703,1018m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e5f5b551fd72ce9:0xcb2c5983bb540f22!8m2!3d25.3443869!4d55.386703!16s%2Fg%2F11y8x06f2r",
+              "https://www.google.com/maps/place/Relaam+(previously+ADCP)+-+Al+Ain/@24.2162428,55.7591723,1027m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3e8ab6ccc2829bb1:0x6d7aebb3689676b0!8m2!3d24.2162428!4d55.7591723!16s%2Fg%2F11h9y4x8yv"
+            ],
+            maxReviews: 15,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          setDemoItemsGmaps(result.data);
+        }
+      } finally {
+        setIsFetchingDemoGmaps(false);
       }
-    } catch (err) {
-      console.error("Failed to fetch demo reviews", err);
-    } finally {
-      setIsFetchingDemoGmaps(false);
-    }
-  };
+    };
+
+    fetchReviews();
+  }, []);
 
   const combinedItems = [...demoItemsGmaps, ...streamItems];
 
@@ -209,9 +212,9 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
     setFilterPlatform(plat);
 
     // Auto-fetch demo data the FIRST time they click the maps filter
-    if (plat === 'google_maps' && demoItemsGmaps.length === 0 && !isFetchingDemoGmaps) {
-      handleFetchDemoReviewsGmaps();
-    }
+    // if (plat === 'google_maps' && demoItemsGmaps.length === 0 && !isFetchingDemoGmaps) {
+    //   handleFetchDemoReviewsGmaps();
+    // }
   };
 
   if (hasChannels === null) {
