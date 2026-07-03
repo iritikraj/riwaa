@@ -85,13 +85,32 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
   //   return dateSortOrder === 'newest' ? dateB - dateA : dateA - dateB;
   // });
 
-  const processedStreamItems = combinedItems.filter((item: any) => {
-    // If no date is selected, show all
-    if (!filterDateStr) return true;
+  // const processedStreamItems = combinedItems.filter((item: any) => {
+  //   // If no date is selected, show all
+  //   if (!filterDateStr) return true;
 
-    // Compare just the YYYY-MM-DD portion
-    const itemDateStr = new Date(item.received_at).toISOString().split('T')[0];
-    return itemDateStr === filterDateStr;
+  //   // Compare just the YYYY-MM-DD portion
+  //   const itemDateStr = new Date(item.received_at).toISOString().split('T')[0];
+  //   return itemDateStr === filterDateStr;
+  // }).sort((a: any, b: any) => {
+  //   const dateA = new Date(a.received_at).getTime();
+  //   const dateB = new Date(b.received_at).getTime();
+  //   return dateSortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+  // });
+  const processedStreamItems = combinedItems.filter((item: any) => {
+    // 1. Check Platform
+    if (filterPlatform !== 'all' && item.channels?.platform !== filterPlatform) return false;
+
+    // 2. Check Sentiment
+    if (filterSentiment !== 'all' && item.sentiment !== filterSentiment) return false;
+
+    // 3. Check Date
+    if (filterDateStr) {
+      const itemDateStr = new Date(item.received_at).toISOString().split('T')[0];
+      if (itemDateStr !== filterDateStr) return false;
+    }
+
+    return true;
   }).sort((a: any, b: any) => {
     const dateA = new Date(a.received_at).getTime();
     const dateB = new Date(b.received_at).getTime();
