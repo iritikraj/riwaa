@@ -1,7 +1,6 @@
-// src/app/seo-agent/audit/history/[id]/page.tsx
 import { notFound } from 'next/navigation';
-import AuditDetailView from './_detail/page';
 import { getAuditById } from '@/lib/seo-agent/strapi';
+import AuditDetailView from './_detail/page';
 
 export async function generateMetadata(
   {
@@ -30,8 +29,8 @@ export default async function AuditDetailPage({
   }
 
   return (
-    <div className="min-h-screen px-8 py-16 text-slate-100 bg-slate-950 font-jost">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen px-6 py-16 md:px-12 text-neutral-900 bg-[#FCFBF8] font-jost selection:bg-neutral-200">
+      <div className="max-w-4xl mx-auto">
         <AuditDetailView record={record} />
       </div>
     </div>
