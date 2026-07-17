@@ -1,4 +1,7 @@
-import { CheerioCrawler, createCheerioRouter } from 'crawlee';
+import { CheerioCrawler, Configuration, createCheerioRouter } from 'crawlee';
+
+// Disable persistence to disk
+const config = new Configuration({ persistStorage: false });
 
 interface PageNode {
   url: string;
@@ -52,12 +55,12 @@ export async function runDomainSpider(startUrl: string) {
 
   const crawler = new CheerioCrawler({
     requestHandler: router,
-    maxRequestsPerCrawl: 1000, // Safety limit for EC2 memory
+    maxRequestsPerCrawl: 500, // Safety limit for EC2 memory
     maxConcurrency: 10,       // Be polite to the target server
     failedRequestHandler({ request, log }) {
       log.error(`Spider failed to crawl ${request.url}`);
     },
-  });
+  }, config);
 
   console.log(`🚀 Initiating Domain Spider for: ${startUrl}`);
   await crawler.run([startUrl]);

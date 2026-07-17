@@ -4,9 +4,8 @@
 import React, { useState } from 'react';
 import {
   ShieldCheck, AlertTriangle, ArrowLeft, Calendar, Globe,
-  ChevronDown, ChevronUp, CheckCircle, Layers, FileText,
-  LayoutTemplate, XCircle, Search, MessageCircle, TrendingUp,
-  Sparkles, Code, Zap
+  ChevronDown, ChevronUp, CheckCircle, Layers,
+  LayoutTemplate, XCircle, Search, MessageCircle, TrendingUp, Code, Zap, Tag
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -24,6 +23,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
 
   const isBatch = audit_data?.is_batch;
   const resultsArray = isBatch ? (audit_data.results || []) : (audit_data ? [audit_data] : []);
+  const domainArchitecture = audit_data?.domain_architecture;
 
   // Set initial expanded URL if there's only one result
   React.useEffect(() => {
@@ -54,10 +54,18 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
   const StatusIcon = ({ status }: { status: boolean }) =>
     status ? <CheckCircle className="w-4 h-4 text-emerald-600" /> : <XCircle className="w-4 h-4 text-red-500" />;
 
+  // Clean up the DB data: Remove duplicate URLs and drop any titles that only have 1 unique URL
+  const validDuplicateTitles = domainArchitecture?.duplicate_titles
+    ?.map((dup: any) => ({
+      ...dup,
+      urls: Array.from(new Set(dup.urls)) // Deduplicate the URLs array
+    }))
+    .filter((dup: any) => dup.urls.length > 1); // Only keep if there are actually 2+ DIFFERENT urls
+
   return (
     <div className="space-y-16 font-jost text-neutral-800 pb-20">
 
-      {/* HEADER SECTION - Clean Document Style */}
+      {/* HEADER SECTION */}
       <header className="border-b border-neutral-200 pb-10">
         <Link
           href="/seo-agent/audit-history"
@@ -87,15 +95,75 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
         </div>
       </header>
 
+      {/* DOMAIN ARCHITECTURE (Duplicates & Orphans) */}
+      {isBatch && domainArchitecture && (
+        <section className="space-y-6">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-900 flex items-center gap-3">
+            <span className="w-6 h-px bg-neutral-300"></span> Domain Architecture Analysis
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-6 bg-white border border-neutral-200 rounded-xl shadow-sm">
+              <h4 className="text-sm font-semibold text-neutral-900 mb-4 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-500" /> Duplicate Meta Titles
+              </h4>
+              {validDuplicateTitles && validDuplicateTitles.length > 0 ? (
+                <div className="space-y-4 max-h-48 overflow-y-auto pr-2">
+                  {validDuplicateTitles.map((dup: any, i: number) => (
+                    <div key={i} className="pb-3 border-b border-neutral-100 last:border-0 last:pb-0">
+                      <p className="text-xs font-medium text-neutral-800 mb-1">{dup.title}</p>
+                      <ul className="space-y-1">
+                        {dup.urls.map((u: string, idx: number) => (
+                          <li key={idx} className="text-[10px] text-neutral-500 font-mono">- {u}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-neutral-500 italic">No duplicate titles detected.</p>
+              )}
+            </div>
+
+            <div className="p-6 bg-white border border-neutral-200 rounded-xl shadow-sm">
+              <h4 className="text-sm font-semibold text-neutral-900 mb-4 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" /> Orphan Pages
+              </h4>
+              {domainArchitecture.orphan_pages?.length > 0 ? (
+                <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                  {domainArchitecture.orphan_pages.map((u: string, idx: number) => (
+                    <li key={idx} className="text-xs text-neutral-600 font-mono">{u}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-neutral-500 italic">No orphan pages detected. Site architecture is healthy.</p>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* DOCUMENT RESULTS FLOW */}
       {audit_status === 'completed' && resultsArray.length > 0 && (
         <div className="space-y-12">
-
           {resultsArray.map((result: any, idx: number) => {
             const isExpanded = expandedUrl === result.url;
             const kw = result.keyword_opportunities;
             const dom = result.raw_dom_data;
             const psi = result.raw_pagespeed_data;
+            const nlp = result.raw_nlp_entities;
+
+            // Safe derivations for Architecture Checklist based on DOM data
+            const titleLength = dom?.title?.length || 0;
+            const isTitleValid = titleLength >= 30 && titleLength <= 60;
+            const descLength = dom?.description?.length || 0;
+            const isDescValid = descLength >= 120 && descLength <= 160;
+            const hasH1 = dom?.headings?.h1?.length > 0;
+            const isUrlOptimized = dom?.url_metrics?.raw_url ? true : false;
+            const hasBreadcrumbs = dom?.breadcrumbs && dom.breadcrumbs.length > 0;
+            const hasOGTags = !!dom?.social_graph?.og_title;
+            const hasTwitterCards = !!dom?.social_graph?.twitter_card;
+            const hasCanonical = !!dom?.canonical_url;
+            const noGenericAnchors = !dom?.link_architecture?.unoptimized_anchors || dom.link_architecture.unoptimized_anchors.length === 0;
 
             return (
               <section key={idx} className="group">
@@ -128,22 +196,37 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                 {isExpanded && !result.error && (
                   <div className="py-12 animate-in fade-in duration-500 cursor-default" onClick={(e) => e.stopPropagation()}>
 
-                    {/* Top Level Scores Row */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-neutral-500 mb-2">SEO Health</p>
+                    {/* Reasoning Scores Row */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+                      <div className="p-5 bg-white border border-neutral-200 rounded-2xl shadow-sm flex flex-col justify-between">
+                        <div className="mb-4">
+                          <p className="text-[11px] font-bold uppercase tracking-widest text-neutral-800 mb-1.5">SEO Health</p>
+                          <p className="text-[10px] text-neutral-500 leading-relaxed">Aggregated from on-page structure, content quality, and technical metadata.</p>
+                        </div>
                         <p className="text-5xl font-light text-emerald-600">{result.seo_health_score}</p>
                       </div>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-neutral-500 mb-2">GEO Score</p>
+
+                      <div className="p-5 bg-white border border-neutral-200 rounded-2xl shadow-sm flex flex-col justify-between">
+                        <div className="mb-4">
+                          <p className="text-[11px] font-bold uppercase tracking-widest text-neutral-800 mb-1.5">Geo Visibility</p>
+                          <p className="text-[10px] text-neutral-500 leading-relaxed">Calculated from local schema, regional keywords, and semantic entities.</p>
+                        </div>
                         <p className="text-5xl font-light text-cyan-600">{result.geo_visibility_score}</p>
                       </div>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-neutral-500 mb-2">Accessibility</p>
+
+                      <div className="p-5 bg-white border border-neutral-200 rounded-2xl shadow-sm flex flex-col justify-between">
+                        <div className="mb-4">
+                          <p className="text-[11px] font-bold uppercase tracking-widest text-neutral-800 mb-1.5">Accessibility</p>
+                          <p className="text-[10px] text-neutral-500 leading-relaxed">Based on WCAG compliance, ARIA attributes, and semantic HTML.</p>
+                        </div>
                         <p className="text-5xl font-light text-purple-600">{result.accessibility_score || '--'}</p>
                       </div>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-neutral-500 mb-2">Best Practices</p>
+
+                      <div className="p-5 bg-white border border-neutral-200 rounded-2xl shadow-sm flex flex-col justify-between">
+                        <div className="mb-4">
+                          <p className="text-[11px] font-bold uppercase tracking-widest text-neutral-800 mb-1.5">Best Practices</p>
+                          <p className="text-[10px] text-neutral-500 leading-relaxed">Evaluated against modern web standards, HTTPS, and safe cross-origin links.</p>
+                        </div>
                         <p className="text-5xl font-light text-blue-600">{result.best_practices_score || '--'}</p>
                       </div>
                     </div>
@@ -162,14 +245,12 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                           <h4 className="text-sm font-medium text-neutral-800 mb-6 flex items-center gap-2">
                             <Search className="w-4 h-4 text-neutral-400" /> Search Opportunity Matrix
                           </h4>
-
                           <div className="mb-8">
                             <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-neutral-500 block mb-2">Seed Keyword Focus</span>
                             <span className="text-lg font-medium text-neutral-900 border-b-2 border-emerald-200 pb-1">
                               {kw.primary_keyword}
                             </span>
                           </div>
-
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                             <div>
                               <h5 className="text-[11px] uppercase tracking-widest font-semibold text-neutral-500 mb-3 flex items-center gap-2"><MessageCircle className="w-3.5 h-3.5" /> People Also Ask</h5>
@@ -183,18 +264,26 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                                 {kw.long_tail_keywords?.map((k: string, i: number) => <span key={i} className="text-xs text-neutral-700 bg-white border border-neutral-200 px-3 py-1.5 rounded-full">{k}</span>)}
                               </div>
                             </div>
-                            <div>
-                              <h5 className="text-[11px] uppercase tracking-widest font-semibold text-neutral-500 mb-3 flex items-center gap-2"><Search className="w-3.5 h-3.5" /> Related Searches</h5>
-                              <div className="flex flex-wrap gap-2">
-                                {kw.related_searches?.map((k: string, i: number) => <span key={i} className="text-xs text-neutral-700 bg-white border border-neutral-200 px-3 py-1.5 rounded-full">{k}</span>)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* NLP Entities */}
+                      {nlp && nlp.length > 0 && (
+                        <div className="mb-12">
+                          <h4 className="text-sm font-medium text-neutral-800 mb-6 flex items-center gap-2">
+                            <Tag className="w-4 h-4 text-neutral-400" /> NLP Extracted Entities
+                          </h4>
+                          <div className="flex flex-wrap gap-3">
+                            {nlp.map((ent: any, i: number) => (
+                              <div key={i} className="flex items-center gap-3 px-4 py-2 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <span className="text-xs font-medium text-neutral-900">{ent.name}</span>
+                                <div className="flex items-center gap-2 border-l border-neutral-200 pl-3">
+                                  <span className="text-[9px] uppercase tracking-widest text-neutral-400">{ent.type}</span>
+                                  <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">{ent.google_salience_score}</span>
+                                </div>
                               </div>
-                            </div>
-                            <div>
-                              <h5 className="text-[11px] uppercase tracking-widest font-semibold text-neutral-500 mb-3 flex items-center gap-2"><Sparkles className="w-3.5 h-3.5" /> Semantic / LSI</h5>
-                              <div className="flex flex-wrap gap-2">
-                                {kw.semantic_keywords?.map((k: string, i: number) => <span key={i} className="text-xs text-neutral-700 bg-white border border-neutral-200 px-3 py-1.5 rounded-full">{k}</span>)}
-                              </div>
-                            </div>
+                            ))}
                           </div>
                         </div>
                       )}
@@ -213,18 +302,20 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                               </div>
                               <div className="flex justify-between items-center py-2 border-b border-neutral-100">
                                 <span className="text-sm text-neutral-600">Internal Links</span>
-                                <span className="text-sm font-medium text-neutral-900">{dom.link_architecture?.internal_links || 0}</span>
+                                <span className="text-sm font-medium text-neutral-900">
+                                  {Array.isArray(dom.link_architecture?.internal_links) ? dom.link_architecture.internal_links.length : (dom.link_architecture?.internal_links || 0)}
+                                </span>
                               </div>
                               <div className="flex justify-between items-center py-2 border-b border-neutral-100">
-                                <span className="text-sm text-neutral-600">Meta Title Length</span>
-                                <span className="text-sm font-medium text-neutral-900">{dom.title?.length || 0} chars</span>
+                                <span className="text-sm text-neutral-600">External Links</span>
+                                <span className="text-sm font-medium text-neutral-900">
+                                  {Array.isArray(dom.link_architecture?.external_links) ? dom.link_architecture.external_links.length : (dom.link_architecture?.external_links || 0)}
+                                </span>
                               </div>
-                              {dom.headings?.h1?.length > 0 && (
-                                <div className="pt-3">
-                                  <span className="text-[10px] uppercase tracking-widest font-semibold text-neutral-500 block mb-2">Extracted H1</span>
-                                  <p className="text-sm text-neutral-800 font-medium bg-neutral-100/50 p-3 rounded-lg border border-neutral-100">{dom.headings.h1[0]}</p>
-                                </div>
-                              )}
+                              <div className="flex justify-between items-center py-2 border-b border-neutral-100">
+                                <span className="text-sm text-neutral-600">Images Missing Alt Text</span>
+                                <span className="text-sm font-medium text-amber-600">{dom.content_metrics?.images_missing_alt || 0}</span>
+                              </div>
                             </div>
                           </div>
                         )}
@@ -259,61 +350,168 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                     </div>
 
                     {/* ======================================================== */}
-                    {/* SECTION 2: AI SYNTHESIS */}
+                    {/* SECTION 2: AI SYNTHESIS & ON-PAGE ARCHITECTURE */}
                     {/* ======================================================== */}
                     <div>
                       <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-900 mb-8 flex items-center gap-3">
                         <span className="w-6 h-px bg-neutral-300"></span> 2. AI Synthesis & Diagnostics
                       </h3>
 
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
-                        {/* Content Quality Panel */}
-                        {result.content_quality && (
-                          <div>
+                      <div className="mb-12">
+                        {/* THE ON-PAGE ARCHITECTURE CHECKLIST (Derived directly from raw DB JSON) */}
+                        {dom && (
+                          <div className="mb-12">
                             <h4 className="text-sm font-medium text-neutral-800 mb-6 flex items-center gap-2">
-                              <FileText className="w-4 h-4 text-neutral-400" /> Content Quality Metrics
+                              <LayoutTemplate className="w-4 h-4 text-neutral-400" />Architecture Validation
                             </h4>
 
-                            <div className="space-y-5">
-                              <div className="flex items-center justify-between py-2 border-b border-neutral-100">
-                                <span className="text-sm text-neutral-600">Readability Score</span>
-                                <span className="text-lg font-medium text-emerald-600">{result.content_quality.readability_score}/100</span>
-                              </div>
-                              <div className="flex items-center justify-between py-2 border-b border-neutral-100">
-                                <span className="text-sm text-neutral-600">Thin Content Detected</span>
-                                <StatusIcon status={!result.content_quality.thin_content_detected} />
-                              </div>
-                              <div className="pt-2">
-                                <span className="text-[10px] uppercase tracking-widest font-semibold text-neutral-500 block mb-2">Tone Analysis</span>
-                                <p className="text-sm text-neutral-700 leading-relaxed bg-white border border-neutral-200 p-4 rounded-lg">{result.content_quality.tone_consistency}</p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-                        {/* On-Page SEO Panel */}
-                        {result.on_page_seo && (
-                          <div>
-                            <h4 className="text-sm font-medium text-neutral-800 mb-6 flex items-center gap-2">
-                              <LayoutTemplate className="w-4 h-4 text-neutral-400" /> On-Page Structural Health
-                            </h4>
+                              {/* 1. URL Optimization */}
+                              <div className="p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-neutral-900">1. URL Valid</span>
+                                  <StatusIcon status={isUrlOptimized} />
+                                </div>
+                                <p className="text-xs font-mono text-neutral-500 break-all">{dom?.url_metrics?.raw_url || '--'}</p>
+                              </div>
 
-                            <div className="space-y-3">
-                              <div className="flex items-center justify-between p-4 bg-white border border-neutral-200 rounded-lg">
-                                <span className="text-sm text-neutral-700">Heading Hierarchy (H1-H6)</span>
-                                <StatusIcon status={result.on_page_seo.heading_hierarchy_valid} />
+                              {/* 2. Slug Optimization */}
+                              <div className="p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-neutral-900">2. Slug Extraction</span>
+                                  <StatusIcon status={dom?.url_metrics?.slug !== null} />
+                                </div>
+                                <p className="text-xs font-mono text-neutral-500">Path: {dom?.url_metrics?.slug || '--'}</p>
                               </div>
-                              <div className="flex items-center justify-between p-4 bg-white border border-neutral-200 rounded-lg">
-                                <span className="text-sm text-neutral-700">Open Graph & Social Cards</span>
-                                <StatusIcon status={result.on_page_seo.open_graph_optimized} />
+
+                              {/* 3. Title Length */}
+                              <div className="p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-neutral-900">3. Meta Title Length</span>
+                                  <StatusIcon status={isTitleValid} />
+                                </div>
+                                <p className="text-xs font-mono text-neutral-600 mb-1">{dom?.title?.text || '--'}</p>
+                                <span className={`text-[10px] font-semibold uppercase tracking-widest ${!isTitleValid ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                  {titleLength} Chars (Target: 30-60)
+                                </span>
                               </div>
-                              <div className="flex items-center justify-between p-4 bg-white border border-neutral-200 rounded-lg">
-                                <span className="text-sm text-neutral-700">Image Alt Accessibility</span>
-                                <StatusIcon status={result.on_page_seo.images_optimized} />
+
+                              {/* 4. Meta Description Length */}
+                              <div className="p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-neutral-900">4. Description Length</span>
+                                  <StatusIcon status={isDescValid} />
+                                </div>
+                                <p className="text-xs font-mono text-neutral-600 line-clamp-4 mb-1">{dom?.description?.text || '--'}</p>
+                                <span className={`text-[10px] font-semibold uppercase tracking-widest ${!isDescValid ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                  {descLength} Chars (Target: 120-160)
+                                </span>
                               </div>
-                              <div className="flex items-center justify-between p-4 bg-white border border-neutral-200 rounded-lg">
-                                <span className="text-sm text-neutral-700">Internal/External Link Ratio</span>
-                                <StatusIcon status={result.on_page_seo.link_ratio_healthy} />
+
+                              {/* 5. Detailed Heading Hierarchy Map */}
+                              <div className="col-span-1 lg:col-span-2 p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <div className="flex items-center justify-between mb-4">
+                                  <span className="text-sm font-semibold text-neutral-900">5. Heading Hierarchy Validation</span>
+                                  <StatusIcon status={hasH1} />
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                  {['h1', 'h2', 'h3'].map((level) => (
+                                    <div key={level}>
+                                      <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 block mb-2">{level.toUpperCase()} ({dom?.headings?.[level]?.length || 0})</span>
+                                      {dom?.headings?.[level]?.length > 0 ? (
+                                        <ul className="space-y-2">
+                                          {dom.headings[level].map((text: string, idx: number) => (
+                                            <li key={idx} className="text-xs text-neutral-700 bg-neutral-50 p-2.5 rounded border border-neutral-100">{text}</li>
+                                          ))}
+                                        </ul>
+                                      ) : (
+                                        <span className="text-xs text-neutral-400 italic">None found</span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* 6. Canonical Tags */}
+                              <div className="p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-neutral-900">6. Canonical Target</span>
+                                  <StatusIcon status={hasCanonical} />
+                                </div>
+                                <p className="text-xs font-mono text-neutral-500">{dom?.canonical_url || <span className="text-red-500 font-medium">Missing Tag</span>}</p>
+                              </div>
+
+                              {/* 7. Robots Meta */}
+                              <div className="p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-neutral-900">7. Robots Directive</span>
+                                  <StatusIcon status={true} />
+                                </div>
+                                <p className="text-xs font-mono text-neutral-500">Rule: {dom?.robots_meta || 'index, follow (Default)'}</p>
+                              </div>
+
+                              {/* 8. Open Graph Tags */}
+                              <div className="p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-neutral-900">8. Open Graph (OG)</span>
+                                  <StatusIcon status={hasOGTags} />
+                                </div>
+                                <p className="text-xs font-mono text-neutral-500">Title: {dom?.social_graph?.og_title || <span className="text-amber-500 font-medium">Missing</span>}</p>
+                              </div>
+
+                              {/* 9. Twitter Cards */}
+                              <div className="p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-neutral-900">9. Twitter Cards</span>
+                                  <StatusIcon status={hasTwitterCards} />
+                                </div>
+                                <p className="text-xs font-mono text-neutral-500">Type: {dom?.social_graph?.twitter_card || <span className="text-amber-500 font-medium">Missing</span>}</p>
+                              </div>
+
+                              {/* 10. Anchor Text Optimization */}
+                              <div className="col-span-1 lg:col-span-2 p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-neutral-900">10. Anchor Text Check</span>
+                                  <StatusIcon status={noGenericAnchors} />
+                                </div>
+                                <div className="text-xs font-mono text-neutral-500">
+                                  {!noGenericAnchors ? (
+                                    <div>
+                                      <span className="text-amber-600 font-medium block mb-2">Found {dom.link_architecture.unoptimized_anchors.length} unoptimized links:</span>
+                                      <ul className="space-y-1">
+                                        {dom.link_architecture.unoptimized_anchors.map((anc: any, i: number) => (
+                                          <li key={i}>&quot;{anc.text}&quot; → {anc.href}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  ) : (
+                                    <span className="text-emerald-600 font-medium">All internal anchors are contextually optimized</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* 11. Breadcrumb Check */}
+                              <div className="p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-neutral-900">11. Breadcrumb Navigation</span>
+                                  <StatusIcon status={hasBreadcrumbs} />
+                                </div>
+                                <div className="text-xs font-mono text-neutral-500">
+                                  {hasBreadcrumbs ? dom.breadcrumbs.join(' > ') : <span className="text-amber-500 font-medium">No Breadcrumbs Detected</span>}
+                                </div>
+                              </div>
+
+                              {/* 12. Pagination */}
+                              <div className="p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-semibold text-neutral-900">12. Pagination (Rel Next/Prev)</span>
+                                  {/* Status is true if there is pagination, or true if there just isn't any needed. We'll check if the object exists. */}
+                                  <StatusIcon status={true} />
+                                </div>
+                                <div className="text-xs font-mono text-neutral-500">
+                                  Next: {dom?.pagination?.next_url || 'None'} | Prev: {dom?.pagination?.prev_url || 'None'}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -322,17 +520,17 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
 
                       {/* Technical Issues Developer Backlog */}
                       {result.technical_issues && result.technical_issues.length > 0 && (
-                        <div className="mt-8">
+                        <div className="mt-12">
                           <h4 className="text-sm font-medium text-neutral-800 mb-6 flex items-center gap-2">
-                            <AlertTriangle className="w-4 h-4 text-neutral-400" /> Developer Backlog
+                            <AlertTriangle className="w-4 h-4 text-neutral-400" /> Technical Backlog Issues ({result.technical_issues.length})
                           </h4>
                           <div className="flex flex-col gap-4">
                             {result.technical_issues.map((issue: any, i: number) => (
-                              <div key={i} className="p-6 bg-white border border-neutral-200 rounded-xl flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
+                              <div key={i} className="p-6 bg-white border border-neutral-200 rounded-xl flex flex-col md:flex-row md:items-start gap-4 md:gap-8 shadow-sm">
                                 <div className="flex-1">
                                   <p className="text-base font-medium text-neutral-900 mb-2">{issue.issue}</p>
                                   <p className="text-sm text-neutral-600 leading-relaxed">
-                                    <span className="font-semibold text-neutral-800 mr-1">Resolution:</span> {issue.recommendation}
+                                    <span className="font-semibold text-neutral-800 mr-1">Recommendation:</span> {issue.recommendation}
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2 md:flex-col md:items-end shrink-0">

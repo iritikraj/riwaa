@@ -1,82 +1,117 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Queue, Worker } from 'bullmq';
 import { runDomainSpider } from './spider';
-import { GoogleGenAI } from '@google/genai';
-import { saveAuditToStrapi } from './strapi';
+import IORedis from 'ioredis';
+import { updateAuditInStrapi } from './strapi';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const redisHost = process.env.REDIS_HOST || '127.0.0.1';
+const redisPort = Number(process.env.REDIS_PORT) || 6379;
+const redisPassword = process.env.REDIS_PASSWORD || undefined;
+const isDevelopment = process.env.NODE_ENV === 'development';
 
-// Assuming Redis is running locally on the standard port
-const connection = {
-  host: '127.0.0.1',
-  port: 6379
+// 1. Safe Redis Configuration
+const redisOptions = {
+  host: redisHost,
+  port: redisPort,
+  password: redisPassword,
+  maxRetriesPerRequest: null,
+  retryStrategy(times: number) {
+    if (isDevelopment && times > 1) {
+      console.warn('⚠️ Local Redis server not found. Queue worker resting in standby mode.');
+      return null;
+    }
+    return Math.min(times * 100, 3000);
+  }
 };
 
-// 1. Create the Queue
-export const spiderQueue = new Queue('domain-spider-queue', { connection });
+export const redisConnection = new IORedis(redisOptions);
 
-// 2. Define the Worker (The Background Process)
+redisConnection.on('error', (err: any) => {
+  if (isDevelopment && err.code === 'ECONNREFUSED') return;
+  console.error('Redis Connection Error:', err);
+});
+
+// 2. Create the Queue
+export const spiderQueue = new Queue('domain-spider-queue', { connection: redisConnection as any });
+
+// 3. Define the Worker
 export const spiderWorker = new Worker('domain-spider-queue', async job => {
-  const { startUrl, industry, documentId } = job.data;
+  const { startUrl, documentId } = job.data;
   console.log(`[Queue] Starting background spider for ${startUrl}`);
 
   try {
     // Step A: Run the Site-Wide Spider
     const spiderResults = await runDomainSpider(startUrl);
 
-    // Step B: Ask Gemini to analyze the site map for Cannibalization & Duplicates
-    const prompt = `
-      You are an Enterprise SEO Architect.
-      I have crawled the domain ${startUrl} and mapped the internal link graph.
-      
-      === SPIDER RESULTS ===
-      ${JSON.stringify(spiderResults.slice(0, 150), null, 2)} // Capped at 150 to protect context window
-      ======================
-      
-      Analyze this map and return a strictly formatted JSON object matching this schema:
-      {
-        "duplicate_titles": [{"title": "The exact duplicate title", "urls": ["url1", "url2"]}],
-        "orphan_pages": ["url1", "url2"],
-        "keyword_cannibalization": [
-          {
-            "topic": "The competing topic/keyword",
-            "competing_urls": ["url1", "url2"],
-            "recommendation": "How to consolidate or de-optimize"
-          }
-        ]
-      }
-      
-      Rules:
-      1. An Orphan Page is any URL with "inboundLinkCount": 0.
-      2. Keyword Cannibalization happens when multiple pages target the exact same intent in their H1/Title.
-    `;
+    // Step B: DETERMINISTIC CROSS-REFERENCE ENGINE (No AI Used Here)
+    console.log(`[Queue] Running deterministic cross-reference on ${spiderResults.length} pages...`);
 
-    const response: any = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: { temperature: 0.1 },
+    const titleTracker: Record<string, string[]> = {};
+    const descTracker: Record<string, string[]> = {};
+    const orphan_pages: string[] = [];
+    const cleanStartUrl = startUrl.replace(/\/$/, "");
+
+    spiderResults.forEach((page: any) => {
+      const cleanUrl = page.url.replace(/\/$/, "");
+
+      // 1. Map Titles
+      if (page.title) {
+        if (!titleTracker[page.title]) titleTracker[page.title] = [];
+        titleTracker[page.title].push(page.url);
+      }
+
+      // 2. Map Descriptions 
+      if (page.description) {
+        if (!descTracker[page.description]) descTracker[page.description] = [];
+        descTracker[page.description].push(page.url);
+      }
+
+      // 3. Detect Orphans (Assuming spider returns inboundLinks or inboundLinkCount)
+      const links = page.inboundLinks ?? page.inboundLinkCount ?? 0;
+      if (cleanUrl !== cleanStartUrl && links === 0) {
+        orphan_pages.push(page.url);
+      }
     });
 
-    let rawText = typeof response.text === 'function' ? response.text() : (response.text || '');
-    rawText = rawText.replace(/```json/gi, '').replace(/```/gi, '').trim();
-    const aiAnalysis = JSON.parse(rawText);
+    // Filter down to ONLY the duplicates
+    const duplicate_titles = Object.entries(titleTracker)
+      .filter(([_, urls]) => urls.length > 1)
+      .map(([title, urls]) => ({ title, urls }));
 
-    // Step C: Update the Strapi Document with the Spider Analysis
-    // (We will need to add an update function to your strapi.ts file later)
-    console.log(`[Queue] AI Analysis complete for ${startUrl}. Found ${aiAnalysis.orphan_pages?.length || 0} orphans.`);
+    const duplicate_descriptions = Object.entries(descTracker)
+      .filter(([_, urls]) => urls.length > 1)
+      .map(([description, urls]) => ({ description, urls }));
 
-    return aiAnalysis;
+    const domain_architecture = {
+      duplicate_titles,
+      duplicate_descriptions,
+      orphan_pages
+    };
+
+    // Step C: Bundle the Raw Data + Calculated Data and Save to Strapi
+    const backgroundPayload = {
+      raw_spider_data: spiderResults, // The raw proof
+      domain_architecture: domain_architecture // The mathematical result
+    };
+
+    console.log(`[Queue] Saving Raw Spider Map & Architecture to Document ${documentId}...`);
+    await updateAuditInStrapi(documentId, backgroundPayload);
+
+    console.log(`[Queue] Successfully updated Strapi. Found ${orphan_pages.length} orphans.`);
+    return backgroundPayload;
 
   } catch (error) {
     console.error(`[Queue] Failed to process spider job for ${startUrl}:`, error);
     throw error;
   }
-}, { connection });
+}, { connection: redisConnection as any });
 
-// 3. Setup Worker Listeners for Observability
+// 4. Observability Listeners
 spiderWorker.on('completed', job => {
   console.log(`[Queue] Job ${job.id} completed successfully`);
 });
 
 spiderWorker.on('failed', (job, err) => {
+  if (isDevelopment && err.message.includes('ECONNREFUSED')) return;
   console.log(`[Queue] Job ${job?.id} failed with ${err.message}`);
 });

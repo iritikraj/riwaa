@@ -138,3 +138,54 @@ export async function fetchPageSpeedData(url: string) {
     return null;
   }
 }
+
+export async function updateAuditInStrapi(documentId: string, backgroundData: any) {
+  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338'; // Aligned port
+  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
+
+  if (!STRAPI_TOKEN) {
+    console.error("Missing STRAPI_API_TOKEN. Cannot update document in background.");
+    return null;
+  }
+
+  try {
+    // 1. Fetch the existing audit data using the CORRECT endpoint
+    const getRes = await fetch(`${STRAPI_URL}/api/website-audits/${documentId}`, {
+      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+    });
+
+    if (!getRes.ok) throw new Error(`Failed to fetch existing document: ${getRes.statusText}`);
+
+    const existingDoc = await getRes.json();
+
+    // Safely extract existing audit_data (handles both Strapi v4 attributes wrapper and v5 flat structures)
+    const currentAuditData = existingDoc.data?.attributes?.audit_data || existingDoc.data?.audit_data || {};
+
+    // 2. Safely inject BOTH the raw spider data and the AI synthesis
+    const updatedAuditData = {
+      ...currentAuditData,
+      raw_spider_data: backgroundData.raw_spider_data, // The hard proof
+      domain_architecture: backgroundData.domain_architecture // The deterministic math summary
+    };
+
+    // 3. Save it back to Strapi using the CORRECT endpoint
+    const updateRes = await fetch(`${STRAPI_URL}/api/website-audits/${documentId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${STRAPI_TOKEN}`,
+      },
+      body: JSON.stringify({
+        data: {
+          audit_data: updatedAuditData,
+        },
+      }),
+    });
+
+    if (!updateRes.ok) throw new Error(`Strapi update failed: ${updateRes.statusText}`);
+    return await updateRes.json();
+  } catch (error) {
+    console.error("Failed to update Strapi from background worker:", error);
+    return null;
+  }
+}

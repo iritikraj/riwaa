@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { saveAuditToStrapi } from '@/lib/seo-agent/strapi';
 import { withLogger } from '@/lib/logs/withLogger';
-// import { spiderQueue } from '@/lib/seo-agent/queue';
+import { spiderQueue } from '@/lib/seo-agent/queue';
 
 export const POST = withLogger('/api/seo-agent/audit/save-batch', async (req: NextRequest, routeLogger) => {
   try {
@@ -22,18 +22,23 @@ export const POST = withLogger('/api/seo-agent/audit/save-batch', async (req: Ne
       audit_status: 'completed',
     });
 
-    // 2. 🛑 TEMPORARILY COMMENTED OUT THE BACKGROUND SPIDER TRIGGER
-    /*
     try {
       routeLogger.info({ event: 'spider_queue_attempt' }, 'Triggering Spider...');
-      await spiderQueue.add('crawl-domain', { startUrl: rootDomain, industry, documentId: strapiRecord.id });
+      const validId = strapiRecord.documentId || strapiRecord.id;
+      await spiderQueue.add('crawl-domain', {
+        startUrl: rootDomain,
+        industry,
+        documentId: validId
+      });
     } catch (redisError: any) {
+      console.error({ redisError });
       routeLogger.warn('Redis skipped.');
     }
-    */
+
+    const validId = strapiRecord.documentId || strapiRecord.data?.documentId || strapiRecord.id;
 
     // 3. Instantly return success to the frontend so the loader disappears
-    return NextResponse.json({ success: true, documentId: strapiRecord.id });
+    return NextResponse.json({ success: true, documentId: validId });
 
   } catch (error: any) {
     routeLogger.error({ err: error }, 'Batch Save Error');
