@@ -55,8 +55,8 @@ export async function runDomainSpider(startUrl: string) {
 
   const crawler = new CheerioCrawler({
     requestHandler: router,
-    maxRequestsPerCrawl: 500, // Safety limit for EC2 memory
-    maxConcurrency: 10,       // Be polite to the target server
+    maxRequestsPerCrawl: 500,
+    maxConcurrency: 3,
     failedRequestHandler({ request, log }) {
       log.error(`Spider failed to crawl ${request.url}`);
     },
