@@ -6,7 +6,7 @@ import { spiderQueue } from '@/lib/seo-agent/queue';
 
 export const POST = withLogger('/api/seo-agent/audit/save-batch', async (req: NextRequest, routeLogger) => {
   try {
-    const { rootDomain, industry, batchResults } = await req.json();
+    const { rootDomain, industry } = await req.json();
 
     // routeLogger.info({ event: 'batch_save_started', rootDomain }, 'Saving batch...');
     routeLogger.info({ event: 'batch_save_started', rootDomain }, 'Saving batch data to Strapi...');
@@ -16,10 +16,10 @@ export const POST = withLogger('/api/seo-agent/audit/save-batch', async (req: Ne
       industry: industry || 'General Business',
       audit_data: {
         is_batch: true,
-        total_urls_scanned: batchResults.length,
-        results: batchResults
+        total_urls_scanned: 0,
+        results: []
       },
-      audit_status: 'completed',
+      audit_status: 'processing',
     });
 
     try {

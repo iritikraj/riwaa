@@ -57,6 +57,13 @@ export async function runDomainSpider(startUrl: string) {
     requestHandler: router,
     maxRequestsPerCrawl: 500,
     maxConcurrency: 3,
+    ignoreSslErrors: true,
+    requestHandlerTimeoutSecs: 60,
+    preNavigationHooks: [
+      (context, gotOptions) => {
+        gotOptions.http2 = true;
+      }
+    ],
     failedRequestHandler({ request, log }) {
       log.error(`Spider failed to crawl ${request.url}`);
     },

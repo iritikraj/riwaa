@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   ShieldCheck, AlertTriangle, ArrowLeft, Calendar, Globe,
   ChevronDown, ChevronUp, CheckCircle, Layers,
-  LayoutTemplate, XCircle, Search, MessageCircle, TrendingUp, Code, Zap, Tag
+  LayoutTemplate, XCircle, Search, MessageCircle, TrendingUp, Code, Zap, Tag, Loader2, Activity
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -14,6 +15,7 @@ interface AuditDetailProps {
 }
 
 export default function AuditDetailView({ record }: AuditDetailProps) {
+  const router = useRouter();
   const [expandedUrl, setExpandedUrl] = useState<string | null>(null);
 
   const { target_url, industry, createdAt, audit_status, audit_data } = record;
@@ -25,7 +27,30 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
   const resultsArray = isBatch ? (audit_data.results || []) : (audit_data ? [audit_data] : []);
   const domainArchitecture = audit_data?.domain_architecture;
 
-  // Set initial expanded URL if there's only one result
+  // 1. Better Data Checks
+  const hasSpiderFinished = audit_data?.raw_spider_data !== undefined;
+  // const totalPagesFound = audit_data?.raw_spider_data?.length || 0;
+  const totalPagesFound = isBatch && hasSpiderFinished ? 1 : 0;
+  const pagesProcessed = resultsArray.length;
+
+  // 2. Smarter Processing Logic (It is processing if the spider hasn't finished OR if we haven't processed all pages)
+  const isProcessing =
+    audit_status === 'processing' ||
+    audit_status === 'pending' ||
+    (isBatch && !hasSpiderFinished) ||
+    (isBatch && hasSpiderFinished && pagesProcessed < totalPagesFound);
+
+  // 3. Keep the Polling
+  useEffect(() => {
+    if (!isProcessing) return;
+
+    const interval = setInterval(() => {
+      router.refresh();
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isProcessing, router]);
+
   React.useEffect(() => {
     if (resultsArray.length === 1) {
       setExpandedUrl(resultsArray[0].url);
@@ -83,17 +108,49 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.15em] font-medium text-neutral-500">
               <span className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> {date}</span>
               {industry && <span className="flex items-center gap-2">Context: <span className="text-neutral-900">{industry}</span></span>}
-              {isBatch && <span className="flex items-center gap-2"><Layers className="w-3.5 h-3.5" /> {audit_data.total_urls_scanned} Routes Scanned</span>}
+              {isBatch && hasSpiderFinished && (
+                <span className="flex items-center gap-2">
+                  <Layers className="w-3.5 h-3.5" /> {totalPagesFound} Routes Discovered
+                </span>
+              )}
             </div>
           </div>
 
           <div>
-            <span className={`px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] rounded-full border ${audit_status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
-              {audit_status}
-            </span>
+            {/* Smarter Live Badge */}
+            {isProcessing ? (
+              <div className="flex items-center gap-3 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full shadow-sm">
+                <Loader2 className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-700">
+                  {!hasSpiderFinished ? "Mapping Domain..." : `Analyzing ${pagesProcessed} / ${totalPagesFound}`}
+                </span>
+              </div>
+            ) : (
+              <span className={`px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200`}>
+                Completed
+              </span>
+            )}
           </div>
         </div>
       </header>
+
+      {/* 4. THE NEW EMPTY LOADING STATE */}
+      {isProcessing && resultsArray.length === 0 && (
+        <div className="py-32 flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <div className="relative mb-8">
+            <div className="absolute inset-0 bg-blue-100 blur-xl rounded-full opacity-50" />
+            <Activity className="w-12 h-12 text-blue-500 relative z-10 animate-pulse" />
+          </div>
+          <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-neutral-800 mb-3">
+            {!hasSpiderFinished ? 'Running Domain Spider...' : 'AI Agents Analyzing...'}
+          </h3>
+          <p className="text-xs text-neutral-500 max-w-sm text-center leading-relaxed">
+            {!hasSpiderFinished
+              ? 'The background spider is currently crawling the target URL to extract all valid routes and check domain architecture. This usually takes 1-2 minutes.'
+              : 'The domain architecture has been mapped. Background AI workers are now processing the first batch of pages.'}
+          </p>
+        </div>
+      )}
 
       {/* DOMAIN ARCHITECTURE (Duplicates & Orphans) */}
       {isBatch && domainArchitecture && (

@@ -40,37 +40,27 @@ export default function AuditDashboard() {
     e.preventDefault();
     if (!rootDomain) return;
 
-    const rawPaths = pathsInput.split(',').map(p => p.trim()).filter(Boolean);
-    const urlsToAudit = [rootDomain, ...rawPaths.map(path => `${rootDomain}${path.startsWith('/') ? '' : '/'}${path}`)];
-
     setViewState('loading');
-    setBatchProgress({ current: 0, total: urlsToAudit.length });
-
-    const results = [];
-    for (let i = 0; i < urlsToAudit.length; i++) {
-      setBatchProgress(prev => ({ ...prev, current: i + 1 }));
-      try {
-        const response = await fetch('/api/seo-agent/audit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: urlsToAudit[i], industry: industry || 'General Business', skipSave: true }),
-        });
-        const data = await response.json();
-        results.push(response.ok && data.success ? { url: urlsToAudit[i], ...data.audit } : { url: urlsToAudit[i], error: data.error });
-      } catch {
-        results.push({ url: urlsToAudit[i], error: "Network failure" });
-      }
-    }
+    setLoadingStatus('INITIALIZING DISTRIBUTED QUEUE...');
 
     try {
+      // Instantly hit save-batch to create the Strapi document and queue the Spider
       const batchSaveRes = await fetch('/api/seo-agent/audit/save-batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rootDomain, industry: industry || 'General Business', batchResults: results }),
+        body: JSON.stringify({
+          rootDomain,
+          industry: industry || 'General Business',
+          batchResults: []
+        }),
       });
+
       const saveData = await batchSaveRes.json();
-      if (saveData.success && saveData.documentId) {
-        router.push(`/seo-agent/audit-history/${saveData.documentId}`);
+      const finalDocumentId = saveData.documentId || saveData.data?.documentId || saveData.data?.data?.documentId;
+
+      if (saveData.success && finalDocumentId) {
+        // Instantly redirect the user to the history page
+        router.push(`/seo-agent/audit-history/${finalDocumentId}`);
         return;
       }
     } catch (err) {
@@ -120,7 +110,6 @@ export default function AuditDashboard() {
             {/* IDLE STATE */}
             {viewState === 'idle' && (
               <form onSubmit={handleStartBatchAudit} className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-6 max-w-3xl">
-                {/* ... existing form inputs ... */}
                 <div className="space-y-3">
                   <label className="block text-[10px] uppercase tracking-[0.2em] text-neutral-500">Target Root Domain</label>
                   <div className="relative">

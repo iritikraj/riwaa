@@ -189,3 +189,61 @@ export async function updateAuditInStrapi(documentId: string, backgroundData: an
     return null;
   }
 }
+
+export async function appendResultToStrapi(documentId: string, url: string, auditResult: any = null, errorMsg: string | null = null) {
+  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
+  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
+
+  // 1. STRIPPED NAKED URL: Removed ?publicationState=preview
+  const endpoint = `${STRAPI_URL}/api/website-audits/${documentId}`;
+
+  let fetchRes = await fetch(endpoint, {
+    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+    cache: 'no-store'
+  });
+
+  // 2. Race Condition Protection (just in case SQLite is locked)
+  if (fetchRes.status === 404) {
+    console.warn(`[Strapi] Document ${documentId} locked. Retrying in 2 seconds...`);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    fetchRes = await fetch(endpoint, {
+      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+      cache: 'no-store'
+    });
+  }
+
+  const currentDoc = await fetchRes.json();
+
+  if (!currentDoc.data) {
+    console.error(`[Strapi] Fatal Error. Response:`, currentDoc);
+    throw new Error(`Strapi Error: ${currentDoc?.error?.message || 'Not Found'}`);
+  }
+
+  // 3. Extract existing array safely
+  const existingAuditData = currentDoc.data.attributes?.audit_data || currentDoc.data.audit_data || { is_batch: true, results: [] };
+  const existingResults = existingAuditData.results || [];
+
+  // 4. Append the new AI result
+  const newEntry = errorMsg ? { url, error: errorMsg } : { url, ...auditResult };
+  existingResults.push(newEntry);
+
+  // 5. Update the document and mark the entire batch as completed
+  const updateRes = await fetch(endpoint, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${STRAPI_TOKEN}`,
+    },
+    body: JSON.stringify({
+      data: {
+        audit_status: 'completed',
+        audit_data: {
+          ...existingAuditData,
+          results: existingResults
+        }
+      }
+    })
+  });
+
+  return updateRes.json();
+}

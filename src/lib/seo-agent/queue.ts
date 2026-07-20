@@ -1,8 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { loadEnvConfig } from '@next/env';
+loadEnvConfig(process.cwd());
+
 import { Queue, Worker } from 'bullmq';
 import { runDomainSpider } from './spider';
 import IORedis from 'ioredis';
 import { updateAuditInStrapi } from './strapi';
+import { runHeavyAiAudit } from './ai-audit';
+import { appendResultToStrapi } from './strapi';
 
 const redisHost = process.env.REDIS_HOST || '127.0.0.1';
 const redisPort = Number(process.env.REDIS_PORT) || 6379;
@@ -31,19 +36,21 @@ redisConnection.on('error', (err: any) => {
   console.error('Redis Connection Error:', err);
 });
 
-// 2. Create the Queue
+// 2. Create the Queues
 export const spiderQueue = new Queue('domain-spider-queue', { connection: redisConnection as any });
+export const aiAuditQueue = new Queue('ai-audit-queue', { connection: redisConnection as any }); // NEW: AI Fan-Out Queue
 
-// 3. Define the Worker
+// 3. Define the Spider Worker
 export const spiderWorker = new Worker('domain-spider-queue', async job => {
-  const { startUrl, documentId } = job.data;
+  // Grab industry from job.data so we can pass it to the AI workers
+  const { startUrl, documentId, industry } = job.data;
   console.log(`[Queue] Starting background spider for ${startUrl}`);
 
   try {
     // Step A: Run the Site-Wide Spider
     const spiderResults = await runDomainSpider(startUrl);
 
-    // Step B: DETERMINISTIC CROSS-REFERENCE ENGINE (No AI Used Here)
+    // Step B: DETERMINISTIC CROSS-REFERENCE ENGINE
     console.log(`[Queue] Running deterministic cross-reference on ${spiderResults.length} pages...`);
 
     const titleTracker: Record<string, string[]> = {};
@@ -54,26 +61,22 @@ export const spiderWorker = new Worker('domain-spider-queue', async job => {
     spiderResults.forEach((page: any) => {
       const cleanUrl = page.url.replace(/\/$/, "");
 
-      // 1. Map Titles
       if (page.title) {
         if (!titleTracker[page.title]) titleTracker[page.title] = [];
         titleTracker[page.title].push(page.url);
       }
 
-      // 2. Map Descriptions 
       if (page.description) {
         if (!descTracker[page.description]) descTracker[page.description] = [];
         descTracker[page.description].push(page.url);
       }
 
-      // 3. Detect Orphans (Assuming spider returns inboundLinks or inboundLinkCount)
       const links = page.inboundLinks ?? page.inboundLinkCount ?? 0;
       if (cleanUrl !== cleanStartUrl && links === 0) {
         orphan_pages.push(page.url);
       }
     });
 
-    // Filter down to ONLY the duplicates
     const duplicate_titles = Object.entries(titleTracker)
       .filter(([_, urls]) => urls.length > 1)
       .map(([title, urls]) => ({ title, urls }));
@@ -88,16 +91,45 @@ export const spiderWorker = new Worker('domain-spider-queue', async job => {
       orphan_pages
     };
 
-    // Step C: Bundle the Raw Data + Calculated Data and Save to Strapi
+    // Step C: Save Raw Spider Data to Strapi
     const backgroundPayload = {
-      raw_spider_data: spiderResults, // The raw proof
-      domain_architecture: domain_architecture // The mathematical result
+      raw_spider_data: spiderResults,
+      domain_architecture: domain_architecture
     };
 
-    console.log(`[Queue] Saving Raw Spider Map & Architecture to Document ${documentId}...`);
+    console.log(`[Queue] Saving Raw Spider Map to Document ${documentId}...`);
     await updateAuditInStrapi(documentId, backgroundPayload);
-
     console.log(`[Queue] Successfully updated Strapi. Found ${orphan_pages.length} orphans.`);
+
+    // Step D: THE FAN-OUT (Trigger AI Workers)
+    console.log(`[Queue] Fanning out ${spiderResults.length} pages to AI Audit Queue...`);
+
+    // const aiJobs = spiderResults.map((page: any) => ({
+    //   name: 'audit-page',
+    //   data: {
+    //     url: page.url,
+    //     documentId,
+    //     industry: industry || 'General Business'
+    //   }
+    // }));
+
+    // Find the exact root URL object from the spider map
+    const rootPage = spiderResults.find((page: any) => page.url.replace(/\/$/, "") === cleanStartUrl);
+    const targetUrl = rootPage ? rootPage.url : startUrl;
+
+    const aiJobs = [{
+      name: 'audit-page',
+      data: {
+        url: targetUrl,
+        documentId,
+        industry: industry || 'General Business'
+      }
+    }];
+
+    // Instantly dump all URLs into the new queue
+    await aiAuditQueue.addBulk(aiJobs);
+    console.log(`[Queue] Successfully pushed ${aiJobs.length} jobs to AI Audit Queue.`);
+
     return backgroundPayload;
 
   } catch (error) {
@@ -106,12 +138,41 @@ export const spiderWorker = new Worker('domain-spider-queue', async job => {
   }
 }, { connection: redisConnection as any });
 
-// 4. Observability Listeners
-spiderWorker.on('completed', job => {
-  console.log(`[Queue] Job ${job.id} completed successfully`);
+
+// 4. Define the AI Audit Worker
+export const aiAuditWorker = new Worker('ai-audit-queue', async job => {
+  const { url, documentId, industry } = job.data;
+  console.log(`[AI Worker] Analyzing ${url}...`);
+
+  try {
+    // 1. Run the heavy AI Logic safely in the background
+    const auditData = await runHeavyAiAudit(url, industry);
+
+    // 2. Append the success result to the Strapi document
+    await appendResultToStrapi(documentId, url, auditData, null);
+
+    console.log(`[AI Worker] Successfully audited and saved ${url}`);
+  } catch (error: any) {
+    console.error(`[AI Worker] Failed to audit ${url}:`, error.message);
+
+    // 3. If it fails, append the error to Strapi so the UI can show a "Failed" badge for this URL
+    await appendResultToStrapi(documentId, url, null, error.message || "AI Processing Failed");
+  }
+}, {
+  connection: redisConnection as any,
+  concurrency: 5
 });
 
+
+// 5. Observability Listeners
+spiderWorker.on('completed', job => console.log(`[Spider Queue] Job ${job.id} completed successfully`));
 spiderWorker.on('failed', (job, err) => {
   if (isDevelopment && err.message.includes('ECONNREFUSED')) return;
-  console.log(`[Queue] Job ${job?.id} failed with ${err.message}`);
+  console.log(`[Spider Queue] Job ${job?.id} failed with ${err.message}`);
+});
+
+aiAuditWorker.on('completed', job => console.log(`[AI Queue] Job ${job.id} completed successfully`));
+aiAuditWorker.on('failed', (job, err) => {
+  if (isDevelopment && err.message.includes('ECONNREFUSED')) return;
+  console.log(`[AI Queue] Job ${job?.id} failed with ${err.message}`);
 });
