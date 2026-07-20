@@ -2,13 +2,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { saveAuditToStrapi } from '@/lib/seo-agent/strapi';
 import { withLogger } from '@/lib/logs/withLogger';
-import { spiderQueue } from '@/lib/seo-agent/queue';
+import { aiAuditQueue } from '@/lib/seo-agent/queue'; // ✅ Only need AI Queue here
 
 export const POST = withLogger('/api/seo-agent/audit/save-batch', async (req: NextRequest, routeLogger) => {
   try {
     const { rootDomain, industry } = await req.json();
 
-    // routeLogger.info({ event: 'batch_save_started', rootDomain }, 'Saving batch...');
     routeLogger.info({ event: 'batch_save_started', rootDomain }, 'Saving batch data to Strapi...');
 
     const strapiRecord = await saveAuditToStrapi({
@@ -19,25 +18,25 @@ export const POST = withLogger('/api/seo-agent/audit/save-batch', async (req: Ne
         total_urls_scanned: 0,
         results: []
       },
-      audit_status: 'processing',
+      audit_status: 'processing', // Keeps the UI in loading mode
     });
 
+    const validId = strapiRecord.documentId || strapiRecord.data?.documentId || strapiRecord.id;
+
     try {
-      routeLogger.info({ event: 'spider_queue_attempt' }, 'Triggering Spider...');
-      const validId = strapiRecord.documentId || strapiRecord.id;
-      await spiderQueue.add('crawl-domain', {
-        startUrl: rootDomain,
-        industry,
-        documentId: validId
+      routeLogger.info({ event: 'queue_attempt' }, 'Triggering AI Worker First...');
+
+      await aiAuditQueue.add('audit-page', {
+        url: rootDomain,
+        documentId: validId,
+        industry: industry || 'General Business'
       });
+
     } catch (redisError: any) {
       console.error({ redisError });
       routeLogger.warn('Redis skipped.');
     }
 
-    const validId = strapiRecord.documentId || strapiRecord.data?.documentId || strapiRecord.id;
-
-    // 3. Instantly return success to the frontend so the loader disappears
     return NextResponse.json({ success: true, documentId: validId });
 
   } catch (error: any) {

@@ -117,12 +117,14 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
           </div>
 
           <div>
-            {/* Smarter Live Badge */}
             {isProcessing ? (
               <div className="flex items-center gap-3 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full shadow-sm">
                 <Loader2 className="w-3.5 h-3.5 text-blue-600 animate-spin" />
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-700">
-                  {!hasSpiderFinished ? "Mapping Domain..." : `Analyzing ${pagesProcessed} / ${totalPagesFound}`}
+                  {/* Smarter parallel messaging */}
+                  {!hasSpiderFinished && resultsArray.length > 0
+                    ? "Mapping Domain Architecture..."
+                    : "AI Agents Analyzing..."}
                 </span>
               </div>
             ) : (
@@ -135,19 +137,17 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
       </header>
 
       {/* 4. THE NEW EMPTY LOADING STATE */}
-      {isProcessing && resultsArray.length === 0 && (
+      {isProcessing && resultsArray.length === 0 && !hasSpiderFinished && (
         <div className="py-32 flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <div className="relative mb-8">
             <div className="absolute inset-0 bg-blue-100 blur-xl rounded-full opacity-50" />
             <Activity className="w-12 h-12 text-blue-500 relative z-10 animate-pulse" />
           </div>
           <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-neutral-800 mb-3">
-            {!hasSpiderFinished ? 'Running Domain Spider...' : 'AI Agents Analyzing...'}
+            Initiating Parallel Audit...
           </h3>
           <p className="text-xs text-neutral-500 max-w-sm text-center leading-relaxed">
-            {!hasSpiderFinished
-              ? 'The background spider is currently crawling the target URL to extract all valid routes and check domain architecture. This usually takes 1-2 minutes.'
-              : 'The domain architecture has been mapped. Background AI workers are now processing the first batch of pages.'}
+            AI Agents are currently rendering the DOM and fetching Core Web Vitals. Meanwhile, the background spider is mapping the site architecture.
           </p>
         </div>
       )}

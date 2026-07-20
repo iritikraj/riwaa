@@ -101,37 +101,7 @@ export const spiderWorker = new Worker('domain-spider-queue', async job => {
     await updateAuditInStrapi(documentId, backgroundPayload);
     console.log(`[Queue] Successfully updated Strapi. Found ${orphan_pages.length} orphans.`);
 
-    // Step D: THE FAN-OUT (Trigger AI Workers)
-    console.log(`[Queue] Fanning out ${spiderResults.length} pages to AI Audit Queue...`);
-
-    // const aiJobs = spiderResults.map((page: any) => ({
-    //   name: 'audit-page',
-    //   data: {
-    //     url: page.url,
-    //     documentId,
-    //     industry: industry || 'General Business'
-    //   }
-    // }));
-
-    // Find the exact root URL object from the spider map
-    const rootPage = spiderResults.find((page: any) => page.url.replace(/\/$/, "") === cleanStartUrl);
-    const targetUrl = rootPage ? rootPage.url : startUrl;
-
-    const aiJobs = [{
-      name: 'audit-page',
-      data: {
-        url: targetUrl,
-        documentId,
-        industry: industry || 'General Business'
-      }
-    }];
-
-    // Instantly dump all URLs into the new queue
-    await aiAuditQueue.addBulk(aiJobs);
-    console.log(`[Queue] Successfully pushed ${aiJobs.length} jobs to AI Audit Queue.`);
-
     return backgroundPayload;
-
   } catch (error) {
     console.error(`[Queue] Failed to process spider job for ${startUrl}:`, error);
     throw error;
@@ -145,18 +115,31 @@ export const aiAuditWorker = new Worker('ai-audit-queue', async job => {
   console.log(`[AI Worker] Analyzing ${url}...`);
 
   try {
-    // 1. Run the heavy AI Logic safely in the background
+    // 1. Run the heavy AI Logic with 100% of the CPU
     const auditData = await runHeavyAiAudit(url, industry);
 
     // 2. Append the success result to the Strapi document
     await appendResultToStrapi(documentId, url, auditData, null);
-
     console.log(`[AI Worker] Successfully audited and saved ${url}`);
+
+    // 3. ✅ THE DAISY CHAIN: Now that AI is done, silently trigger the spider!
+    console.log(`[AI Worker] Triggering Domain Spider in the background...`);
+    await spiderQueue.add('crawl-domain', {
+      startUrl: url,
+      industry,
+      documentId
+    });
+
   } catch (error: any) {
     console.error(`[AI Worker] Failed to audit ${url}:`, error.message);
-
-    // 3. If it fails, append the error to Strapi so the UI can show a "Failed" badge for this URL
     await appendResultToStrapi(documentId, url, null, error.message || "AI Processing Failed");
+
+    // Even if AI fails, we still want to map the domain architecture
+    await spiderQueue.add('crawl-domain', {
+      startUrl: url,
+      industry,
+      documentId
+    });
   }
 }, {
   connection: redisConnection as any,
