@@ -3,8 +3,9 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Loader2, Swords, Activity, CheckCircle, AlertTriangle, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Loader2, Swords, Activity, CheckCircle, AlertTriangle, Lightbulb, Database, Zap, FileText, BrainCircuit } from 'lucide-react';
 import Link from 'next/link';
+import ComparisonRow from '../_comparison';
 
 interface CompetitorDetailProps {
   record: any;
@@ -20,8 +21,8 @@ export default function CompetitorDetailView({ record }: CompetitorDetailProps) 
   const isProcessing = audit_status === 'processing' || audit_status === 'pending';
   const hasAnalysis = !!audit_data?.analysis;
 
-  // const targetRaw = audit_data?.raw_extraction?.target;
-  // const compRaw = audit_data?.raw_extraction?.competitors?.[0];
+  const targetRaw = audit_data?.raw_extraction?.target;
+  const compRaw = audit_data?.raw_extraction?.competitors?.[0];
   const categories = audit_data?.analysis?.categories || {};
 
   // 1. Live Polling
@@ -131,12 +132,121 @@ export default function CompetitorDetailView({ record }: CompetitorDetailProps) 
             <div className="absolute top-0 right-0 w-2 h-full bg-rose-500" />
           </div>
 
-          <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-900 flex items-center gap-3">
-            <span className="w-6 h-px bg-neutral-300"></span> Category Scorecards
-          </h3>
+          {/* ===== RAW DATA TELEMETRY SECTION  ===== */}
+          {targetRaw && compRaw && (
+            <>
+              <div className="mb-10">
+                <h3 className="text-2xl font-light text-neutral-900 flex items-center gap-3 tracking-tight mb-2">
+                  <Database className="w-6 h-6 text-neutral-400" />
+                  Raw Telemetry & Diagnostics
+                </h3>
+                <p className="text-sm text-neutral-500">Unfiltered extraction data powering the AI analysis above.</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                {/* 1. PageSpeed & Web Vitals */}
+                <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
+                  <div className="flex items-center gap-2 mb-6 pb-4 border-b border-neutral-100">
+                    <Zap className="w-4 h-4 text-amber-500" />
+                    <h4 className="text-sm font-semibold uppercase tracking-widest text-neutral-800">Core Web Vitals</h4>
+                  </div>
+
+                  <div className="grid grid-cols-3 mb-2 px-2">
+                    <div className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">Metric</div>
+                    <div className="text-[10px] uppercase tracking-widest text-emerald-600 font-semibold text-center">Target</div>
+                    <div className="text-[10px] uppercase tracking-widest text-rose-600 font-semibold text-center ml-4">Competitor</div>
+                  </div>
+
+                  <div className="px-2">
+                    <ComparisonRow label="Performance Score" targetVal={targetRaw.page_speed?.scores?.performance} compVal={compRaw.page_speed?.scores?.performance} />
+                    <ComparisonRow label="SEO Score" targetVal={targetRaw.page_speed?.scores?.seo} compVal={compRaw.page_speed?.scores?.seo} />
+                    <ComparisonRow label="LCP (Largest Paint)" targetVal={targetRaw.page_speed?.web_vitals?.largest_contentful_paint} compVal={compRaw.page_speed?.web_vitals?.largest_contentful_paint} />
+                    <ComparisonRow label="FCP (First Paint)" targetVal={targetRaw.page_speed?.web_vitals?.first_contentful_paint} compVal={compRaw.page_speed?.web_vitals?.first_contentful_paint} />
+                    <ComparisonRow label="Layout Shift (CLS)" targetVal={targetRaw.page_speed?.web_vitals?.cumulative_layout_shift} compVal={compRaw.page_speed?.web_vitals?.cumulative_layout_shift} />
+                    <ComparisonRow label="Speed Index" targetVal={targetRaw.page_speed?.web_vitals?.speed_index} compVal={compRaw.page_speed?.web_vitals?.speed_index} />
+                  </div>
+                </div>
+
+                {/* 2. Content & Link Architecture */}
+                <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
+                  <div className="flex items-center gap-2 mb-6 pb-4 border-b border-neutral-100">
+                    <FileText className="w-4 h-4 text-blue-500" />
+                    <h4 className="text-sm font-semibold uppercase tracking-widest text-neutral-800">Content & Links</h4>
+                  </div>
+
+                  <div className="grid grid-cols-3 mb-2 px-2">
+                    <div className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">Metric</div>
+                    <div className="text-[10px] uppercase tracking-widest text-emerald-600 font-semibold text-center">Target</div>
+                    <div className="text-[10px] uppercase tracking-widest text-rose-600 font-semibold text-center ml-4">Competitor</div>
+                  </div>
+
+                  <div className="px-2">
+                    <ComparisonRow label="Word Count" targetVal={targetRaw.metadata?.content_metrics?.word_count} compVal={compRaw.metadata?.content_metrics?.word_count} />
+                    <ComparisonRow label="Total Images" targetVal={targetRaw.metadata?.content_metrics?.images_total} compVal={compRaw.metadata?.content_metrics?.images_total} />
+                    <ComparisonRow label="Missing Alt Tags" targetVal={targetRaw.metadata?.content_metrics?.images_missing_alt} compVal={compRaw.metadata?.content_metrics?.images_missing_alt} />
+                    <ComparisonRow label="Internal Links" targetVal={targetRaw.metadata?.link_architecture?.internal_links?.length || 0} compVal={compRaw.metadata?.link_architecture?.internal_links?.length || 0} />
+                    <ComparisonRow label="External Links" targetVal={targetRaw.metadata?.link_architecture?.external_links} compVal={compRaw.metadata?.link_architecture?.external_links} />
+                    <ComparisonRow label="Title Length" targetVal={targetRaw.metadata?.title?.length} compVal={compRaw.metadata?.title?.length} />
+                  </div>
+                </div>
+
+                {/* 3. NLP Entities (Full Width) */}
+                <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm lg:col-span-2">
+                  <div className="flex items-center gap-2 mb-6 pb-4 border-b border-neutral-100">
+                    <BrainCircuit className="w-4 h-4 text-purple-500" />
+                    <h4 className="text-sm font-semibold uppercase tracking-widest text-neutral-800">Top NLP Entities (Google Salience)</h4>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Target Entities */}
+                    <div>
+                      <div className="text-[10px] uppercase tracking-widest text-emerald-700 font-semibold mb-4 bg-emerald-50 py-1.5 px-3 rounded inline-block">Target Entities</div>
+                      <div className="space-y-3">
+                        {targetRaw.nlp_entities?.slice(0, 5).map((entity: any, i: number) => (
+                          <div key={i} className="flex items-center justify-between p-3 border border-neutral-100 rounded-lg bg-neutral-50/50">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium text-neutral-800 truncate max-w-50">{entity.name}</span>
+                              <span className="text-[10px] text-neutral-500 uppercase tracking-wider">{entity.type}</span>
+                            </div>
+                            <span className="text-xs font-mono text-emerald-600 font-semibold bg-emerald-100/50 px-2 py-1 rounded">
+                              {entity.google_salience_score?.toFixed(3)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Competitor Entities */}
+                    <div>
+                      <div className="text-[10px] uppercase tracking-widest text-rose-700 font-semibold mb-4 bg-rose-50 py-1.5 px-3 rounded inline-block">Competitor Entities</div>
+                      <div className="space-y-3">
+                        {compRaw.nlp_entities?.slice(0, 5).map((entity: any, i: number) => (
+                          <div key={i} className="flex items-center justify-between p-3 border border-neutral-100 rounded-lg bg-neutral-50/50">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium text-neutral-800 truncate max-w-50">{entity.name}</span>
+                              <span className="text-[10px] text-neutral-500 uppercase tracking-wider">{entity.type}</span>
+                            </div>
+                            <span className="text-xs font-mono text-rose-600 font-semibold bg-rose-100/50 px-2 py-1 rounded">
+                              {entity.google_salience_score?.toFixed(3)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </>
+          )}
 
           {/* DYNAMIC CATEGORY CARDS */}
           <div className="grid grid-cols-1 gap-8">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-900 flex items-center gap-3 mb-2">
+              <span className="w-6 h-px bg-neutral-300"></span> Category Scorecards
+            </h3>
+
             {Object.entries(categories).map(([key, data]: [string, any]) => {
 
               const targetWins = data.target_score >= data.competitor_score;
@@ -189,7 +299,6 @@ export default function CompetitorDetailView({ record }: CompetitorDetailProps) 
               );
             })}
           </div>
-
         </div>
       )}
     </div>
