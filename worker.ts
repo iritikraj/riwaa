@@ -1,4 +1,3 @@
-// worker.ts (Put this at the root of your Next.js project)
 import { spiderWorker } from './src/lib/seo-agent/queue';
 
 console.log('🕷️ Domain Spider Worker successfully booted and listening to Redis queue...');
