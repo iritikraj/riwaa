@@ -20,7 +20,7 @@ export default async function CompetitorDetailPage({ params }: { params: Promise
   }
 
   return (
-    <div className="min-h-screen px-6 py-16 md:px-12 text-neutral-900 bg-[#FCFBF8] font-jost selection:bg-neutral-200">
+    <div className="min-h-screen px-6 py-16 md:px-12 text-neutral-900 font-jost bg-[#FCFBF8] print:bg-white selection:bg-neutral-200">
       <div className="max-w-5xl mx-auto">
         <CompetitorDetailView record={record} />
       </div>
