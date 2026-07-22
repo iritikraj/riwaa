@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, UserCircle, Sparkles, Shield, Diamond, LayoutDashboard, MessageCircleMore, CheckCircle2, Building2 } from "lucide-react";
+import { ArrowRight, UserCircle, Swords, Search, Sparkles, Shield, Diamond, LayoutDashboard, MessageCircleMore, CheckCircle2, Building2 } from "lucide-react";
 
 export default function RiwaaHomePage() {
   return (
@@ -330,6 +330,135 @@ export default function RiwaaHomePage() {
               </div>
             </motion.div>
           </div>
+
+          {/* ================================================= */}
+          {/* SEO & COMPETITOR INTELLIGENCE AGENTS SECTION      */}
+          {/* ================================================= */}
+          <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+            {/* ------------------------------------------------- */}
+            {/* 1. SEO AGENT AUDIT MODULE                         */}
+            {/* ------------------------------------------------- */}
+            <motion.div
+              whileHover={{ y: -8 }}
+              transition={{ duration: 0.35 }}
+              className="group relative overflow-hidden rounded-[30px] border border-[#b8924a]/20 bg-gradient-to-br from-[#121614] via-[#0d110f] to-[#080808] min-h-[470px]"
+            >
+              <div className="absolute right-0 top-0 h-75 w-75 rounded-full bg-emerald-500/10 blur-[120px]" />
+
+              <div className="relative flex h-full flex-col p-8">
+                <div className="flex items-center justify-between">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                    <Search size={26} className="text-emerald-400" />
+                  </div>
+
+                  <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-[10px] uppercase tracking-[0.3em] text-emerald-400">
+                    SEO Agent
+                  </span>
+                </div>
+
+                <h2 className="mt-8 text-3xl font-light">
+                  SEO Audit &<br />
+                  Diagnostics Agent
+                </h2>
+
+                <p className="mt-5 text-sm leading-7 text-white/55">
+                  Automate technical SEO crawling, Core Web Vitals diagnostics, Schema verification, and keyword health for your real estate assets.
+                </p>
+
+                {/* Mini Diagnostic Score Card Preview */}
+                <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                    <span className="text-[10px] uppercase tracking-[0.3em] text-white/40">Audit Scorecard</span>
+                    <span className="text-xs font-mono font-bold text-emerald-400">92/100</span>
+                  </div>
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-center font-mono">
+                    <div className="rounded-lg bg-white/5 p-2">
+                      <p className="text-[9px] uppercase text-white/40">Performance</p>
+                      <p className="mt-1 text-sm text-emerald-400">94</p>
+                    </div>
+                    <div className="rounded-lg bg-white/5 p-2">
+                      <p className="text-[9px] uppercase text-white/40">SEO Health</p>
+                      <p className="mt-1 text-sm text-emerald-400">98</p>
+                    </div>
+                    <div className="rounded-lg bg-white/5 p-2">
+                      <p className="text-[9px] uppercase text-white/40">Schema</p>
+                      <p className="mt-1 text-sm text-amber-400">Valid</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-auto pt-8">
+                  <Link
+                    href="/seo-agent/audit"
+                    className="inline-flex items-center gap-3 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-300 transition-all hover:bg-emerald-500 hover:text-black"
+                  >
+                    Run SEO Audit
+                    <ArrowRight size={15} />
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ------------------------------------------------- */}
+            {/* 2. COMPETITOR COMPARISON MODULE                   */}
+            {/* ------------------------------------------------- */}
+            <motion.div
+              whileHover={{ y: -8 }}
+              transition={{ duration: 0.35 }}
+              className="group relative overflow-hidden rounded-[30px] border border-[#b8924a]/20 bg-gradient-to-br from-[#1c1511] via-[#120f0d] to-[#080808] min-h-[470px]"
+            >
+              <div className="absolute right-0 bottom-0 h-75 w-75 rounded-full bg-[#b8924a]/10 blur-[120px]" />
+
+              <div className="relative flex h-full flex-col p-8">
+                <div className="flex items-center justify-between">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#b8924a]/10 border border-[#b8924a]/20">
+                    <Swords size={26} className="text-[#d8bc83]" />
+                  </div>
+
+                  <span className="rounded-full border border-[#b8924a]/20 bg-[#b8924a]/10 px-3 py-2 text-[10px] uppercase tracking-[0.3em] text-[#d8bc83]">
+                    Gap Analysis
+                  </span>
+                </div>
+
+                <h2 className="mt-8 text-3xl font-light">
+                  Competitor<br />
+                  Gap Analysis
+                </h2>
+
+                <p className="mt-5 text-sm leading-7 text-white/55">
+                  Extract parallel DOM metrics, Google NLP salience entities, and Core Web Vitals to uncover critical deficits versus competing brokerages.
+                </p>
+
+                {/* Versus Comparison Scoreboard Preview */}
+                <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+                  <div className="flex items-center justify-between font-mono text-xs">
+                    <div className="text-left">
+                      <p className="text-[9px] uppercase tracking-widest text-emerald-400 font-sans">Target</p>
+                      <p className="mt-1 font-medium text-white/80">drivenproperties.com</p>
+                    </div>
+                    <div className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] uppercase text-white/40">VS</div>
+                    <div className="text-right">
+                      <p className="text-[9px] uppercase tracking-widest text-rose-400 font-sans">Competitor</p>
+                      <p className="mt-1 font-medium text-white/80">famproperties.com</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-auto pt-8">
+                  <Link
+                    href="/seo-agent/competitor"
+                    className="inline-flex items-center gap-3 rounded-full bg-[#b8924a] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-black transition-all hover:gap-5"
+                  >
+                    Compare Competitor
+                    <ArrowRight size={15} />
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+
+          </div>
+
           {/* ========================================= */}
           {/* WHY RIWAA */}
           {/* ========================================= */}
