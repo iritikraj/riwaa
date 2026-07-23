@@ -86,6 +86,42 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
   // });
 
   const processedStreamItems = combinedItems.filter((item: any) => {
+    // 1. Filter by Platform
+    if (filterPlatform && filterPlatform !== 'all') {
+      const itemPlatform = item.channels?.platform || '';
+      if (itemPlatform !== filterPlatform) return false;
+    }
+
+    // 2. Filter by Sentiment
+    if (filterSentiment && filterSentiment !== 'all') {
+      if (item.sentiment !== filterSentiment) return false;
+    }
+
+    // 3. Filter by Date
+    if (filterDateStr) {
+      const itemDateStr = new Date(item.received_at).toISOString().split('T')[0];
+      if (itemDateStr !== filterDateStr) return false;
+    }
+
+    return true; // Keep the item if it passes all active filters
+  }).sort((a: any, b: any) => {
+    const dateA = new Date(a.received_at).getTime();
+    const dateB = new Date(b.received_at).getTime();
+    return dateSortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+  });
+
+  // DYNAMIC FRONTEND ANALYTICS (Fixed to consistently use processedStreamItems)
+  const totalCount = processedStreamItems.length;
+  const negativeCount = processedStreamItems.filter((i: any) => i.sentiment === 'negative').length;
+  const positiveCount = processedStreamItems.filter((i: any) => i.sentiment === 'positive').length;
+  const neutralCount = processedStreamItems.filter((i: any) => i.sentiment === 'neutral' || i.sentiment === 'unassigned').length;
+
+  const posPct = totalCount ? (positiveCount / totalCount) * 100 : 0;
+  const negPct = totalCount ? (negativeCount / totalCount) * 100 : 0;
+  const neuPct = totalCount ? (neutralCount / totalCount) * 100 : 0;
+
+  /*
+  const processedStreamItems = combinedItems.filter((item: any) => {
     // If no date is selected, show all
     if (!filterDateStr) return true;
 
@@ -111,6 +147,7 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
   const posPct = totalCount ? (positiveCount / totalCount) * 100 : 0;
   const negPct = totalCount ? (negativeCount / totalCount) * 100 : 0;
   const neuPct = totalCount ? (neutralCount / totalCount) * 100 : 0;
+*/
 
   const handleSelectItem = (item: any) => {
     setActiveItem(item);
@@ -299,7 +336,7 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
       <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0"> {/* min-h-0 is crucial for flex-child scrolling */}
 
         {/* LEFT PANE: The Queue (35% width) */}
-        <div className="w-full lg:w-[400px] flex flex-col bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden shrink-0">
+        <div className="w-full lg:w-100 flex flex-col bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden shrink-0">
 
           {/* List Header & Filters */}
           <div className="p-4 border-b border-zinc-100 bg-zinc-50/50 shrink-0">
@@ -359,7 +396,7 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
                       : `bg-white border-zinc-100 text-zinc-500 ${hoverStyle}`
                       }`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full shadow-sm ${dotStyle} ${!isActive && 'opacity-40 grayscale-[50%]'}`}></span>
+                    <span className={`w-1.5 h-1.5 rounded-full shadow-sm ${dotStyle} ${!isActive && 'opacity-40 grayscale-50'}`}></span>
                     {sent === 'negative' ? 'Alerts' : sent}
                   </button>
                 );
@@ -483,7 +520,7 @@ export default function DashboardStream({ workspaceId }: DashboardStreamProps) {
         <div className={`
           flex-col bg-white border border-zinc-100 overflow-hidden min-w-0
           ${activeItem
-            ? 'fixed top-4 bottom-4 left-4 right-4 z-50 rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] flex lg:static lg:inset-auto lg:z-auto lg:shadow-sm lg:flex-1 lg:rounded-3xl'
+            ? 'fixed top-4 bottom-4 left-4 right-4 z-50 rounded-4xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] flex lg:static lg:inset-auto lg:z-auto lg:shadow-sm lg:flex-1 lg:rounded-3xl'
             : 'hidden lg:flex lg:flex-1 lg:rounded-3xl shadow-sm'}
         `}>
           {activeItem ? (

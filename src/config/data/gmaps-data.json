@@ -2,6 +2,201 @@
   "success": true,
   "data": [
     {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2tWU2RXdFplbTVwVEVkR1ZVbDJUM0pEUzA1RUxYYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2tWU2RXdFplbTVwVEVkR1ZVbDJUM0pEUzA1RUxYYxAB",
+      "sender_username": "Jane HanhMinh",
+      "content": "One of the worst customer service experiences I've had.\n\nI requested a refund and expected a straightforward process, but instead I was met with extremely slow response times and poor communication from Mr James Gonsalves. Emails went unanswered for days, and every update required multiple follow-ups from my side. The document were still at his desk without any processing. It felt like the company was deliberately delaying the refund rather than trying to resolve the issue.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-07-21T14:50:01.825Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2tWU2RXdFplbTVwVEVkR1ZVbDJUM0pEUzA1RUxYYxAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOkVSdWtZem5pTEdGVUl2T3JDS05ELXc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2twUWRuZFNlWGhoVGtoQ1EzSlVjbUYwT0ZGSmVWRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2twUWRuZFNlWGhoVGtoQ1EzSlVjbUYwT0ZGSmVWRRAB",
+      "sender_username": "Mohamed Sultan",
+      "content": "A complete waste of time. I have spent weeks following up—making calls, visiting the office, and asking for updates over 100 times—only to receive excuses and no real progress.\n\nEvery single day, brokers are already surrounding the office before genuine customers even arrive. It gives the impression that brokers get access to available apartments first, while ordinary residents are left waiting with false hope.\n\nSince I started searching, apartments become “reserved” almost immediately, yet customers are still encouraged to apply and continue following up. This process feels frustrating, unfair, and completely lacking in transparency.\n\nThere is no respect for people’s time. Residents who genuinely need a home deserve the same opportunity as everyone else—not a process that appears to favor brokers over direct applicants.\n\nAfter months of waiting and endless follow-ups, I cannot recommend this experience to anyone. I sincerely hope the management reviews this system and makes it fair and transparent for all residents.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-07-20T09:32:41.258Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2twUWRuZFNlWGhoVGtoQ1EzSlVjbUYwT0ZGSmVWRRAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOkpQdndSeXhhTkhCQ3JUcmF0OFFJeVE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2pOaWRrWllkbFV4VFhwTFJWZEJURXgyVG5oa2NsRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2pOaWRrWllkbFV4VFhwTFJWZEJURXgyVG5oa2NsRRAB",
+      "sender_username": "Hemana Parveen",
+      "content": "I have never seen such a disappointing and frustrating experience in Abu Dhabi before. It is truly shocking.\n\nRelaam seems to work only for brokers and commission grabbers, not for ordinary residents who are desperately searching for a home. Common people hardly get a fair chance to rent an apartment directly.\n\nWhenever a vacancy arises, it feels like the information reaches brokers first, and by the time genuine customers inquire, the apartment already appears to be reserved. Yet customers are made to believe that the unit is still available.\n\nThis kind of unfair and non-transparent system is extremely disappointing. Residents deserve equal opportunities, honesty, and professionalism—not favoritism and hidden dealings.\n\nSuch experiences create anger and frustration among residents and only damage the reputation of Abu Dhabi's housing sector. I am deeply disappointed and genuinely upset by the way this process appears to be handled.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-07-20T08:17:02.228Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2pOaWRrWllkbFV4VFhwTFJWZEJURXgyVG5oa2NsRRAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOjNidkZYdlUxTXpLRVdBTEx2TnhkclE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT20xbVkwUk9aRGsxVFZVeVRHVTFURTluZFdGb1RYYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT20xbVkwUk9aRGsxVFZVeVRHVTFURTluZFdGb1RYYxAB",
+      "sender_username": "جابر العبيدلي",
+      "content": "Really that company is very bad and I push that company the teams there is not working very well and there is not any knowledge of the work just waiting for the checks and for the money that’s it the surface for him very bad the interaction for him very bad he don’t caring of the customer",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-07-17T06:54:08.089Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT20xbVkwUk9aRGsxVFZVeVRHVTFURTluZFdGb1RYYxAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOm1mY0ROZDk1TVUyTGU1TE9ndWFoTXc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2pKcFpWcFdia3B1ZDNOTVUwMXZVbGxQVjI5a2NuYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2pKcFpWcFdia3B1ZDNOTVUwMXZVbGxQVjI5a2NuYxAB",
+      "sender_username": "Arshad Rv",
+      "content": "Very poor service. I have over 20 years of experience in Abu Dhabi, and this is one of the lowest-quality services I have experienced. The quality of your maintenance and customer support is unacceptable.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-07-16T13:59:53.993Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2pKcFpWcFdia3B1ZDNOTVUwMXZVbGxQVjI5a2NuYxAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOjJpZVpWbkpud3NMU01vUllPV29kcnc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT205V1UwZHJVRE16ZEVSVFRucGpkRGQ2UjNWNGVrRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT205V1UwZHJVRE16ZEVSVFRucGpkRGQ2UjNWNGVrRRAB",
+      "sender_username": "Kawser Mohammad",
+      "content": "I would to thank Mr Tamer  in reelam delma mall for his cooperation and fast response... Highly appreciated his support 🙂🙂🙂🙂",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-07-16T11:49:57.819Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT205V1UwZHJVRE16ZEVSVFRucGpkRGQ2UjNWNGVrRRAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOm9WU0drUDMzdERTTnpjdDd6R3V4ekE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2s1QlVFc3pjMmx3VVVwUk5GTTVZbVJMUjJ4Q1NVRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2s1QlVFc3pjMmx3VVVwUk5GTTVZbVJMUjJ4Q1NVRRAB",
+      "sender_username": "Mohammed Al Nuaimi",
+      "content": "I had a very disappointing experience with Relaam. The call centre are answering my calls but the maintenance service is extremely poor, and they rarely respond to requests. Even after calling more than 10 times and submitting complaints, there was little to no follow-up. As a tenant, this level of customer service is unacceptable. I would not recommend renting through this company unless they significantly improve their maintenance response and customer support.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-07-16T10:29:28.696Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2s1QlVFc3pjMmx3VVVwUk5GTTVZbVJMUjJ4Q1NVRRAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOk5BUEszc2lwUUpRNFM5YmRLR2xCSUE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT20xMmFUVnVZVVJQVjFWMVduWmplVVI0V1RRM1lWRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT20xMmFUVnVZVVJQVjFWMVduWmplVVI0V1RRM1lWRRAB",
+      "sender_username": "Belal Rube3",
+      "content": "Since two months, I have been searching for two bedroom apartment\nOnce I got the availability list from the team of Relaam and once I choose one of the options, the same moment I called to book it or to rent the flat and they say it's rented or booked already\nIs no system automatically updated it's only an Excel sheet which takes people time effort and waste it",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-07-16T06:24:10.892Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT20xMmFUVnVZVVJQVjFWMVduWmplVVI0V1RRM1lWRRAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOm12aTVuYURPV1V1WnZjeUR4WTQ3YVE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2t4Q2R6Qk1RVXd5WlRKWFFsbE5SVkpIUzFKZmVHYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2t4Q2R6Qk1RVXd5WlRKWFFsbE5SVkpIUzFKZmVHYxAB",
+      "sender_username": "Mohamed Ahmed",
+      "content": "ريلام العقاريه لو فى اقل من النجمه كنت عملتها والله عندهم استاف خدمة عملاء الله يسامحهم والله شكوى مره واتنين وتلاته عشان مكيف ولا حياة لمن تنادى لا وف اخر المكالمه بتقولى هيوصلك تقييم 5 اعلى حاجه وواحد اقل حاجه والله المفروض انكوا تبقوا خارج التقييم اصلا او سالب 90 حلو سالب 90",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-07-11T20:49:55.491Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2t4Q2R6Qk1RVXd5WlRKWFFsbE5SVkpIUzFKZmVHYxAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOkxCdzBMQUwyZTJXQllNRVJHS1JfeGc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT25sQkxWVnZOSEZrY2xKd1UycFpSRVU0VFdwd1FsRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT25sQkxWVnZOSEZrY2xKd1UycFpSRVU0VFdwd1FsRRAB",
+      "sender_username": "Ma Belinda Avenilla",
+      "content": "Thank you so much Dhanielyn, I sincerely appreciate your accommodation, kindness, and professionalism while handling our request. Your support made all the difference. Wishing you continued blessings.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-07-07T05:35:14.190Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT25sQkxWVnZOSEZrY2xKd1UycFpSRVU0VFdwd1FsRRAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOnlBLVVvNHFkclJwU2pZREU4TWpwQlE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xaSk56QkRXRFF3YzBOMFMwVTBVVXBsZG1ocE1WRRAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xaSk56QkRXRFF3YzBOMFMwVTBVVXBsZG1ocE1WRRAB",
+      "sender_username": "Aarif Raza",
+      "content": "It was very fantastic and fast service at #relaam and i would like express my happiness with Dhanielyn Santos. I really appreciate for her dedication in favor of me. To get my renew property paper. once again thanks Dhanielyn santos.  Happiest moment.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-07-03T08:12:10.466Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xaSk56QkRXRFF3YzBOMFMwVTBVVXBsZG1ocE1WRRAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOlZJNzBDWDQwc0N0S0U0UUpldmhpMVE%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xKUVZreFFZMU15YldNMVRVVkxNREpPU1ZsbVdYYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xKUVZreFFZMU15YldNMVRVVkxNREpPU1ZsbVdYYxAB",
+      "sender_username": "Archi Umar",
+      "content": "I had a great experience with Saeeda Al Alawi at Relaam Real Estate while renewing my house rental. She was professional, friendly, and made the entire renewal process quick and hassle-free. She kept me informed throughout, responded promptly to my questions, and ensured everything was completed smoothly. I really appreciate her excellent service.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-07-01T07:14:11.664Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xKUVZreFFZMU15YldNMVRVVkxNREpPU1ZsbVdYYxAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOlJQVkxQY1MybWM1TUVLMDJOSVlmWXc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
+      "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xkNWMwSktRVlJUZUhsMFdrRTJNa0ZDZVRSelpIYxAB",
+      "channel_id": "demo-google-maps",
+      "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xkNWMwSktRVlJUZUhsMFdrRTJNa0ZDZVRSelpIYxAB",
+      "sender_username": "Sibin Yohannan",
+      "content": "TOKEN SYSTEM HERE IN THE RELAAM OFFICE IS REALLY NOT FAIR. It is just for name sake the token system they are following. The token before me called and later jumped to those after me.",
+      "sentiment": "unassigned",
+      "ai_suggestion": null,
+      "is_replied": false,
+      "received_at": "2026-06-29T06:09:47.947Z",
+      "permalink_url": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xkNWMwSktRVlJUZUhsMFdrRTJNa0ZDZVRSelpIYxAB!2m1!1s0x0:0xf45c98c1eccba460!3m1!1s2@1:CAIQACodChtycF9oOld5c0JKQVRTeHl0WkE2MkFCeTRzZHc%7C%7C?hl=en",
+      "channels": {
+        "platform": "google_maps"
+      }
+    },
+    {
       "id": "demo-Ci9DQUlRQUNvZENodHljRjlvT2xSRGEzVlhXRkJKTkdaU1dGWkhUbGhFV1hCUmQyYxAB",
       "channel_id": "demo-google-maps",
       "external_id": "Ci9DQUlRQUNvZENodHljRjlvT2xSRGEzVlhXRkJKTkdaU1dGWkhUbGhFV1hCUmQyYxAB",

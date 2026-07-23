@@ -16,6 +16,10 @@ import {
   updateCompetitorAuditInStrapi
 } from './strapi';
 
+import * as mammoth from 'mammoth';
+import { updateComplianceAuditInStrapi } from './strapi';
+import { extractComplianceData, parseBriefWithGemini, runComparisonEngine } from './compliance/compliance-scrapper';
+
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 console.log("🤖 Background Workers Started and Listening for Jobs...");
@@ -245,6 +249,60 @@ export const competitorWorker = new Worker('competitor-audit-queue', async job =
   concurrency: 2
 });
 
+/* CONTENT COMPLIANCE WORKER */
+export const complianceWorker = new Worker('compliance-audit-queue', async job => {
+  const { documentId, targetUrl, fileUrl } = job.data;
+  console.log(`[Compliance Worker] Starting audit for Document ID: ${documentId} on ${targetUrl}`);
+
+  try {
+    // 1. Download Docx from Strapi Media Library
+    console.log(`[Compliance Worker] Downloading brief from ${fileUrl}...`);
+    const fileRes = await fetch(fileUrl, {
+      headers: { Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}` }
+    });
+
+    if (!fileRes.ok) throw new Error('Failed to download document from Strapi');
+    const arrayBuffer = await fileRes.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // 2. Extract Raw Text using Mammoth
+    console.log(`[Compliance Worker] Extracting raw text via Mammoth...`);
+    const { value: rawText } = await mammoth.extractRawText({ buffer });
+
+    // 3. AI Structuring
+    console.log(`[Compliance Worker] Mapping brief to JSON via Gemini...`);
+    const expectedData = await parseBriefWithGemini(rawText);
+
+    // 4. Scrape Live Target Page
+    console.log(`[Compliance Worker] Extracting live DOM from ${targetUrl}...`);
+    const actualData = await extractComplianceData(targetUrl);
+
+    // 5. Run Comparison Engine
+    console.log(`[Compliance Worker] Running strict comparison engine...`);
+    const { report, overall_score } = runComparisonEngine(expectedData, actualData);
+
+    const finalReportPayload = {
+      raw_expected: expectedData,     // The pure JSON mapped from the Docx
+      raw_actual: actualData,         // The pure JSON scraped from the live URL
+      comparison_results: report      // The Pass/Warning/Fail analysis
+    };
+
+    // 6. Save back to Strapi
+    console.log(`[Compliance Worker] Saving final payload to Strapi with score ${overall_score}%...`);
+    await updateComplianceAuditInStrapi(documentId, 'completed', overall_score, finalReportPayload);
+
+    console.log(`[Compliance Worker] Job ${job.id} fully completed.`);
+    return { documentId, overall_score };
+
+  } catch (error: any) {
+    console.error(`[Compliance Worker] Failed job for document ${documentId}:`, error);
+    await updateComplianceAuditInStrapi(documentId, 'failed');
+    throw error;
+  }
+}, {
+  connection: redisConnection as any,
+  concurrency: 3
+});
 
 /* 4. OBSERVABILITY LISTENERS */
 aiAuditWorker.on('completed', job => console.log(`[AI Queue] Job ${job.id} completed successfully`));
@@ -263,4 +321,10 @@ competitorWorker.on('completed', job => console.log(`[Competitor Queue] Job ${jo
 competitorWorker.on('failed', (job, err) => {
   if (isDevelopment && err.message.includes('ECONNREFUSED')) return;
   console.log(`[Competitor Queue] Job ${job?.id} failed with ${err.message}`);
+});
+
+complianceWorker.on('completed', job => console.log(`[Compliance Queue] Job ${job.id} completed successfully`));
+complianceWorker.on('failed', (job, err) => {
+  if (isDevelopment && err.message.includes('ECONNREFUSED')) return;
+  console.log(`[Compliance Queue] Job ${job?.id} failed with ${err.message}`);
 });

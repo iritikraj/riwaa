@@ -35,5 +35,6 @@ redisConnection.on('error', (err: any) => {
 // 2. Export Queues (NO WORKER LOGIC HERE)
 // These are imported by Next.js to add jobs to the Redis queue.
 export const spiderQueue = new Queue('domain-spider-queue', { connection: redisConnection as any });
-export const aiAuditQueue = new Queue('ai-audit-queue', { connection: redisConnection as any }); 
+export const aiAuditQueue = new Queue('ai-audit-queue', { connection: redisConnection as any });
 export const competitorQueue = new Queue('competitor-audit-queue', { connection: redisConnection as any });
+export const complianceQueue = new Queue('compliance-audit-queue', { connection: redisConnection as any });

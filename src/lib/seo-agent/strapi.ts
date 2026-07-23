@@ -374,3 +374,100 @@ export async function updateCompetitorAuditInStrapi(
 
   return await updateRes.json();
 }
+
+/* CONTENT COMPLIANCE STRAPI HELPERS */
+
+/** Updates the compliance audit record with the final comparison payload and score from the worker. */
+export async function updateComplianceAuditInStrapi(
+  documentId: string,
+  status: 'completed' | 'failed',
+  overallScore: number | null = null,
+  reportData: any = null
+) {
+  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
+  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
+
+  if (!STRAPI_TOKEN) {
+    throw new Error("Missing STRAPI_API_TOKEN in environment variables.");
+  }
+
+  const endpoint = `${STRAPI_URL}/api/compliance-audits/${documentId}`;
+
+  // Build the update payload dynamically based on what the worker extracted
+  const updateData: any = {
+    audit_status: status,
+  };
+
+  if (overallScore !== null) updateData.overall_score = overallScore;
+  if (reportData !== null) updateData.report_data = reportData;
+
+  const updateRes = await fetch(endpoint, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${STRAPI_TOKEN}`,
+    },
+    body: JSON.stringify({
+      data: updateData,
+    }),
+  });
+
+  if (!updateRes.ok) {
+    const errorText = await updateRes.text();
+    throw new Error(`Failed to update compliance audit in Strapi: ${errorText}`);
+  }
+
+  return await updateRes.json();
+}
+
+/**
+  Fetches the complete history of compliance checks. 
+  Uses populate=brief_file to retrieve the media URL for the frontend.
+ */
+export async function getComplianceAuditsHistory() {
+  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
+  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
+
+  const response = await fetch(`${STRAPI_URL}/api/compliance-audits?sort=createdAt:desc&populate=brief_file`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${STRAPI_TOKEN}`,
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.text();
+    console.error(`Strapi Compliance Fetch Error (${response.status}): ${errorDetails}`);
+    return [];
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+/**
+  Retrieves a single compliance audit record by documentId.
+ */
+export async function getComplianceAuditById(id: string) {
+  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
+  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
+
+  const response = await fetch(`${STRAPI_URL}/api/compliance-audits/${id}?populate=brief_file`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${STRAPI_TOKEN}`,
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    console.error(`Failed to fetch compliance audit ID: ${id}`);
+    return null;
+  }
+
+  const result = await response.json();
+  return result.data;
+}
