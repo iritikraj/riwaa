@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Queue } from 'bullmq';
 import { redisConnection } from '@/lib/seo-agent/queue';
 import { logger } from '@/lib/logs/logger';
@@ -9,14 +9,17 @@ const complianceQueue = new Queue('compliance-audit-queue', {
 });
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const job = await complianceQueue.getJob(params.id);
+    // Await the params object to extract the id
+    const { id } = await params;
+
+    const job = await complianceQueue.getJob(id);
 
     if (!job) {
-      logger.warn(`[STATUS_CHECK_WARNING] Job ID ${params.id} not found.`);
+      logger.warn(`[STATUS_CHECK_WARNING] Job ID ${id} not found.`);
       return NextResponse.json({ status: 'not_found' }, { status: 404 });
     }
 
@@ -35,7 +38,7 @@ export async function GET(
     });
 
   } catch (error: any) {
-    logger.error(`[STATUS_CHECK_ERROR] Failed to fetch job status for ID ${params.id}: ${error?.message}`, error);
+    logger.error(`[STATUS_CHECK_ERROR] Failed to fetch job status for ID: ${error?.message}`, error);
     return NextResponse.json({ error: 'Failed to fetch job status' }, { status: 500 });
   }
 }
