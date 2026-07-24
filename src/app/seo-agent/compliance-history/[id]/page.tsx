@@ -70,7 +70,7 @@ export default async function ComplianceReportPage({ params }: { params: Promise
                 </a>
                 <span className="hidden sm:inline text-neutral-300">|</span>
                 {fileUrl && (
-                  <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#b8924a] transition-colors truncate">
+                  <a href={`${process.env.NEXT_PUBLIC_STRAPI_URL}${fileUrl}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#b8924a] transition-colors truncate">
                     <Download className="w-4 h-4 shrink-0" />
                     <span className="truncate">{fileName}</span>
                   </a>
@@ -80,14 +80,13 @@ export default async function ComplianceReportPage({ params }: { params: Promise
 
             {/* Score Badge */}
             {!isProcessing && !isFailed && score !== undefined && (
-              <div className={`px-6 py-4 rounded-2xl border flex flex-col items-center justify-center min-w-[140px] shadow-sm ${score >= 80 ? 'bg-emerald-50 border-emerald-100' :
-                score >= 50 ? 'bg-amber-50 border-amber-100' :
-                  'bg-rose-50 border-rose-100'
-                }`}>
-                <span className={`text-[10px] uppercase tracking-widest font-bold mb-1 ${score >= 80 ? 'text-emerald-600' : score >= 50 ? 'text-amber-600' : 'text-rose-600'
-                  }`}>Overall Match</span>
-                <span className={`text-4xl font-light tracking-tighter ${score >= 80 ? 'text-emerald-700' : score >= 50 ? 'text-amber-700' : 'text-rose-700'
-                  }`}>{score}%</span>
+              <div className={`px-6 py-4 rounded-2xl border flex flex-col items-center justify-center min-w-35 shadow-sm ${score >= 80 ? 'bg-emerald-50 border-emerald-100' : score >= 50 ? 'bg-amber-50 border-amber-100' : 'bg-rose-50 border-rose-100'}`}>
+                <span className={`text-[10px] uppercase tracking-widest font-bold mb-1 ${score >= 80 ? 'text-emerald-600' : score >= 50 ? 'text-amber-600' : 'text-rose-600'}`}>
+                  Overall Match
+                </span>
+                <span className={`text-4xl font-light tracking-tighter ${score >= 80 ? 'text-emerald-700' : score >= 50 ? 'text-amber-700' : 'text-rose-700'}`}>
+                  {score}%
+                </span>
               </div>
             )}
           </div>
@@ -188,15 +187,10 @@ export default async function ComplianceReportPage({ params }: { params: Promise
                   <div className="flex-1 space-y-4">
                     <p className="text-sm text-neutral-600">
                       The brief requested <strong>{expectedFaqs.length}</strong> FAQs.
-                      {results.faq_schema.found_on_page
-                        ? ` Found ${actualFaqs.length} question(s) in live schema (${matchedFaqs.length} matched).`
-                        : ' No valid FAQPage schema markup was found in the live DOM.'}
+                      {results.faq_schema.found_on_page ? ` Found ${actualFaqs.length} question(s) in live schema (${matchedFaqs.length} matched).` : ' No valid FAQPage schema markup was found in the live DOM.'}
                     </p>
 
-                    <div className={`flex items-center gap-3 p-3 rounded-xl border ${results.faq_schema.found_on_page
-                        ? 'bg-emerald-50/50 border-emerald-100'
-                        : 'bg-rose-50/50 border-rose-100'
-                      }`}>
+                    <div className={`flex items-center gap-3 p-3 rounded-xl border ${results.faq_schema.found_on_page ? 'bg-emerald-50/50 border-emerald-100' : 'bg-rose-50/50 border-rose-100'}`}>
                       {results.faq_schema.found_on_page ? (
                         <>
                           <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />

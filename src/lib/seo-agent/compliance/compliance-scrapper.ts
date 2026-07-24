@@ -218,12 +218,17 @@ export function runComparisonEngine(expected: any, actual: any) {
   const compareArrays = (expArr: string[], actArr: string[], weightPerItem: number) => {
     const missing: string[] = [];
     const found: string[] = [];
-    const normActArr = actArr.map(normalizeString);
+    const normActArr = actArr.filter(Boolean).map(normalizeString).filter(Boolean);
+    const validExpArr = expArr.filter(Boolean);
 
-    expArr.forEach(exp => {
+    validExpArr.forEach(exp => {
       totalPoints += weightPerItem;
       const normExp = normalizeString(exp);
+
+      if (!normExp) return;
+
       const isFound = normActArr.some(act => act.includes(normExp) || normExp.includes(act));
+
       if (isFound) {
         found.push(exp);
         earnedPoints += weightPerItem;
@@ -233,10 +238,10 @@ export function runComparisonEngine(expected: any, actual: any) {
     });
 
     return {
-      expected: expArr,
+      expected: validExpArr,
       actual: actArr,
       missing,
-      status: missing.length === 0 ? 'pass' : missing.length === expArr.length ? 'fail' : 'warning'
+      status: missing.length === 0 ? 'pass' : missing.length === validExpArr.length ? 'fail' : 'warning'
     };
   };
 
