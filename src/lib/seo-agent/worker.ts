@@ -251,8 +251,8 @@ export const competitorWorker = new Worker('competitor-audit-queue', async job =
 
 /* CONTENT COMPLIANCE WORKER */
 export const complianceWorker = new Worker('compliance-audit-queue', async job => {
-  const { documentId, targetUrl, fileUrl } = job.data;
-  console.log(`[Compliance Worker] Starting audit for Document ID: ${documentId} on ${targetUrl}`);
+  const { documentId, targetUrl, fileUrl, pageType } = job.data;
+  console.log(`[Compliance Worker] Starting ${pageType} audit for Document ID: ${documentId} on ${targetUrl}`);
 
   try {
     // 1. Download Docx from Strapi Media Library
@@ -265,9 +265,9 @@ export const complianceWorker = new Worker('compliance-audit-queue', async job =
     const arrayBuffer = await fileRes.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // 2. Extract Raw Text using Mammoth
-    console.log(`[Compliance Worker] Extracting raw text via Mammoth...`);
-    const { value: rawText } = await mammoth.extractRawText({ buffer });
+    // 2. Extract Structured HTML using Mammoth
+    console.log(`[Compliance Worker] Extracting structured HTML via Mammoth...`);
+    const { value: rawText } = await mammoth.convertToHtml({ buffer });
 
     // 3. AI Structuring
     console.log(`[Compliance Worker] Mapping brief to JSON via Gemini...`);
@@ -282,6 +282,7 @@ export const complianceWorker = new Worker('compliance-audit-queue', async job =
     const { report, overall_score } = runComparisonEngine(expectedData, actualData);
 
     const finalReportPayload = {
+      page_type: pageType,
       raw_expected: expectedData,     // The pure JSON mapped from the Docx
       raw_actual: actualData,         // The pure JSON scraped from the live URL
       comparison_results: report      // The Pass/Warning/Fail analysis

@@ -124,7 +124,8 @@ export default function CompetitorDashboard() {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-red-500 font-semibold">Competitor URLs (Comma Separated)</label>
+                  {/* <label className="block text-[10px] uppercase tracking-[0.2em] text-red-500 font-semibold">Competitor URLs (Comma Separated)</label> */}
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-red-500 font-semibold">Competitor URL</label>
                   <textarea required placeholder="https://famproperties.com/properties-for-sale-in-dubai" value={competitorsInput} onChange={(e) => setCompetitorsInput(e.target.value)} className="w-full h-24 bg-white/5 border border-white/10 rounded-2xl p-5 text-neutral-200 outline-none focus:border-white/30 focus:bg-white/10 transition-all placeholder:text-neutral-600 text-sm font-light resize-none backdrop-blur-md shadow-inner custom-scrollbar" />
                 </div>
 

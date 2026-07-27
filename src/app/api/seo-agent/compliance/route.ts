@@ -30,11 +30,12 @@ export const POST = withLogger('/api/seo-agent/compliance', async (req: NextRequ
     const formData = await req.formData();
     const targetUrl = formData.get('url') as string;
     const file = formData.get('brief') as File;
+    const pageType = formData.get('pageType') as string;
 
-    if (!targetUrl || !file) {
-      routeLogger.warn({ event: 'compliance_validation_failed' }, 'Missing required fields: targetUrl or file.');
+    if (!targetUrl || !file || !pageType) {
+      routeLogger.warn({ event: 'compliance_validation_failed' }, 'Missing required fields: targetUrl, file, or pageType.');
       return NextResponse.json(
-        { error: 'Target URL and Docx brief are required.' },
+        { error: 'Target URL, Page Type, and Docx brief are required.' },
         { status: 400 }
       );
     }
@@ -124,6 +125,7 @@ export const POST = withLogger('/api/seo-agent/compliance', async (req: NextRequ
       const job = await complianceQueue.add('analyze-compliance', {
         documentId,
         targetUrl,
+        pageType,
         fileUrl: strapiFileUrl,
         fileName: file.name,
         createdAt: new Date().toISOString(),

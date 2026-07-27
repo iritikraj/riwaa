@@ -17,6 +17,8 @@ export default function ComplianceDashboard() {
   const [viewState, setViewState] = useState<'idle' | 'loading'>('idle');
   const [loadingStatus, setLoadingStatus] = useState('');
 
+  const [pageType, setPageType] = useState('');
+
   // Cycle through loading statuses for better UX
   useEffect(() => {
     if (viewState !== 'loading') return;
@@ -79,6 +81,7 @@ export default function ComplianceDashboard() {
     const formData = new FormData();
     formData.append('url', targetUrl);
     formData.append('brief', selectedFile);
+    formData.append('pageType', pageType);
 
     try {
       const response = await fetch('/api/seo-agent/compliance', {
@@ -156,6 +159,26 @@ export default function ComplianceDashboard() {
                   </div>
                 </div>
 
+                <div className="space-y-3 mt-6">
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-[#b8924a] font-semibold">Page Type</label>
+                  <select
+                    required
+                    value={pageType}
+                    onChange={(e) => setPageType(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-neutral-200 outline-none focus:border-white/30 focus:bg-white/10 transition-all text-sm font-light backdrop-blur-md shadow-inner appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled className="bg-[#0b0b0c] text-neutral-500">Select Page Type...</option>
+                    <option value="Homepage" className="bg-[#0b0b0c]">Homepage</option>
+                    <option value="Listings" className="bg-[#0b0b0c]">Listings (Collection)</option>
+                    <option value="Area Guides" className="bg-[#0b0b0c]">Area Guides</option>
+                    <option value="Off-Plan/Ready" className="bg-[#0b0b0c]">Off-Plan/Ready</option>
+                    <option value="Exclusive Projects" className="bg-[#0b0b0c]">Exclusive Projects</option>
+                    <option value="Agent Profiles" className="bg-[#0b0b0c]">Agent Profiles</option>
+                    <option value="Detail Pages" className="bg-[#0b0b0c]">Detail Pages</option>
+                    <option value="Blogs" className="bg-[#0b0b0c]">Blogs</option>
+                  </select>
+                </div>
+
                 <div className="flex items-center gap-4 py-2">
                   <div className="h-px flex-1 bg-white/5" />
                   <span className="text-[9px] uppercase tracking-[0.28em] text-neutral-600">AGAINST</span>
@@ -215,7 +238,7 @@ export default function ComplianceDashboard() {
                 <div className="flex justify-end pt-4">
                   <button
                     type="submit"
-                    disabled={!targetUrl || !selectedFile}
+                    disabled={!targetUrl || !selectedFile || !pageType}
                     className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white text-[11px] font-semibold uppercase tracking-[0.3em] text-black cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-white px-8 py-4 w-full sm:w-auto"
                   >
                     <span className="relative z-10 flex items-center justify-center gap-3">

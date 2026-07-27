@@ -9,6 +9,8 @@ export const metadata = {
   title: 'Compliance Audit Report - Riwaa SEO Agent',
 };
 
+const BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : `${process.env.NEXT_PUBLIC_APP_URL}`;
+
 export default async function ComplianceReportPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const audit = await getComplianceAuditById(id);
@@ -36,7 +38,14 @@ export default async function ComplianceReportPage({ params }: { params: Promise
     audit.report_data?.raw_actual?.faq_schema?.extracted_questions ||
     [];
 
-  const normalize = (q: string) => q.trim().toLowerCase().replace(/\s+/g, ' ');
+  const normalize = (q: string) => {
+    return q
+      .replace(/^(h\d:?\s*)?/i, '')     // 1. Strips stray "H4:" or "H3:" if Gemini left them in
+      .replace(/^\d+[\.\-\)]\s*/, '')   // 2. Strips leading numbers like "1. ", "2)", "3-"
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/gi, '');      // 3. Strips all punctuation and spaces for a bulletproof match
+  };
 
   const actualSet = new Set(actualFaqs.map(normalize));
   const expectedSet = new Set(expectedFaqs.map(normalize));
@@ -126,7 +135,7 @@ export default async function ComplianceReportPage({ params }: { params: Promise
                 </a>
                 <span className="hidden sm:inline text-neutral-300 print:hidden">|</span>
                 {fileUrl && (
-                  <a href={`${process.env.NEXT_PUBLIC_STRAPI_URL}${fileUrl}`} target="_blank" rel="noopener noreferrer" className="print:hidden flex items-center gap-2 hover:text-[#b8924a] transition-colors truncate">
+                  <a href={`${BASE_URL}${fileUrl}`} target="_blank" rel="noopener noreferrer" className="print:hidden flex items-center gap-2 hover:text-[#b8924a] transition-colors truncate">
                     <Download className="w-4 h-4 shrink-0" />
                     <span className="truncate">{fileName}</span>
                   </a>
@@ -216,6 +225,16 @@ export default async function ComplianceReportPage({ params }: { params: Promise
                 actual={results.h3s.actual}
                 status={results.h3s.status}
                 message={results.h3s.missing?.length > 0 ? `Missing ${results.h3s.missing.length} expected tag(s)` : ''}
+              />
+            )}
+
+            {results.required_schemas && (
+              <ComparisonRow
+                label={`Required Schemas (${audit.report_data?.page_type || 'Selected Page Type'})`}
+                expected={results.required_schemas.expected}
+                actual={results.required_schemas.actual}
+                status={results.required_schemas.status}
+                message={results.required_schemas.missing?.length > 0 ? `Missing ${results.required_schemas.missing.length} expected schema(s)` : ''}
               />
             )}
 

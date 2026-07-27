@@ -6,6 +6,17 @@ import { GoogleGenAI } from '@google/genai';
 
 puppeteer.use(StealthPlugin());
 
+export const SCHEMA_MATRIX: Record<string, string[]> = {
+  "Homepage": ["WebSite", "Organization", "BreadcrumbList", "RealEstateAgent"],
+  "Listings": ["CollectionPage", "ItemList", "Organization", "BreadcrumbList", "Offer"],
+  "Area Guides": ["Place", "Organization", "BreadcrumbList", "FAQPage"],
+  "Off-Plan/Ready": ["ApartmentComplex", "Organization", "BreadcrumbList", "Brand"],
+  "Exclusive Projects": ["Organization", "BreadcrumbList", "RealEstateListing", "AggregateOffer"],
+  "Agent Profiles": ["Person", "Organization", "BreadcrumbList", "RealEstateAgent", "AggregateRating"],
+  "Detail Pages": ["House", "Apartment", "Organization", "BreadcrumbList", "RealEstateListing", "Offer", "PriceSpecification", "RealEstateAgent", "GeoCoordinates"],
+  "Blogs": ["BlogPosting", "Organization", "BreadcrumbList", "FAQPage"]
+};
+
 /**
  * Executes a fast static HTML fetch.
  * Returns the Cheerio instance and a boolean indicating if the page looks empty (needs JS rendering).
@@ -100,6 +111,7 @@ export async function extractComplianceData(url: string) {
   // FAQ Schema Extraction (JSON-LD)
   let hasFaqSchema = false;
   const foundQuestions: string[] = [];
+  const foundSchemaTypes = new Set<string>();
 
   $('script[type="application/ld+json"]').each((_, el) => {
     const rawContent = $(el).html() || $(el).text() || '';
@@ -110,6 +122,16 @@ export async function extractComplianceData(url: string) {
       const parsed = JSON.parse(rawContent.trim());
 
       const processSchema = (schemaObj: any) => {
+        if (schemaObj['@type']) {
+          const type = schemaObj['@type'];
+          if (Array.isArray(type)) {
+            type.forEach(t => foundSchemaTypes.add(t));
+          } else {
+            foundSchemaTypes.add(type);
+          }
+        }
+
+        // Keep existing FAQ deep-dive logic intact
         if (schemaObj['@type'] === 'FAQPage') {
           console.log(`[Compliance Scraper] Valid FAQPage Schema successfully parsed!`);
           hasFaqSchema = true;
@@ -138,6 +160,7 @@ export async function extractComplianceData(url: string) {
       if (rawContent.includes('"FAQPage"') || rawContent.includes("'FAQPage'")) {
         console.log(`[Compliance Scraper] Fallback trigger: Found FAQPage via raw string match despite broken JSON!`);
         hasFaqSchema = true;
+        foundSchemaTypes.add("FAQPage");
       }
     }
   });
@@ -148,6 +171,7 @@ export async function extractComplianceData(url: string) {
     h1,
     h2s,
     h3s,
+    found_schema_types: Array.from(foundSchemaTypes),
     faq_schema: {
       has_schema: hasFaqSchema,
       extracted_questions: foundQuestions
@@ -155,14 +179,22 @@ export async function extractComplianceData(url: string) {
   };
 }
 
-export async function parseBriefWithGemini(rawText: string) {
+export async function parseBriefWithGemini(documentContent: string) {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   const prompt = `
-    You are a strict SEO Content Auditor. Extract the target SEO elements from the following content brief into a strict JSON format. 
+    You are a strict HTML parsing assistant. Extract the target SEO elements from the following converted HTML brief into a strict JSON format. 
     If an element is missing, return an empty string or empty array.
     
-    RAW BRIEF TEXT:
-    ${rawText}
+    CRITICAL RULES:
+    1. STRICT HEADING MAPPING: You MUST map text exactly to its corresponding HTML tag. 
+       - Text wrapped in <h2> tags MUST ONLY go into the "h2s" array.
+       - Text wrapped in <h3> tags MUST ONLY go into the "h3s" array.
+       - NEVER promote an <h3> to an <h2> just because of its semantic meaning (e.g., do not move "FAQs" to "h2s" if it is inside an <h3> tag).
+    2. EXPLICIT TEXT OVERRIDES: If the author explicitly wrote "(H2)" or "H3:" in plain text next to a heading, honor that text override.
+    3. CLEAN TEXT: Extract ONLY the text. Remove the HTML tags entirely.
+    
+    RAW HTML CONTENT:
+    ${documentContent}
 
     EXPECTED JSON SCHEMA:
     {
@@ -178,7 +210,7 @@ export async function parseBriefWithGemini(rawText: string) {
   const response: any = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
     contents: prompt,
-    config: { temperature: 0.1 },
+    config: { temperature: 0.0 },
   });
 
   let text = typeof response.text === 'function' ? response.text() : (response.text || '');
@@ -194,7 +226,7 @@ export function normalizeString(str: string) {
   return stripInstructions.toLowerCase().replace(/[^a-z0-9]/gi, '').trim();
 }
 
-export function runComparisonEngine(expected: any, actual: any) {
+export function runComparisonEngine(expected: any, actual: any, pageType: string) {
   let totalPoints = 0;
   let earnedPoints = 0;
 
@@ -245,12 +277,24 @@ export function runComparisonEngine(expected: any, actual: any) {
     };
   };
 
+  const expectedSchemas = SCHEMA_MATRIX[pageType] || [];
+  const actualSchemas = actual.found_schema_types || [];
+  const missingSchemas = expectedSchemas.filter(s => !actualSchemas.includes(s));
+  expectedSchemas.forEach(() => totalPoints += 5);
+  earnedPoints += (expectedSchemas.length - missingSchemas.length) * 5;
+
   const report = {
     meta_title: compareSingle(expected.meta_title, actual.meta_title, 20),
     meta_description: compareSingle(expected.meta_description, actual.meta_description, 10),
     h1: compareSingle(expected.h1, actual.h1, 20),
     h2s: compareArrays(expected.h2s || [], actual.h2s || [], 5),
     h3s: compareArrays(expected.h3s || [], actual.h3s || [], 2),
+    required_schemas: {
+      expected: expectedSchemas,
+      actual: actualSchemas,
+      missing: missingSchemas,
+      status: missingSchemas.length === 0 ? 'pass' : (missingSchemas.length === expectedSchemas.length ? 'fail' : 'warning')
+    },
     faq_schema: {
       expected_questions: expected.faqs || [],
       found_on_page: actual.faq_schema?.has_schema || false,
