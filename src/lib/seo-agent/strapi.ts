@@ -380,7 +380,7 @@ export async function updateCompetitorAuditInStrapi(
 /** Updates the compliance audit record with the final comparison payload and score from the worker. */
 export async function updateComplianceAuditInStrapi(
   documentId: string,
-  status: 'completed' | 'failed',
+  status: 'processing' | 'downloading_brief' | 'scraping_live_url' | 'running_ai_analysis' | 'completed' | 'failed',
   overallScore: number | null = null,
   reportData: any = null
 ) {

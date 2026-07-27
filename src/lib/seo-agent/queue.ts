@@ -11,7 +11,7 @@ const redisPassword = process.env.REDIS_PASSWORD || undefined;
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 // 1. Safe Redis Configuration
-const redisOptions = {
+export const redisOptions = {
   host: redisHost,
   port: redisPort,
   password: redisPassword,
@@ -25,16 +25,33 @@ const redisOptions = {
   }
 };
 
-export const redisConnection = new IORedis(redisOptions);
+const globalForRedis = globalThis as unknown as { redisConnection: IORedis };
+export const redisConnection = globalForRedis.redisConnection || new IORedis(redisOptions);
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForRedis.redisConnection = redisConnection;
+}
 
 redisConnection.on('error', (err: any) => {
   if (isDevelopment && err.code === 'ECONNREFUSED') return;
   console.error('Redis Connection Error:', err);
 });
 
-// 2. Export Queues (NO WORKER LOGIC HERE)
-// These are imported by Next.js to add jobs to the Redis queue.
-export const spiderQueue = new Queue('domain-spider-queue', { connection: redisConnection as any });
-export const aiAuditQueue = new Queue('ai-audit-queue', { connection: redisConnection as any });
-export const competitorQueue = new Queue('competitor-audit-queue', { connection: redisConnection as any });
-export const complianceQueue = new Queue('compliance-audit-queue', { connection: redisConnection as any });
+const globalForQueues = globalThis as unknown as {
+  spiderQueue: Queue;
+  aiAuditQueue: Queue;
+  competitorQueue: Queue;
+  complianceQueue: Queue;
+};
+
+export const spiderQueue = globalForQueues.spiderQueue || new Queue('domain-spider-queue', { connection: redisOptions });
+export const aiAuditQueue = globalForQueues.aiAuditQueue || new Queue('ai-audit-queue', { connection: redisOptions });
+export const competitorQueue = globalForQueues.competitorQueue || new Queue('competitor-audit-queue', { connection: redisOptions });
+export const complianceQueue = globalForQueues.complianceQueue || new Queue('compliance-audit-queue', { connection: redisOptions });
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForQueues.spiderQueue = spiderQueue;
+  globalForQueues.aiAuditQueue = aiAuditQueue;
+  globalForQueues.competitorQueue = competitorQueue;
+  globalForQueues.complianceQueue = complianceQueue;
+}

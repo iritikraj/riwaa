@@ -4,6 +4,7 @@ import { getComplianceAuditById } from '@/lib/seo-agent/strapi';
 import { notFound } from 'next/navigation';
 import ComparisonRow, { StatusIcon, toTitleCase } from '../_comparison';
 import PrintButton from '../_print';
+import LiveProgressTracker from '../_progress';
 
 export const metadata = {
   title: 'Compliance Audit Report - Riwaa SEO Agent',
@@ -163,12 +164,8 @@ export default async function ComplianceReportPage({ params }: { params: Promise
           </div>
         </header>
 
-        {isProcessing ? (
-          <div className="py-20 text-center border-2 border-dashed border-neutral-200 rounded-3xl bg-white/50 print:hidden">
-            <LayoutTemplate className="w-12 h-12 text-neutral-300 mx-auto mb-4 animate-pulse" />
-            <h3 className="text-lg font-medium text-neutral-900 mb-2">Audit in Progress</h3>
-            <p className="text-neutral-500 text-sm">The AI worker is currently analyzing the document and scraping the live page. Please refresh in a few moments.</p>
-          </div>
+        {(!isFailed && audit.audit_status !== 'completed') ? (
+          <LiveProgressTracker documentId={id} />
         ) : isFailed ? (
           <div className="py-20 text-center border-2 border-dashed border-rose-200 rounded-3xl bg-rose-50/50 print:hidden">
             <XCircle className="w-12 h-12 text-rose-400 mx-auto mb-4" />

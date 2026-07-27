@@ -3,7 +3,7 @@ import { loadEnvConfig } from '@next/env';
 loadEnvConfig(process.cwd());
 
 import { Worker } from 'bullmq';
-import { redisConnection, spiderQueue } from './queue';
+import { redisOptions, spiderQueue } from './queue';
 import { runDomainSpider } from './spider';
 import { scrapeWithPuppeteer } from './scraper';
 import { analyzeEntities } from './nlp';
@@ -13,11 +13,11 @@ import {
   updateAuditInStrapi,
   appendResultToStrapi,
   fetchPageSpeedData,
-  updateCompetitorAuditInStrapi
+  updateCompetitorAuditInStrapi,
+  updateComplianceAuditInStrapi
 } from './strapi';
 
 import * as mammoth from 'mammoth';
-import { updateComplianceAuditInStrapi } from './strapi';
 import { extractComplianceData, parseBriefWithGemini, runComparisonEngine } from './compliance/compliance-scrapper';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -25,7 +25,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 console.log("🤖 Background Workers Started and Listening for Jobs...");
 
 /* 1. STANDARD AUDIT AI WORKER (Runs First) */
-export const aiAuditWorker = new Worker('ai-audit-queue', async job => {
+const createAiAuditWorker = () => new Worker('ai-audit-queue', async job => {
   const { url, documentId, industry } = job.data;
   console.log(`[AI Worker] Analyzing ${url}...`);
 
@@ -54,12 +54,12 @@ export const aiAuditWorker = new Worker('ai-audit-queue', async job => {
     });
   }
 }, {
-  connection: redisConnection as any,
+  connection: redisOptions as any,
   concurrency: 5
 });
 
 /* 2. DOMAIN SPIDER WORKER (Runs Second, triggered by AI Worker) */
-export const spiderWorker = new Worker('domain-spider-queue', async job => {
+const createSpiderWorker = () => new Worker('domain-spider-queue', async job => {
   const { startUrl, documentId } = job.data;
   console.log(`[Spider Worker] Starting background crawl for ${startUrl}`);
 
@@ -110,10 +110,9 @@ export const spiderWorker = new Worker('domain-spider-queue', async job => {
     console.error(`[Spider Worker] Failed to process spider job for ${startUrl}:`, error);
     throw error;
   }
-}, { connection: redisConnection as any });
+}, { connection: redisOptions as any });
 
-
-/* 3. COMPETITOR ANALYSIS WORKER (New Module) */
+/* COMPETITOR HELPER FUNCTIONS */
 async function extractPageMetrics(url: string) {
   console.log(`[Competitor Worker] Fetching raw DOM and PageSpeed for: ${url}`);
   const [scraperResult, psiData] = await Promise.all([
@@ -135,7 +134,6 @@ async function extractPageMetrics(url: string) {
 
 async function runGeminiCompetitorComparison(targetData: any, competitorData: any[], industry: string) {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
   const prompt = `
     Perform an enterprise side-by-side SEO comparison between the Target URL and the Competitor URL(s).
     Target Industry Context: ${industry || 'General Business'}.
@@ -151,7 +149,7 @@ async function runGeminiCompetitorComparison(targetData: any, competitorData: an
     2. Score each category out of 10 for both Target and Competitor based on strict technical standards.
     3. Provide a clear, actionable "ai_opinion" detailing WHY the target scored less (or higher) than the competitor and exact steps to beat them.
 
-    EXPECTED JSON SCHEMA:
+EXPECTED JSON SCHEMA:
     {
       "overall_winner": "target" | "competitor",
       "categories": {
@@ -219,7 +217,7 @@ async function runGeminiCompetitorComparison(targetData: any, competitorData: an
   return JSON.parse(rawText);
 }
 
-export const competitorWorker = new Worker('competitor-audit-queue', async job => {
+const createCompetitorWorker = () => new Worker('competitor-audit-queue', async job => {
   const { targetUrl, competitorUrls, documentId, industry } = job.data;
   console.log(`[Competitor Worker] Initiating comparison for ${targetUrl} vs [${competitorUrls.join(', ')}]`);
 
@@ -245,17 +243,18 @@ export const competitorWorker = new Worker('competitor-audit-queue', async job =
     await updateCompetitorAuditInStrapi(documentId, { error: error.message || 'Competitor Analysis Failed' }, 'failed');
   }
 }, {
-  connection: redisConnection as any,
+  connection: redisOptions as any,
   concurrency: 2
 });
 
-/* CONTENT COMPLIANCE WORKER */
-export const complianceWorker = new Worker('compliance-audit-queue', async job => {
+const createComplianceWorker = () => new Worker('compliance-audit-queue', async job => {
   const { documentId, targetUrl, fileUrl, pageType } = job.data;
   console.log(`[Compliance Worker] Starting ${pageType} audit for Document ID: ${documentId} on ${targetUrl}`);
 
   try {
-    // 1. Download Docx from Strapi Media Library
+    // 1. Download Docx from Strapi Media Library (MICRO-UPDATE 1)
+    await updateComplianceAuditInStrapi(documentId, 'downloading_brief');
+
     console.log(`[Compliance Worker] Downloading brief from ${fileUrl}...`);
     const fileRes = await fetch(fileUrl, {
       headers: { Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}` }
@@ -273,11 +272,14 @@ export const complianceWorker = new Worker('compliance-audit-queue', async job =
     console.log(`[Compliance Worker] Mapping brief to JSON via Gemini...`);
     const expectedData = await parseBriefWithGemini(rawText);
 
-    // 4. Scrape Live Target Page
+    // 4. Scrape Live Target Page (MICRO-UPDATE 2)
+    await updateComplianceAuditInStrapi(documentId, 'scraping_live_url');
+
     console.log(`[Compliance Worker] Extracting live DOM from ${targetUrl}...`);
     const actualData = await extractComplianceData(targetUrl);
 
-    // 5. Run Comparison Engine
+    // 5. Run Comparison Engine (MICRO-UPDATE 3)
+    await updateComplianceAuditInStrapi(documentId, 'running_ai_analysis');
     console.log(`[Compliance Worker] Running strict comparison engine...`);
     const { report, overall_score } = runComparisonEngine(expectedData, actualData, pageType);
 
@@ -301,9 +303,30 @@ export const complianceWorker = new Worker('compliance-audit-queue', async job =
     throw error;
   }
 }, {
-  connection: redisConnection as any,
+  connection: redisOptions as any,
   concurrency: 3
 });
+
+/* 2. SINGLETON CACHE (This permanently fixes the stalling/zombie issue) */
+
+const globalForWorkers = globalThis as unknown as {
+  aiAuditWorker: Worker;
+  spiderWorker: Worker;
+  competitorWorker: Worker;
+  complianceWorker: Worker;
+};
+
+export const aiAuditWorker = globalForWorkers.aiAuditWorker || createAiAuditWorker();
+export const spiderWorker = globalForWorkers.spiderWorker || createSpiderWorker();
+export const competitorWorker = globalForWorkers.competitorWorker || createCompetitorWorker();
+export const complianceWorker = globalForWorkers.complianceWorker || createComplianceWorker();
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForWorkers.aiAuditWorker = aiAuditWorker;
+  globalForWorkers.spiderWorker = spiderWorker;
+  globalForWorkers.competitorWorker = competitorWorker;
+  globalForWorkers.complianceWorker = complianceWorker;
+}
 
 /* 4. OBSERVABILITY LISTENERS */
 aiAuditWorker.on('completed', job => console.log(`[AI Queue] Job ${job.id} completed successfully`));

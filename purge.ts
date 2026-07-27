@@ -1,15 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { loadEnvConfig } from '@next/env';
 loadEnvConfig(process.cwd());
 
-import { spiderQueue, aiAuditQueue } from './src/lib/seo-agent/queue';
+import { Queue } from 'bullmq';
+import { redisConnection, spiderQueue, aiAuditQueue } from './src/lib/seo-agent/queue';
+
+const competitorQueue = new Queue('competitor-audit-queue', { connection: redisConnection as any });
+const complianceQueue = new Queue('compliance-audit-queue', { connection: redisConnection as any });
 
 async function wipeQueues() {
   console.log('🧹 Wiping Domain Spider Queue...');
-  // Force obliterate removes waiting, active, completed, and failed jobs
   await spiderQueue.obliterate({ force: true });
 
   console.log('🧹 Wiping AI Audit Queue...');
   await aiAuditQueue.obliterate({ force: true });
+
+  console.log('🧹 Wiping Competitor Audit Queue...');
+  await competitorQueue.obliterate({ force: true });
+
+  console.log('🧹 Wiping Compliance Audit Queue...');
+  await complianceQueue.obliterate({ force: true });
 
   console.log('✅ All queues completely cleared! You can now test your new URL.');
   process.exit(0);
