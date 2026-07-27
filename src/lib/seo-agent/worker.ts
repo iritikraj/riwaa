@@ -279,7 +279,7 @@ export const complianceWorker = new Worker('compliance-audit-queue', async job =
 
     // 5. Run Comparison Engine
     console.log(`[Compliance Worker] Running strict comparison engine...`);
-    const { report, overall_score } = runComparisonEngine(expectedData, actualData);
+    const { report, overall_score } = runComparisonEngine(expectedData, actualData, pageType);
 
     const finalReportPayload = {
       page_type: pageType,
