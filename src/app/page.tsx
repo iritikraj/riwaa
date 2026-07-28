@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Roster from "./(home)/_roster";
 import Hero from "./(home)/_hero";
+import Navbar from "./(home)/_nav";
 
 const WHY = [
   {
@@ -32,42 +33,7 @@ const WHY = [
 export default function RiwaaHomePage() {
   return (
     <div className="min-h-screen bg-[#FCFBF8] font-jost text-[#14181F] antialiased">
-      {/* ================= Navbar ================= */}
-      <header className="sticky top-0 z-40 border-b border-[#14181F]/8 bg-[#FCFBF8]/90 backdrop-blur-md">
-        <nav className="mx-auto flex max-w-350 items-center justify-between px-6 py-4 lg:px-10">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#14181F]/10 bg-white">
-              <Image src="/riwa-logo-transparent.png" alt="RIWAA" width={30} height={30} />
-            </div>
-            <div className="leading-tight">
-              <p className="text-[15px] font-medium tracking-[0.2em]">RIWAA</p>
-              <p className="font-jost text-[9px] uppercase tracking-[0.25em] text-[#565C6B]">
-                by Solvetude
-              </p>
-            </div>
-          </div>
-
-          <div className="hidden items-center gap-9 lg:flex">
-            {["Advisor Studio", "Social Intelligence", "Website Studio", "SEO Agent"].map(
-              (item) => (
-                <span
-                  key={item}
-                  className="font-jost text-[11px] uppercase tracking-[0.18em] text-[#565C6B] transition-colors hover:text-[#14181F]"
-                >
-                  {item}
-                </span>
-              )
-            )}
-          </div>
-
-          <a
-            href="mailto:ak@solvetude.com"
-            className="rounded-full text-center bg-[#1B2A4A] px-5 py-2.5 font-jost text-[11px] uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-90"
-          >
-            Book a walkthrough
-          </a>
-        </nav>
-      </header>
+      <Navbar />
 
       <main>
         <Hero />
@@ -126,14 +92,39 @@ export default function RiwaaHomePage() {
 
       {/* ================= Footer ================= */}
       <footer className="border-t border-[#14181F]/8">
-        <div className="mx-auto flex max-w-[1400px] flex-col gap-8 px-6 py-10 sm:flex-row sm:items-center sm:justify-between lg:px-10">
+        <div className="mx-auto flex max-w-350 flex-col gap-8 px-6 py-10 sm:flex-row sm:items-center sm:justify-between lg:px-10">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#14181F]/10 bg-white">
-              <Image src="/riwa-logo-transparent.png" alt="RIWAA" width={28} height={28} />
+            {/* RIWAA Icon */}
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#14181F]/10 bg-white">
+              <Image
+                src="/riwa-logo-transparent.png"
+                alt="RIWAA"
+                width={30}
+                height={30}
+              />
             </div>
-            <p className="font-jost text-[11px] uppercase tracking-[0.2em] text-[#565C6B]">
-              RIWAA · by Solvetude
-            </p>
+
+            {/* RIWAA Text */}
+            <div className="leading-none">
+              <p className="text-[15px] font-medium tracking-[0.22em] text-[#14181F]">
+                RIWAA
+              </p>
+              <p className="mt-1 font-jost text-[9px] uppercase tracking-[0.22em] text-[#565C6B]">
+                powered by
+              </p>
+            </div>
+
+            {/* Divider */}
+            <div className="mx-2 h-8 w-px bg-[#14181F]/15" />
+
+            {/* Solvetude Logo */}
+            <Image
+              src="/solvetude-logo.png"
+              alt="Solvetude"
+              width={100}
+              height={30}
+              className="object-contain"
+            />
           </div>
 
           <div className="flex flex-wrap gap-7 font-jost text-[11px] uppercase tracking-[0.16em] text-[#565C6B]">

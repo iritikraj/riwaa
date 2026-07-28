@@ -79,10 +79,10 @@ export default function AuditDashboard() {
 
           {/* HEADER */}
           <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-4">
               <div className="flex items-center gap-3">
                 <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/4 backdrop-blur-xl shadow-inner">
-                  <Image src="/riwa-logo.png" height={26} width={26} alt="RIWAA" className="object-contain" />
+                  <Image src="/riwa-logo-transparent.png" height={30} width={30} alt="RIWAA" className="object-contain" />
                 </div>
                 <div className="flex flex-col justify-center">
                   <h2 className="text-neutral-100 font-light uppercase text-[15px] tracking-[0.28em] leading-none">RIWAA</h2>
@@ -93,7 +93,7 @@ export default function AuditDashboard() {
               <div className="flex flex-col justify-center">
                 <Image src="/solvetude-logo.png" height={32} width={100} alt="Solvetude" className="h-8 w-auto object-contain opacity-90" />
               </div>
-            </div>
+            </Link>
             <div className="flex items-center gap-3">
               <Link href="/seo-agent/audit-history" className="flex items-center gap-2 rounded-full border transition-all duration-300 px-4 py-2 border-white/10 bg-white/4 text-neutral-400 hover:text-white">
                 <Clock size={12} />

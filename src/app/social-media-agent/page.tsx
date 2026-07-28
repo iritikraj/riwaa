@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import ConnectMetaButton from "./_connect-meta";
 import DashboardStream from "./_dashboard";
+import Image from 'next/image';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const mockWorkspaceId = "99700b46-3eff-48e9-9b0d-477032c6dd72";
@@ -25,20 +27,39 @@ export default function DashboardPage() {
         <div className="flex flex-col flex-1 overflow-hidden">
           {/* BRAND HEAD */}
           <div className="p-6 pb-4 border-b border-zinc-50 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 shadow-sm">
-                <span className="text-zinc-900 font-bold text-lg tracking-widest">RI</span>
+            <Link href="/" className="flex items-center gap-3">
+              {/* RIWAA Icon */}
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#14181F]/10 bg-white">
+                <Image
+                  src="/riwa-logo-transparent.png"
+                  alt="RIWAA"
+                  width={26}
+                  height={26}
+                />
               </div>
-              <div className="flex flex-col justify-center">
-                <h2 className="text-zinc-900 font-semibold uppercase text-[13px] tracking-[0.25em] leading-none">
+
+              {/* RIWAA Text */}
+              <div className="leading-none">
+                <p className="text-[15px] font-medium tracking-[0.22em] text-[#14181F]">
                   RIWAA
-                </h2>
-                <span className="text-[9px] tracking-[0.2em] uppercase text-zinc-400 mt-1.5 font-medium flex items-center gap-1">
-                  by
-                  <img src="/solvetude-logo.png" alt="Solvetude" className="h-4 w-auto object-contain" />
-                </span>
+                </p>
+                <p className="mt-1 font-jost text-[9px] uppercase tracking-[0.22em] text-[#565C6B]">
+                  powered by
+                </p>
               </div>
-            </div>
+
+              {/* Divider */}
+              <div className="h-8 w-px bg-[#14181F]/15" />
+
+              {/* Solvetude Logo */}
+              <Image
+                src="/solvetude-logo.png"
+                alt="Solvetude"
+                width={75}
+                height={23}
+                className="object-contain"
+              />
+            </Link>
 
             {/* Mobile Close Button */}
             <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-zinc-400 hover:text-zinc-900 bg-zinc-50 rounded-lg">
@@ -111,10 +132,37 @@ export default function DashboardPage() {
         {/* MOBILE TOP NAVIGATION (Hidden on Desktop) */}
         <header className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-zinc-100 shadow-sm z-20">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50">
-              <span className="text-zinc-900 font-bold text-sm tracking-widest">RI</span>
+            {/* RIWAA Icon */}
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#14181F]/10 bg-white">
+              <Image
+                src="/riwa-logo-transparent.png"
+                alt="RIWAA"
+                width={30}
+                height={30}
+              />
             </div>
-            <span className="text-zinc-900 font-semibold uppercase text-[14px] tracking-[0.2em] leading-none">RIWAA</span>
+
+            {/* RIWAA Text */}
+            <div className="leading-none">
+              <p className="text-[15px] font-medium tracking-[0.22em] text-[#14181F]">
+                RIWAA
+              </p>
+              <p className="mt-1 font-jost text-[9px] uppercase tracking-[0.22em] text-[#565C6B]">
+                powered by
+              </p>
+            </div>
+
+            {/* Divider */}
+            <div className="mx-2 h-8 w-px bg-[#14181F]/15" />
+
+            {/* Solvetude Logo */}
+            <Image
+              src="/solvetude-logo.png"
+              alt="Solvetude"
+              width={85}
+              height={24}
+              className="object-contain"
+            />
           </div>
           <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 rounded-lg transition-colors">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>

@@ -32,6 +32,7 @@ import dynamic from 'next/dynamic';
 // --- NEW IMPORTS ---
 import { mockDrivenListings } from '@/config/data/mock-driven-listings';
 import { BrokerageFooter } from "../_brokerage-company";
+import Link from "next/link";
 
 const AgentListings = dynamic(() => import('../_listings').then(mod => mod.AgentListings), {
   ssr: false,
@@ -358,14 +359,14 @@ export default function AgentBuilderPage() {
 
             <div className="relative w-full p-8">
               <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
+                <Link href="/" className="flex items-center gap-4">
                   {/* RIWAA */}
                   <div className="flex items-center gap-3">
                     <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/4 backdrop-blur-xl">
                       <Image
-                        src="/riwa-logo.png"
-                        height={26}
-                        width={26}
+                        src="/riwa-logo-transparent.png"
+                        height={30}
+                        width={30}
                         alt="RIWAA"
                         className="object-contain"
                       />
@@ -389,7 +390,7 @@ export default function AgentBuilderPage() {
                       className="h-8 w-auto object-contain opacity-90"
                     />
                   </div>
-                </div>
+                </Link>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setShowHistory(!showHistory)}

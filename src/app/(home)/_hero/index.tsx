@@ -1,5 +1,9 @@
+"use client";
+
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { useState } from "react";
+import LeadModal from "../_lead";
 
 const AGENT_LOG = [
   {
@@ -35,6 +39,8 @@ const TONE_MAP: Record<string, string> = {
 };
 
 const Hero = () => {
+  const [leadOpen, setLeadOpen] = useState(false);
+
   return (
     <section className="mx-auto max-w-350 px-6 pb-20 pt-16 lg:px-10 lg:pt-24">
       <div className="grid grid-cols-1 gap-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
@@ -78,8 +84,8 @@ const Hero = () => {
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <a
-              href="mailto:ak@solvetude.com"
+            <button
+              onClick={() => setLeadOpen(true)}
               className="group inline-flex items-center gap-2.5 rounded-full bg-[#1B2A4A] px-7 py-3.5 text-[13px] font-medium text-white transition-opacity hover:opacity-90"
             >
               Book a walkthrough
@@ -87,12 +93,19 @@ const Hero = () => {
                 size={15}
                 className="transition-transform group-hover:translate-x-0.5"
               />
-            </a>
+            </button>
             <a
-              href="#console"
-              className="inline-flex items-center gap-2 rounded-full border border-[#14181F]/15 px-7 py-3.5 text-[13px] font-medium text-[#14181F] transition-colors hover:border-[#14181F]/30"
+              onClick={() => {
+                document
+                  .getElementById("roster")
+                  ?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+              }}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#14181F]/15 px-7 py-3.5 text-[13px] font-medium text-[#14181F] transition-colors hover:border-[#14181F]/30"
             >
-              See the live console
+              Explore
             </a>
           </div>
 
@@ -109,7 +122,6 @@ const Hero = () => {
 
         {/* Right: signature — live agent console */}
         <motion.div
-          id="console"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
@@ -164,6 +176,7 @@ const Hero = () => {
           </div>
         </motion.div>
       </div>
+      <LeadModal open={leadOpen} onClose={() => setLeadOpen(false)} />
     </section>
   )
 };

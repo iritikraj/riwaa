@@ -43,7 +43,7 @@ const ROSTER = [
 
 const Roster = () => {
   return (
-    <section className="mx-auto max-w-350 px-6 py-20 lg:px-10">
+    <section className="mx-auto max-w-350 px-6 py-20 lg:px-10" id="roster">
       <div className="max-w-xl">
         <span className="font-jost text-[11px] uppercase tracking-[0.28em] text-[#9C7A3C]">
           The roster

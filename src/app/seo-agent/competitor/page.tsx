@@ -79,17 +79,38 @@ export default function CompetitorDashboard() {
 
           {/* HEADER */}
           <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-4">
+              {/* RIWAA */}
               <div className="flex items-center gap-3">
-                <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/4 backdrop-blur-xl shadow-inner">
-                  <Image src="/riwa-logo.png" height={26} width={26} alt="RIWAA" className="object-contain" />
+                <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/4 backdrop-blur-xl">
+                  <Image
+                    src="/riwa-logo-transparent.png"
+                    height={30}
+                    width={30}
+                    alt="RIWAA"
+                    className="object-contain"
+                  />
                 </div>
                 <div className="flex flex-col justify-center">
-                  <h2 className="text-neutral-100 font-light uppercase text-[15px] tracking-[0.28em] leading-none">RIWAA</h2>
-                  <span className="text-[9px] tracking-[0.24em] uppercase text-neutral-500 mt-2">Competitor Engine</span>
+                  <h2 className="text-neutral-100 font-light uppercase text-[15px] tracking-[0.28em] leading-none">
+                    RIWAA
+                  </h2>
+                  <span className="text-[9px] tracking-[0.24em] uppercase text-neutral-500 mt-2">
+                    Powered by
+                  </span>
                 </div>
               </div>
-            </div>
+              {/* Divider */}
+              <div className="h-8 w-px bg-white/10" />
+              {/* Powered By */}
+              <div className="flex flex-col justify-center">
+                <img
+                  src="/solvetude-logo.png"
+                  alt="Solvetude"
+                  className="h-8 w-auto object-contain opacity-90"
+                />
+              </div>
+            </Link>
             <div className="flex items-center gap-3">
               <Link href="/seo-agent/competitor-history" className="flex items-center gap-2 rounded-full border transition-all duration-300 px-4 py-2 border-white/10 bg-white/4 text-neutral-400 hover:text-white">
                 <History size={12} />

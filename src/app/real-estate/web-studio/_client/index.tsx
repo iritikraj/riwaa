@@ -8,6 +8,7 @@ import { Footer } from "@/components/skeleton/Footer";
 import { Navbar } from "@/components/skeleton/Navbar";
 import { ComponentRegistry } from "..";
 import { Clock, Share2, Check, X, Save, LayoutTemplate } from "lucide-react";
+import Link from "next/link";
 
 const steps = [
   { id: 'vision', label: 'The Vision', type: 'text' },
@@ -201,10 +202,10 @@ export default function BuilderPage() {
 
                 {/* Header */}
                 <div className="flex items-center justify-between mb-7">
-                  <div className="flex items-center gap-4">
+                  <Link href="/" className="flex items-center gap-4">
                     <div className="flex items-center gap-3">
                       <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/4 backdrop-blur-xl">
-                        <Image src="/riwa-logo.png" height={26} width={26} alt="RIWAA" className="object-contain" />
+                        <Image src="/riwa-logo-transparent.png" height={30} width={30} alt="RIWAA" className="object-contain" />
                       </div>
                       <div className="flex flex-col justify-center">
                         <h2 className="text-neutral-100 font-light uppercase text-[15px] tracking-[0.28em] leading-none">RIWAA</h2>
@@ -215,7 +216,7 @@ export default function BuilderPage() {
                     <div className="flex flex-col justify-center">
                       <img src="/solvetude-logo.png" alt="Solvetude" className="h-8 w-auto object-contain opacity-90" />
                     </div>
-                  </div>
+                  </Link>
 
                   <div className="flex items-center gap-3">
                     <button onClick={() => setShowHistory(!showHistory)} className={`flex items-center gap-2 rounded-full border transition-all duration-300 hover:bg-white/10 px-3 py-2 ${showHistory ? "bg-white/10 border-white/20 text-white" : "border-white/10 bg-white/3 text-neutral-400"}`}>
