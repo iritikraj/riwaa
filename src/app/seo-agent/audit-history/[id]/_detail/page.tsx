@@ -170,7 +170,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                       <p className="text-xs font-medium text-neutral-800 mb-1">{dup.title}</p>
                       <ul className="space-y-1">
                         {dup.urls.map((u: string, idx: number) => (
-                          <li key={idx} className="text-[10px] text-neutral-500 font-mono">- {u}</li>
+                          <li key={idx} className="text-[10px] text-neutral-500 font-jost">- {u}</li>
                         ))}
                       </ul>
                     </div>
@@ -188,7 +188,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
               {domainArchitecture.orphan_pages?.length > 0 ? (
                 <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
                   {domainArchitecture.orphan_pages.map((u: string, idx: number) => (
-                    <li key={idx} className="text-xs text-neutral-600 font-mono">{u}</li>
+                    <li key={idx} className="text-xs text-neutral-600 font-jost">{u}</li>
                   ))}
                 </ul>
               ) : (
@@ -430,7 +430,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                                   <span className="text-sm font-semibold text-neutral-900">1. URL Valid</span>
                                   <StatusIcon status={isUrlOptimized} />
                                 </div>
-                                <p className="text-xs font-mono text-neutral-500 break-all">{dom?.url_metrics?.raw_url || '--'}</p>
+                                <p className="text-xs font-jost text-neutral-500 break-all">{dom?.url_metrics?.raw_url || '--'}</p>
                               </div>
 
                               {/* 2. Slug Optimization */}
@@ -439,7 +439,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                                   <span className="text-sm font-semibold text-neutral-900">2. Slug Extraction</span>
                                   <StatusIcon status={dom?.url_metrics?.slug !== null} />
                                 </div>
-                                <p className="text-xs font-mono text-neutral-500">Path: {dom?.url_metrics?.slug || '--'}</p>
+                                <p className="text-xs font-jost text-neutral-500">Path: {dom?.url_metrics?.slug || '--'}</p>
                               </div>
 
                               {/* 3. Title Length */}
@@ -448,7 +448,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                                   <span className="text-sm font-semibold text-neutral-900">3. Meta Title Length</span>
                                   <StatusIcon status={isTitleValid} />
                                 </div>
-                                <p className="text-xs font-mono text-neutral-600 mb-1">{dom?.title?.text || '--'}</p>
+                                <p className="text-xs font-jost text-neutral-600 mb-1">{dom?.title?.text || '--'}</p>
                                 <span className={`text-[10px] font-semibold uppercase tracking-widest ${!isTitleValid ? 'text-amber-600' : 'text-emerald-600'}`}>
                                   {titleLength} Chars (Target: 30-60)
                                 </span>
@@ -460,7 +460,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                                   <span className="text-sm font-semibold text-neutral-900">4. Description Length</span>
                                   <StatusIcon status={isDescValid} />
                                 </div>
-                                <p className="text-xs font-mono text-neutral-600 line-clamp-4 mb-1">{dom?.description?.text || '--'}</p>
+                                <p className="text-xs font-jost text-neutral-600 line-clamp-4 mb-1">{dom?.description?.text || '--'}</p>
                                 <span className={`text-[10px] font-semibold uppercase tracking-widest ${!isDescValid ? 'text-amber-600' : 'text-emerald-600'}`}>
                                   {descLength} Chars (Target: 120-160)
                                 </span>
@@ -496,7 +496,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                                   <span className="text-sm font-semibold text-neutral-900">6. Canonical Target</span>
                                   <StatusIcon status={hasCanonical} />
                                 </div>
-                                <p className="text-xs font-mono text-neutral-500">{dom?.canonical_url || <span className="text-red-500 font-medium">Missing Tag</span>}</p>
+                                <p className="text-xs font-jost text-neutral-500">{dom?.canonical_url || <span className="text-red-500 font-medium">Missing Tag</span>}</p>
                               </div>
 
                               {/* 7. Robots Meta */}
@@ -505,7 +505,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                                   <span className="text-sm font-semibold text-neutral-900">7. Robots Directive</span>
                                   <StatusIcon status={true} />
                                 </div>
-                                <p className="text-xs font-mono text-neutral-500">Rule: {dom?.robots_meta || 'index, follow (Default)'}</p>
+                                <p className="text-xs font-jost text-neutral-500">Rule: {dom?.robots_meta || 'index, follow (Default)'}</p>
                               </div>
 
                               {/* 8. Open Graph Tags */}
@@ -514,7 +514,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                                   <span className="text-sm font-semibold text-neutral-900">8. Open Graph (OG)</span>
                                   <StatusIcon status={hasOGTags} />
                                 </div>
-                                <p className="text-xs font-mono text-neutral-500">Title: {dom?.social_graph?.og_title || <span className="text-amber-500 font-medium">Missing</span>}</p>
+                                <p className="text-xs font-jost text-neutral-500">Title: {dom?.social_graph?.og_title || <span className="text-amber-500 font-medium">Missing</span>}</p>
                               </div>
 
                               {/* 9. Twitter Cards */}
@@ -523,7 +523,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                                   <span className="text-sm font-semibold text-neutral-900">9. Twitter Cards</span>
                                   <StatusIcon status={hasTwitterCards} />
                                 </div>
-                                <p className="text-xs font-mono text-neutral-500">Type: {dom?.social_graph?.twitter_card || <span className="text-amber-500 font-medium">Missing</span>}</p>
+                                <p className="text-xs font-jost text-neutral-500">Type: {dom?.social_graph?.twitter_card || <span className="text-amber-500 font-medium">Missing</span>}</p>
                               </div>
 
                               {/* 10. Anchor Text Optimization */}
@@ -532,7 +532,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                                   <span className="text-sm font-semibold text-neutral-900">10. Anchor Text Check</span>
                                   <StatusIcon status={noGenericAnchors} />
                                 </div>
-                                <div className="text-xs font-mono text-neutral-500">
+                                <div className="text-xs font-jost text-neutral-500">
                                   {!noGenericAnchors ? (
                                     <div>
                                       <span className="text-amber-600 font-medium block mb-2">Found {dom.link_architecture.unoptimized_anchors.length} unoptimized links:</span>
@@ -554,7 +554,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                                   <span className="text-sm font-semibold text-neutral-900">11. Breadcrumb Navigation</span>
                                   <StatusIcon status={hasBreadcrumbs} />
                                 </div>
-                                <div className="text-xs font-mono text-neutral-500">
+                                <div className="text-xs font-jost text-neutral-500">
                                   {hasBreadcrumbs ? dom.breadcrumbs.join(' > ') : <span className="text-amber-500 font-medium">No Breadcrumbs Detected</span>}
                                 </div>
                               </div>
@@ -566,7 +566,7 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                                   {/* Status is true if there is pagination, or true if there just isn't any needed. We'll check if the object exists. */}
                                   <StatusIcon status={true} />
                                 </div>
-                                <div className="text-xs font-mono text-neutral-500">
+                                <div className="text-xs font-jost text-neutral-500">
                                   Next: {dom?.pagination?.next_url || 'None'} | Prev: {dom?.pagination?.prev_url || 'None'}
                                 </div>
                               </div>

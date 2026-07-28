@@ -136,24 +136,24 @@ export default function CompetitorDetailView({ record }: CompetitorDetailProps) 
             <div className="flex flex-col gap-2 mb-4">
               <div className="flex items-center gap-2 text-sm">
                 <span className="font-semibold text-emerald-700 w-24">TARGET:</span>
-                <span className="text-neutral-700 font-mono truncate hidden print:block">{target_url}</span>
+                <span className="text-neutral-700 font-jost truncate hidden print:block">{target_url}</span>
                 <a
                   href={target_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral-700 hover:text-blue-800! font-mono truncate print:hidden"
+                  className="text-neutral-700 hover:text-blue-800! font-jost truncate print:hidden"
                 >
                   {target_url}
                 </a>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <span className="font-semibold text-rose-700 w-24">COMPETITOR:</span>
-                <span className="text-neutral-700 font-mono truncate hidden print:block">{primaryCompetitorUrl}</span>
+                <span className="text-neutral-700 font-jost truncate hidden print:block">{primaryCompetitorUrl}</span>
                 <a
                   href={primaryCompetitorUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral-700 hover:text-blue-800! font-mono truncate print:hidden"
+                  className="text-neutral-700 hover:text-blue-800! font-jost truncate print:hidden"
                 >
                   {primaryCompetitorUrl}
                 </a>
@@ -313,7 +313,7 @@ export default function CompetitorDetailView({ record }: CompetitorDetailProps) 
                               <span className="text-sm font-medium text-neutral-800 truncate max-w-50">{entity.name}</span>
                               <span className="text-[10px] text-neutral-500 uppercase tracking-wider">{entity.type}</span>
                             </div>
-                            <span className="text-xs font-mono text-emerald-600 font-semibold bg-emerald-100/50 px-2 py-1 rounded">
+                            <span className="text-xs font-jost text-emerald-600 font-semibold bg-emerald-100/50 px-2 py-1 rounded">
                               {entity.google_salience_score?.toFixed(3)}
                             </span>
                           </div>
@@ -331,7 +331,7 @@ export default function CompetitorDetailView({ record }: CompetitorDetailProps) 
                               <span className="text-sm font-medium text-neutral-800 truncate max-w-50">{entity.name}</span>
                               <span className="text-[10px] text-neutral-500 uppercase tracking-wider">{entity.type}</span>
                             </div>
-                            <span className="text-xs font-mono text-rose-600 font-semibold bg-rose-100/50 px-2 py-1 rounded">
+                            <span className="text-xs font-jost text-rose-600 font-semibold bg-rose-100/50 px-2 py-1 rounded">
                               {entity.google_salience_score?.toFixed(3)}
                             </span>
                           </div>
