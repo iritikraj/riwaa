@@ -1,3 +1,4 @@
+// src/lib/seo-agent/queue.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { loadEnvConfig } from '@next/env';
 loadEnvConfig(process.cwd());
@@ -42,16 +43,19 @@ const globalForQueues = globalThis as unknown as {
   aiAuditQueue: Queue;
   competitorQueue: Queue;
   complianceQueue: Queue;
+  contentBriefQueue: Queue;
 };
 
 export const spiderQueue = globalForQueues.spiderQueue || new Queue('domain-spider-queue', { connection: redisOptions });
 export const aiAuditQueue = globalForQueues.aiAuditQueue || new Queue('ai-audit-queue', { connection: redisOptions });
 export const competitorQueue = globalForQueues.competitorQueue || new Queue('competitor-audit-queue', { connection: redisOptions });
 export const complianceQueue = globalForQueues.complianceQueue || new Queue('compliance-audit-queue', { connection: redisOptions });
+export const contentBriefQueue = globalForQueues.contentBriefQueue || new Queue('content-brief-queue', { connection: redisOptions });
 
 if (process.env.NODE_ENV !== 'production') {
   globalForQueues.spiderQueue = spiderQueue;
   globalForQueues.aiAuditQueue = aiAuditQueue;
   globalForQueues.competitorQueue = competitorQueue;
   globalForQueues.complianceQueue = complianceQueue;
+  globalForQueues.contentBriefQueue = contentBriefQueue;
 }

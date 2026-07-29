@@ -26,6 +26,7 @@
     "cheerio": "^1.2.0",
     "clsx": "^2.1.1",
     "crawlee": "^3.17.0",
+    "docx": "^9.7.1",
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.38.0",
     "gsap": "^3.15.0",

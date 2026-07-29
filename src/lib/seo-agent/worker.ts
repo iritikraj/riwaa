@@ -1,3 +1,4 @@
+// src/lib/seo-agent/worker.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { loadEnvConfig } from '@next/env';
 loadEnvConfig(process.cwd());
@@ -18,7 +19,11 @@ import {
 } from './strapi';
 
 import * as mammoth from 'mammoth';
-import { extractComplianceData, parseBriefWithGemini, runComparisonEngine } from './compliance/compliance-scrapper';
+import { extractComplianceData, parseBriefWithGemini, runComparisonEngine } from './compliance/scrapper';
+import { generateContentBrief } from './content-brief/generator';
+import { extractBriefArchitecture, scrapeMultipleCompetitors } from './content-brief/scrapper';
+import { fetchGcpKnowledgeGraphEntities } from './content-brief/gcp-entities';
+import { logger as defaultLogger } from '@/lib/logs/logger';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -307,6 +312,106 @@ const createComplianceWorker = () => new Worker('compliance-audit-queue', async 
   concurrency: 3
 });
 
+/* 4. CONTENT BRIEF WORKER */
+const createContentBriefWorker = () => new Worker('content-brief-queue', async job => {
+  const { documentId, topic, pageTypeId, urlPattern, internalBlueprintUrl, referenceUrls } = job.data;
+
+  // Create localized child logger for worker job execution
+  const workerLogger = defaultLogger.child({
+    module: 'content_brief_worker',
+    jobId: job.id,
+    documentId,
+    topic
+  });
+
+  workerLogger.info({ event: 'content_brief_job_started' }, `Starting job for Topic: "${topic}"`);
+
+  // Helper function to update micro-statuses in Strapi
+  const updateStatus = async (status: string, data: any = null) => {
+    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.STRAPI_URL;
+    const res = await fetch(`${strapiUrl}/api/content-briefs/${documentId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}`
+      },
+      body: JSON.stringify({
+        data: {
+          audit_status: status,
+          ...(data && { generated_data: data })
+        }
+      })
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      workerLogger.error({ event: 'strapi_update_failed', status, errText }, 'Failed to update Strapi status');
+      throw new Error(`Strapi update failed: ${res.statusText}`);
+    }
+  };
+
+  try {
+    // Step 1: Fetch Page Type Rules from Strapi
+    workerLogger.debug({ event: 'fetching_page_type_rules' });
+    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.STRAPI_URL;
+    const ruleRes = await fetch(`${strapiUrl}/api/page-type-rules/${pageTypeId}`, {
+      headers: { Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}` }
+    });
+
+    if (!ruleRes.ok) throw new Error(`Failed to fetch Page Type Rules for ID ${pageTypeId}`);
+    const ruleJson = await ruleRes.json();
+    const pageTypeRules = ruleJson.data?.attributes ? { id: ruleJson.data.id, ...ruleJson.data.attributes } : ruleJson.data;
+
+    // Step 2: Scrape User-Provided Competitor URLs & Internal Blueprint
+    await updateStatus('scraping_competitors');
+    workerLogger.info({ event: 'scraping_competitors_started', urlCount: referenceUrls?.length || 0 });
+    const competitorData = await scrapeMultipleCompetitors(referenceUrls || []);
+
+    let internalBlueprintData = null;
+    if (pageTypeRules?.requires_internal_blueprint && internalBlueprintUrl) {
+      workerLogger.info({ event: 'extracting_internal_blueprint', internalBlueprintUrl });
+      internalBlueprintData = await extractBriefArchitecture(internalBlueprintUrl);
+    }
+
+    // Step 3: Fetch GCP Knowledge Graph Entities
+    await updateStatus('extracting_entities');
+    workerLogger.info({ event: 'fetching_gcp_entities_started' });
+    const entityData = await fetchGcpKnowledgeGraphEntities(topic, workerLogger);
+
+    // Step 4: Run 3-Step Gemini Synthesis Chain (Architect -> Strategist -> Writer)
+    await updateStatus('generating_ai_brief');
+    workerLogger.info({ event: 'gemini_synthesis_started' });
+    const finalBriefJson = await generateContentBrief(
+      topic,
+      urlPattern,
+      pageTypeRules,
+      entityData,            // Passes Knowledge Graph LSI entities to Gemini
+      competitorData,        // Passes scraped competitor heading trees
+      internalBlueprintData, // Passes client blueprint (if present)
+      workerLogger
+    );
+
+    // Step 5: Save Final Brief & Mark Completed
+    workerLogger.info({ event: 'saving_brief_to_strapi' });
+    await updateStatus('completed', finalBriefJson);
+
+    workerLogger.info({ event: 'content_brief_job_completed' }, `Job ${job.id} fully completed.`);
+    return { documentId };
+
+  } catch (error: any) {
+    workerLogger.error({
+      err: error,
+      event: 'content_brief_job_failed'
+    }, `Failed job for document ${documentId}: ${error.message}`);
+
+    await updateStatus('failed');
+    throw error;
+  }
+}, {
+  connection: redisOptions as any,
+  concurrency: 2
+});
+
 /* 2. SINGLETON CACHE (This permanently fixes the stalling/zombie issue) */
 
 const globalForWorkers = globalThis as unknown as {
@@ -314,18 +419,21 @@ const globalForWorkers = globalThis as unknown as {
   spiderWorker: Worker;
   competitorWorker: Worker;
   complianceWorker: Worker;
+  contentBriefWorker: Worker;
 };
 
 export const aiAuditWorker = globalForWorkers.aiAuditWorker || createAiAuditWorker();
 export const spiderWorker = globalForWorkers.spiderWorker || createSpiderWorker();
 export const competitorWorker = globalForWorkers.competitorWorker || createCompetitorWorker();
 export const complianceWorker = globalForWorkers.complianceWorker || createComplianceWorker();
+export const contentBriefWorker = globalForWorkers.contentBriefWorker || createContentBriefWorker();
 
 if (process.env.NODE_ENV !== 'production') {
   globalForWorkers.aiAuditWorker = aiAuditWorker;
   globalForWorkers.spiderWorker = spiderWorker;
   globalForWorkers.competitorWorker = competitorWorker;
   globalForWorkers.complianceWorker = complianceWorker;
+  globalForWorkers.contentBriefWorker = contentBriefWorker;
 }
 
 /* 4. OBSERVABILITY LISTENERS */
@@ -351,4 +459,10 @@ complianceWorker.on('completed', job => console.log(`[Compliance Queue] Job ${jo
 complianceWorker.on('failed', (job, err) => {
   if (isDevelopment && err.message.includes('ECONNREFUSED')) return;
   console.log(`[Compliance Queue] Job ${job?.id} failed with ${err.message}`);
+});
+
+contentBriefWorker.on('completed', job => console.log(`[Brief Queue] Job ${job.id} completed successfully`));
+contentBriefWorker.on('failed', (job, err) => {
+  if (isDevelopment && err.message.includes('ECONNREFUSED')) return;
+  console.log(`[Brief Queue] Job ${job?.id} failed with ${err.message}`);
 });

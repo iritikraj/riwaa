@@ -140,9 +140,6 @@ export async function fetchPageSpeedData(url: string) {
 }
 
 export async function updateAuditInStrapi(documentId: string, backgroundData: any) {
-  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338'; // Aligned port
-  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
-
   if (!STRAPI_TOKEN) {
     console.error("Missing STRAPI_API_TOKEN. Cannot update document in background.");
     return null;
@@ -191,8 +188,8 @@ export async function updateAuditInStrapi(documentId: string, backgroundData: an
 }
 
 export async function appendResultToStrapi(documentId: string, url: string, auditResult: any = null, errorMsg: string | null = null) {
-  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
-  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
+
+
 
   // 1. STRIPPED NAKED URL: Removed ?publicationState=preview
   const endpoint = `${STRAPI_URL}/api/website-audits/${documentId}`;
@@ -264,9 +261,6 @@ export interface CompetitorAuditPayload {
   Creates the initial placeholder record in Strapi when a comparison is initiated.
  */
 export async function saveCompetitorAuditToStrapi(payload: CompetitorAuditPayload) {
-  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
-  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
-
   if (!STRAPI_TOKEN) {
     throw new Error("Missing STRAPI_API_TOKEN in environment variables.");
   }
@@ -293,9 +287,6 @@ export async function saveCompetitorAuditToStrapi(payload: CompetitorAuditPayloa
   Fetches the complete history of competitor comparison reports.
  */
 export async function getCompetitorAuditsHistory() {
-  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
-  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
-
   const response = await fetch(`${STRAPI_URL}/api/competitor-audits?sort=createdAt:desc`, {
     method: 'GET',
     headers: {
@@ -319,9 +310,6 @@ export async function getCompetitorAuditsHistory() {
   Retrieves a single competitor audit record by documentId or ID.
  */
 export async function getCompetitorAuditById(id: string) {
-  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
-  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
-
   const response = await fetch(`${STRAPI_URL}/api/competitor-audits/${id}`, {
     method: 'GET',
     headers: {
@@ -348,9 +336,6 @@ export async function updateCompetitorAuditInStrapi(
   updatedAuditData: any,
   status: 'completed' | 'failed' = 'completed'
 ) {
-  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
-  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
-
   const endpoint = `${STRAPI_URL}/api/competitor-audits/${documentId}`;
 
   const updateRes = await fetch(endpoint, {
@@ -384,8 +369,6 @@ export async function updateComplianceAuditInStrapi(
   overallScore: number | null = null,
   reportData: any = null
 ) {
-  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
-  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
 
   if (!STRAPI_TOKEN) {
     throw new Error("Missing STRAPI_API_TOKEN in environment variables.");
@@ -425,9 +408,6 @@ export async function updateComplianceAuditInStrapi(
   Uses populate=brief_file to retrieve the media URL for the frontend.
  */
 export async function getComplianceAuditsHistory() {
-  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
-  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
-
   const response = await fetch(`${STRAPI_URL}/api/compliance-audits?sort=createdAt:desc&populate=brief_file`, {
     method: 'GET',
     headers: {
@@ -451,9 +431,6 @@ export async function getComplianceAuditsHistory() {
   Retrieves a single compliance audit record by documentId.
  */
 export async function getComplianceAuditById(id: string) {
-  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
-  const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
-
   const response = await fetch(`${STRAPI_URL}/api/compliance-audits/${id}?populate=brief_file`, {
     method: 'GET',
     headers: {
@@ -466,6 +443,49 @@ export async function getComplianceAuditById(id: string) {
   if (!response.ok) {
     console.error(`Failed to fetch compliance audit ID: ${id}`);
     return null;
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+export async function getContentBriefById(id: string) {
+  const response = await fetch(`${STRAPI_URL}/api/content-briefs/${id}?populate=*`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${STRAPI_TOKEN}`,
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    console.error(`Failed to fetch content brief ID: ${id}`);
+    return null;
+  }
+
+  const result = await response.json();
+  return result.data;
+}
+
+/**
+ * Fetches the complete history of Content Briefs.
+ * Uses populate=page_type_rule to get the name of the rule used.
+ */
+export async function getContentBriefsHistory() {
+  const response = await fetch(`${STRAPI_URL}/api/content-briefs?sort=createdAt:desc&populate=page_type_rule`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${STRAPI_TOKEN}`,
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errorDetails = await response.text();
+    console.error(`Strapi Content Brief Fetch Error (${response.status}): ${errorDetails}`);
+    return [];
   }
 
   const result = await response.json();

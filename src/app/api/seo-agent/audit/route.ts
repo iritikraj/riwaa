@@ -164,7 +164,7 @@ export const POST = withLogger('/api/seo-agent/audit', async (req: NextRequest, 
         geoScore: auditData.geo_visibility_score
       }, 'AI Engine successfully generated and parsed the JSON report.');
     } catch (parseError) {
-      routeLogger.error({ event: 'ai_parse_failed', rawText }, 'Failed to parse AI JSON response.');
+      routeLogger.error({ event: 'ai_parse_failed', rawText, parseError }, 'Failed to parse AI JSON response.');
       throw new Error("AI Engine response failed structural JSON validation");
     }
 
