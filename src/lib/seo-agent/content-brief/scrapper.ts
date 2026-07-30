@@ -3,6 +3,8 @@
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import * as cheerio from 'cheerio';
+import type { Logger } from 'pino';
+import { logger as defaultLogger } from '@/lib/logs/logger';
 
 puppeteer.use(StealthPlugin());
 
@@ -120,4 +122,75 @@ export async function scrapeMultipleCompetitors(urls: string[]) {
     }
   }
   return results;
+}
+
+export async function fetchPeopleAlsoAsk(topic: string, parentLogger: Logger = defaultLogger): Promise<string[]> {
+  const paaLogger = parentLogger.child({ module: 'paa_scraper', topic });
+  let browser;
+
+  try {
+    paaLogger.info({ event: 'paa_scrape_started' });
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--single-process',
+        '--no-zygote'
+      ]
+    });
+
+    const page = await browser.newPage();
+    await page.goto(`https://www.google.com/search?q=${encodeURIComponent(topic)}`, { waitUntil: 'domcontentloaded' });
+
+    // Extract the text from the PAA accordion elements
+    const paaQuestions = await page.evaluate(() => {
+      const elements = Array.from(document.querySelectorAll('div[data-init-q]'));
+      return elements.map(el => el.getAttribute('data-init-q') || '').filter(q => q.length > 0);
+    });
+
+    paaLogger.info({ event: 'paa_scrape_success', count: paaQuestions.length });
+    return paaQuestions.slice(0, 5); // Return top 5 questions
+  } catch (error: any) {
+    paaLogger.error({ event: 'paa_scrape_failed', err: error });
+    return [];
+  } finally {
+    if (browser) await browser.close();
+  }
+}
+
+/**
+ * Analyzes scraped competitor headings and returns a frequency matrix of ALL topics.
+ * This allows the AI to decide if a low-frequency topic is actually a valuable unique gap.
+ */
+export function extractCompetitorTopicFrequencies(competitorData: any[]) {
+  const headingCounts: Record<string, { heading: string; count: number }> = {};
+
+  competitorData.forEach(comp => {
+    const headings = comp.headings || [];
+    const uniqueInComp = new Set<string>();
+
+    headings.forEach((h: any) => {
+      // Clean and normalize heading text
+      const cleanText = h.text.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
+      if (cleanText.length > 3) {
+        uniqueInComp.add(h.text.trim());
+      }
+    });
+
+    uniqueInComp.forEach(headingText => {
+      if (!headingCounts[headingText]) {
+        headingCounts[headingText] = { heading: headingText, count: 1 };
+      } else {
+        headingCounts[headingText].count += 1;
+      }
+    });
+  });
+
+  // Return ALL topics, sorted by how many competitors cover them (highest first)
+  return Object.values(headingCounts)
+    .sort((a, b) => b.count - a.count)
+    .map(item => `${item.heading} (Covered by ${item.count}/${competitorData.length} competitors)`);
 }

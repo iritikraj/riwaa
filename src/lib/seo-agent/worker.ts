@@ -21,7 +21,7 @@ import {
 import * as mammoth from 'mammoth';
 import { extractComplianceData, parseBriefWithGemini, runComparisonEngine } from './compliance/scrapper';
 import { generateContentBrief } from './content-brief/generator';
-import { extractBriefArchitecture, scrapeMultipleCompetitors } from './content-brief/scrapper';
+import { extractBriefArchitecture, scrapeMultipleCompetitors, fetchPeopleAlsoAsk, extractCompetitorTopicFrequencies } from './content-brief/scrapper';
 import { fetchGcpKnowledgeGraphEntities } from './content-brief/gcp-entities';
 import { logger as defaultLogger } from '@/lib/logs/logger';
 
@@ -376,7 +376,13 @@ const createContentBriefWorker = () => new Worker('content-brief-queue', async j
     // Step 3: Fetch GCP Knowledge Graph Entities
     await updateStatus('extracting_entities');
     workerLogger.info({ event: 'fetching_gcp_entities_started' });
-    const entityData = await fetchGcpKnowledgeGraphEntities(topic, workerLogger);
+    // Fetch GCP Entities and PAA Questions concurrently to save execution time
+    const [entityData, paaQuestions] = await Promise.all([
+      fetchGcpKnowledgeGraphEntities(topic, workerLogger),
+      fetchPeopleAlsoAsk(topic, workerLogger)
+    ]);
+
+    const competitorTopicFrequencies = extractCompetitorTopicFrequencies(competitorData);
 
     // Step 4: Run 3-Step Gemini Synthesis Chain (Architect -> Strategist -> Writer)
     await updateStatus('generating_ai_brief');
@@ -386,6 +392,8 @@ const createContentBriefWorker = () => new Worker('content-brief-queue', async j
       urlPattern,
       pageTypeRules,
       entityData,            // Passes Knowledge Graph LSI entities to Gemini
+      paaQuestions,                  // Pass PAA
+      competitorTopicFrequencies, // Pass Competitor Matrix
       competitorData,        // Passes scraped competitor heading trees
       internalBlueprintData, // Passes client blueprint (if present)
       workerLogger
