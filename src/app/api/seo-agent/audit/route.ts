@@ -2,11 +2,12 @@
 // src/app/api/seo-agent/audit/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { fetchPageSpeedData, saveAuditToStrapi } from '@/lib/seo-agent/strapi';
+import { saveAuditToStrapi } from '@/lib/seo-agent/strapi';
 import { scrapeWithPuppeteer } from '@/lib/seo-agent/scraper';
 import { analyzeEntities } from '@/lib/seo-agent/nlp';
 import { withLogger } from '@/lib/logs/withLogger'; // Your custom logger
 import { generateKeywordMatrix } from '@/lib/seo-agent/keyword-research';
+import { fetchPageSpeedData } from '@/lib/seo-agent/google-tools/page-speed';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 

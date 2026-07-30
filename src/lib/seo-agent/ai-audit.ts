@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GoogleGenAI } from '@google/genai';
-import { fetchPageSpeedData } from '@/lib/seo-agent/strapi';
+import { fetchPageSpeedData } from '@/lib/seo-agent/google-tools/page-speed';
 import { scrapeWithPuppeteer } from '@/lib/seo-agent/scraper';
 import { analyzeEntities } from '@/lib/seo-agent/nlp';
 import { generateKeywordMatrix } from '@/lib/seo-agent/keyword-research';

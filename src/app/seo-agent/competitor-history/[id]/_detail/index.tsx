@@ -3,7 +3,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Loader2, Swords, Activity, CheckCircle, AlertTriangle, Lightbulb, Database, Zap, FileText, BrainCircuit, Printer } from 'lucide-react';
+import { ArrowLeft, Loader2, Swords, Activity, CheckCircle, AlertTriangle, Lightbulb, Database, Zap, FileText, BrainCircuit, Printer, ChevronRight, Link2 } from 'lucide-react';
 import Link from 'next/link';
 import ComparisonRow from '../_comparison';
 
@@ -34,7 +34,7 @@ export default function CompetitorDetailView({ record }: CompetitorDetailProps) 
     if (!isProcessing) return;
     const interval = setInterval(() => {
       router.refresh();
-    }, 4000);
+    }, 10000);
     return () => clearInterval(interval);
   }, [isProcessing, router]);
 
@@ -293,6 +293,20 @@ export default function CompetitorDetailView({ record }: CompetitorDetailProps) 
                     <ComparisonRow label="External Links" targetVal={targetRaw.metadata?.link_architecture?.external_links} compVal={compRaw.metadata?.link_architecture?.external_links} />
                     <ComparisonRow label="Title Length" targetVal={targetRaw.metadata?.title?.length} compVal={compRaw.metadata?.title?.length} />
                   </div>
+                </div>
+
+                <div className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm lg:col-span-2">
+                  <div className="flex items-center gap-2 mb-6 pb-4 border-b border-neutral-100">
+                    <Link2 className="w-4 h-4 text-blue-500" />
+                    <h4 className="text-sm font-semibold uppercase tracking-widest text-neutral-800">External Links List</h4>
+                  </div>
+                  <ComparisonRow
+                    label="External Links"
+                    targetVal={targetRaw.metadata?.link_architecture?.external_links_array?.length || 0}
+                    compVal={compRaw.metadata?.link_architecture?.external_links_array?.length || 0}
+                    targetList={targetRaw.metadata?.link_architecture?.external_links_array}
+                    compList={compRaw.metadata?.link_architecture?.external_links_array}
+                  />
                 </div>
 
                 {/* 3. NLP Entities (Full Width) */}

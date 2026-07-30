@@ -1,3 +1,4 @@
+// riwaa/src/app/api/seo-agent/competitor/route.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { saveCompetitorAuditToStrapi } from '@/lib/seo-agent/strapi'; // We will build this in the next step

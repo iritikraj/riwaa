@@ -1,3 +1,4 @@
+// riwaa/src/lib/seo-agent/scraper.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
@@ -24,7 +25,7 @@ export async function scrapeWithPuppeteer(url: string) {
     await page.setViewport({ width: 1920, height: 1080 });
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const html = await page.content();
@@ -87,7 +88,8 @@ export async function scrapeWithPuppeteer(url: string) {
 
     // 13. Anchor Text Raw Data
     const baseDomain = urlObj.hostname;
-    const internalHrefs = new Set<string>(); // NEW: Storing exact URLs
+    const internalHrefs = new Set<string>(); // Storing exact URLs
+    const externalHrefs = new Set<string>(); // Storing exact external URLs
     let externalLinks = 0;
     const genericAnchorsFound: { text: string, href: string }[] = [];
     const genericWords = ['click here', 'read more', 'learn more', 'link', 'go', 'here', 'more', 'view all'];
@@ -108,6 +110,7 @@ export async function scrapeWithPuppeteer(url: string) {
         const cleanHref = href.split('#')[0].replace(/\/$/, "");
         internalHrefs.add(cleanHref);
       } else if (href.startsWith('http')) {
+        externalHrefs.add(href);
         externalLinks++;
       }
 
@@ -145,6 +148,7 @@ export async function scrapeWithPuppeteer(url: string) {
         link_architecture: {
           internal_links: Array.from(internalHrefs),
           external_links: externalLinks,
+          external_links_array: Array.from(externalHrefs),
           unoptimized_anchors: genericAnchorsFound
         },
         content_metrics: {

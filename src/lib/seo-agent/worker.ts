@@ -13,7 +13,6 @@ import { runHeavyAiAudit } from './ai-audit';
 import {
   updateAuditInStrapi,
   appendResultToStrapi,
-  fetchPageSpeedData,
   updateCompetitorAuditInStrapi,
   updateComplianceAuditInStrapi
 } from './strapi';
@@ -24,6 +23,7 @@ import { generateContentBrief } from './content-brief/generator';
 import { extractBriefArchitecture, scrapeMultipleCompetitors, fetchPeopleAlsoAsk, extractCompetitorTopicFrequencies } from './content-brief/scrapper';
 import { fetchGcpKnowledgeGraphEntities } from './content-brief/gcp-entities';
 import { logger as defaultLogger } from '@/lib/logs/logger';
+import { fetchPageSpeedData } from '@/lib/seo-agent/google-tools/page-speed';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
