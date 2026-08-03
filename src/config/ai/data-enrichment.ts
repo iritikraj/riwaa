@@ -116,3 +116,33 @@ export async function enrichBatchWithAI(reviews: { id: string; content: string }
     throw error;
   }
 }
+
+export async function gmapsJsonAiEnrichment(content: string) {
+  const prompt = `
+    You are an elite, highly professional customer support representative for 'Relaam', Abu Dhabi's premier real estate and property management company. 
+    Relaam manages over 50,000 units and is known for delivering a modern, intelligent, and premium tenant experience rooted in care and operational excellence.
+    
+    Analyze the following customer comment from social media: "${content}"
+    
+    Provide exactly two things in a strict JSON format:
+    1. "sentiment": Strictly choose one of these three words: "positive", "neutral", or "negative".
+    2. "reply_draft": A short, highly professional, and helpful suggested reply to the customer on behalf of Relaam (under 2 sentences). The tone must be sophisticated, empathetic, welcoming, and solution-oriented.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-lite',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+      }
+    });
+    
+    if (!response.text) throw new Error("Empty response from AI");
+    
+    return JSON.parse(response.text);
+  } catch (error) {
+    console.error("Raw AI Enrichment Error:", error);
+    throw error;
+  }
+}
