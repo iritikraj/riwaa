@@ -3,6 +3,7 @@
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import * as cheerio from 'cheerio';
+import { getJaccardSimilarity } from './audit/content-analysis';
 
 puppeteer.use(StealthPlugin());
 
@@ -123,6 +124,38 @@ export async function scrapeWithPuppeteer(url: string) {
     const imagesTotal = $('img').length;
     const imagesMissingAlt = $('img:not([alt]), img[alt=""]').length;
 
+    // ==========================================
+    // NEW: IN-PAGE DUPLICATE CONTENT CHECK
+    // ==========================================
+    const textChunks: string[] = [];
+    // Extract substantive text blocks (paragraphs, lists, subheadings)
+    $('p, h2, h3, h4, li').each((_, el) => {
+      const text = $(el).text().trim().replace(/\s\s+/g, ' ');
+      // Only check blocks that have at least 15 words to avoid flagging standard UI elements
+      if (text.split(/\s+/).length > 15) {
+        textChunks.push(text);
+      }
+    });
+
+    const internalDuplicates: { text: string; similarity: number }[] = [];
+    const JACCARD_THRESHOLD = 0.85;
+
+    for (let i = 0; i < textChunks.length; i++) {
+      for (let j = i + 1; j < textChunks.length; j++) {
+        const sim = getJaccardSimilarity(textChunks[i], textChunks[j]);
+        if (sim >= JACCARD_THRESHOLD) {
+          internalDuplicates.push({
+            text: textChunks[i],
+            similarity: Number(sim.toFixed(2))
+          });
+        }
+      }
+    }
+
+    const uniqueDuplicates = Array.from(new Set(internalDuplicates.map(d => d.text)))
+      .map(text => internalDuplicates.find(d => d.text === text))
+      .filter(Boolean);
+
     // Schema Extraction
     const schemaTypes: Set<string> = new Set();
     $('script[type="application/ld+json"]').each((_, el) => {
@@ -155,6 +188,7 @@ export async function scrapeWithPuppeteer(url: string) {
           word_count: wordCount,
           images_total: imagesTotal,
           images_missing_alt: imagesMissingAlt,
+          internal_duplicates_found: uniqueDuplicates,
         },
         detected_schemas: Array.from(schemaTypes),
       },

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// riwaa/src/app/seo-agent/audit-history/[id]/_detail/index.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -9,6 +10,7 @@ import {
   LayoutTemplate, XCircle, Search, MessageCircle, TrendingUp, Code, Zap, Tag, Loader2, Activity
 } from 'lucide-react';
 import Link from 'next/link';
+import ContentQualityCard from '../_content-quality';
 
 interface AuditDetailProps {
   record: any;
@@ -575,6 +577,19 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                         )}
                       </div>
 
+                      {result.content_quality && (
+                        <div className="mb-12">
+                          <h4 className="text-sm font-medium text-neutral-800 mb-6 flex items-center gap-2">
+                            <Layers className="w-4 h-4 text-neutral-400" /> Content Quality Integrity
+                          </h4>
+                          <ContentQualityCard
+                            contentData={{
+                              ...result.content_quality,
+                              raw_dom_data: dom // Pass dom so we can access internal_duplicates_found
+                            }}
+                          />
+                        </div>
+                      )}
                       {/* Technical Issues Developer Backlog */}
                       {result.technical_issues && result.technical_issues.length > 0 && (
                         <div className="mt-12">
@@ -604,7 +619,6 @@ export default function AuditDetailView({ record }: AuditDetailProps) {
                         </div>
                       )}
                     </div>
-
                   </div>
                 )}
               </section>

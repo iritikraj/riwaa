@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getAuditById } from '@/lib/seo-agent/strapi';
-import AuditDetailView from './_detail/page';
+import AuditDetailView from './_detail';
 
 export async function generateMetadata(
   {

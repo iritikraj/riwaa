@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// riwaa/src/lib/seo-agent/ai-audit.ts
 import { GoogleGenAI } from '@google/genai';
 import { fetchPageSpeedData } from '@/lib/seo-agent/google-tools/page-speed';
 import { scrapeWithPuppeteer } from '@/lib/seo-agent/scraper';
 import { analyzeEntities } from '@/lib/seo-agent/nlp';
 import { generateKeywordMatrix } from '@/lib/seo-agent/keyword-research';
+import { calculateKeywordDensity, checkGrammar } from './audit/content-analysis';
 
 // const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -28,7 +30,23 @@ export async function runHeavyAiAudit(url: string, industry: string) {
   const seedKeyword = h1Text || titleText || industry || 'General Business';
   const keywordMatrix = await generateKeywordMatrix(seedKeyword);
 
-  // 4. Gemini AI Synthesis
+
+  // INJECT KEYWORD DENSITY MATH HERE
+  const keywordsToCheck = [seedKeyword];
+  if (keywordMatrix && keywordMatrix.length > 0) {
+    keywordsToCheck.push(...keywordMatrix.slice(0, 2).map((k: any) => k.keyword));
+  }
+
+  const grammarReport = await checkGrammar(scraperResult.rawText);
+
+  const promptGrammarReport = {
+    total_errors: grammarReport.total_errors,
+    sample_issues: grammarReport.issues.slice(0, 3)
+  };
+
+  // Pass the raw text and the target keywords to our new utility function
+  const densityReport = calculateKeywordDensity(scraperResult.rawText, keywordsToCheck);
+
   const prompt = `
       [Request ID: ${timestamp}]
       Perform a comprehensive enterprise SEO and Content Quality analysis on the URL: ${url}.
@@ -48,6 +66,12 @@ export async function runHeavyAiAudit(url: string, industry: string) {
       
       4. KNOWLEDGE GRAPH ENTITIES (Google NLP API Salience):
       ${JSON.stringify(nlpEntities.length > 0 ? nlpEntities : "Unavailable", null, 2)}
+
+      5. KEYWORD DENSITY & STUFFING REPORT:
+      ${JSON.stringify(densityReport, null, 2)}
+
+      6. GRAMMAR & READABILITY REPORT:
+      ${JSON.stringify(promptGrammarReport, null, 2)}
       ====================================
 
       CRITICAL AGENT INSTRUCTIONS:
@@ -57,7 +81,10 @@ export async function runHeavyAiAudit(url: string, industry: string) {
       4. Analyze the "social_graph". If OG tags or Twitter Cards are missing, flag them.
       5. Read the "RAW TEXT CONTENT" to calculate a Readability Score (0-100) and evaluate Tone Consistency.
       6. Use "word_count" to determine if Thin Content is detected (usually < 300 words).
-      
+      7. If "internal_duplicates_found" (in the DOM data) has items, flag duplicate content issues.
+      8. Review the "KEYWORD DENSITY & STUFFING REPORT". If any keyword status is "Critical (Stuffing)", flag it severely in the content quality metrics.
+      9. Use "GRAMMAR & READABILITY REPORT" to adjust the overall content health score. Do NOT attempt to list grammar errors in your JSON response.
+
       Expected JSON Format:
       {
         "seo_health_score": 85, 
@@ -82,12 +109,13 @@ export async function runHeavyAiAudit(url: string, industry: string) {
         "content_quality": {
           "thin_content_detected": false, 
           "readability_score": 82,
-          "grammar_issues_found": ["issue 1", "issue 2"],
-          "tone_consistency": "Highly consistent, professional luxury tone.", 
-          "missing_semantic_topics": ["topic1", "topic2"] 
+          "tone_consistency": "Highly consistent.", 
+          "missing_semantic_topics": ["topic1", "topic2"],
+          "keyword_stuffing_warnings": [{"keyword": "example", "density": 5.2, "status": "Critical (Stuffing)"}],
+          "duplicate_content_detected": true
         }
       }
-  `;
+    `;
 
   const response: any = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
@@ -103,6 +131,10 @@ export async function runHeavyAiAudit(url: string, industry: string) {
   auditData.raw_dom_data = scraperResult.metadata;
   auditData.raw_nlp_entities = nlpEntities;
   auditData.raw_pagespeed_data = psiData;
+  if (!auditData.content_quality) auditData.content_quality = {};
+  auditData.content_quality.deterministic_keyword_density = densityReport;
+  auditData.content_quality.grammar_issues_found = grammarReport.issues;
+  auditData.content_quality.grammar_total_errors = grammarReport.total_errors;
 
   return auditData;
 }
