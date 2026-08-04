@@ -56,7 +56,7 @@ export function getJaccardSimilarity(str1: string, str2: string): number {
 
 export async function checkGrammar(rawText: string) {
   if (!rawText || rawText.trim() === '') return { total_errors: 0, issues: [] };
-  
+
   const rawTruncated = rawText.substring(0, 8000);
   const safeText = rawTruncated.substring(0, rawTruncated.lastIndexOf('.') + 1);
   // console.log(safeText);
@@ -117,7 +117,7 @@ export async function checkGrammar(rawText: string) {
       model: 'gemini-3.5-flash-lite',
       contents: prompt,
       config: {
-        temperature: 0.1,
+        temperature: 0.0,
         responseMimeType: "application/json"
       },
     });
@@ -132,5 +132,75 @@ export async function checkGrammar(rawText: string) {
   } catch (error) {
     console.error('Failed to run AI grammar check:', error);
     return { total_errors: 0, issues: [], error: 'AI check failed' };
+  }
+}
+
+export async function analyzeReadabilityAndTone(rawText: string) {
+  if (!rawText || rawText.trim() === '') {
+    return {
+      readability: { score: 0, complexity_level: 'N/A', feedback: [] },
+      tone: { primary_tone: 'N/A', is_consistent: true, inconsistencies: [] }
+    };
+  }
+
+  // Safe truncation to avoid mid-word slicing
+  const rawTruncated = rawText.substring(0, 8000);
+  const safeText = rawTruncated.substring(0, rawTruncated.lastIndexOf('.') + 1) || rawTruncated;
+
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+  const prompt = `
+    You are an expert SEO Content Strategist and Brand Auditor. Evaluate the following website copy for Readability and Tone Consistency.
+
+    TASK 1: READABILITY ANALYSIS
+    Evaluate how easy the text is to read.
+    - Provide a 'score' from 0 to 100 (100 = very easy/conversational, 0 = highly dense/academic). A score of 60-80 is ideal for premium web copy.
+    - Classify the 'complexity_level' (e.g., Easy, Moderate, Advanced).
+    - Provide 1-2 short, actionable bullet points of 'feedback' regarding sentence structure or word complexity.
+    - THE "10-WORD RULE": Completely ignore any sentence or phrase that is fewer than 10 words long.
+
+    TASK 2: TONE CONSISTENCY
+    Evaluate the brand voice. The baseline expectation is usually a premium, professional, or welcoming tone.
+    - Identify the 'primary_tone' (e.g., "Luxurious and serene", "Corporate and professional").
+    - Determine if the tone 'is_consistent' (boolean true/false).
+    - If the tone breaks (e.g., a sudden drop into highly informal slang, overly aggressive sales pitches, or disjointed formatting), list the jarring phrases in 'inconsistencies'. If perfectly consistent, return an empty array [].
+    - THE "10-WORD RULE": Completely ignore any sentence or phrase that is fewer than 10 words long.
+
+    Expected JSON Format:
+    {
+      "readability": {
+        "score": 75,
+        "complexity_level": "Moderate",
+        "feedback": ["Sentences flow well with a good mix of lengths.", "Vocabulary is accessible but retains a premium feel."]
+      },
+      "tone": {
+        "primary_tone": "Premium and welcoming",
+        "is_consistent": true,
+        "inconsistencies": []
+      }
+    }
+
+    Text to analyze:
+    "${safeText}"
+  `;
+
+  try {
+    const response: any = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        temperature: 0.1, // Slight flexibility allowed for tone analysis
+        responseMimeType: "application/json"
+      },
+    });
+
+    const rawOutput = typeof response.text === 'function' ? response.text() : (response.text || '{}');
+    return JSON.parse(rawOutput);
+  } catch (error) {
+    console.error('Failed to run AI readability/tone check:', error);
+    return {
+      readability: { score: '--', complexity_level: 'Error', feedback: [] },
+      tone: { primary_tone: 'Error', is_consistent: false, inconsistencies: [] }
+    };
   }
 }

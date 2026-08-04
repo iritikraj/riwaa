@@ -59,7 +59,7 @@ export default function InstantContentCheck() {
         </div>
 
         {/* INPUT FORM */}
-        <div className="bg-white border border-neutral-200 rounded-[24px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <div className="bg-white border border-neutral-200 rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <form onSubmit={handleCheck} className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
             <div className="md:col-span-6 space-y-2">
               <label className="text-[10px] uppercase tracking-[0.2em] font-semibold text-neutral-500 ml-1">
@@ -90,7 +90,7 @@ export default function InstantContentCheck() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-[50px] flex items-center justify-center gap-2 bg-zinc-900 text-white hover:bg-zinc-800 transition-colors rounded-xl text-[11px] font-bold uppercase tracking-widest disabled:opacity-50 shadow-md"
+                className="w-full h-12.5 flex items-center justify-center gap-2 bg-zinc-900 text-white hover:bg-zinc-800 transition-colors rounded-xl text-[11px] font-bold uppercase tracking-widest disabled:opacity-50 shadow-md"
               >
                 {loading ? <Loader2 size={16} className="animate-spin" /> : <><Search size={14} /> Analyze</>}
               </button>

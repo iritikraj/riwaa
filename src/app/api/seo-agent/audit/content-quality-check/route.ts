@@ -2,7 +2,7 @@
 // riwaa/src/app/api/seo-agent/audit/content-quality-check/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { scrapeWithPuppeteer } from '@/lib/seo-agent/scraper';
-import { calculateKeywordDensity, checkGrammar } from '@/lib/seo-agent/audit/content-analysis';
+import { calculateKeywordDensity, checkGrammar, analyzeReadabilityAndTone } from '@/lib/seo-agent/audit/content-analysis';
 import { withLogger } from '@/lib/logs/withLogger';
 
 export const POST = withLogger('/api/seo-agent/audit/content-quality-check', async (req: NextRequest, routeLogger) => {
@@ -16,7 +16,7 @@ export const POST = withLogger('/api/seo-agent/audit/content-quality-check', asy
 
     routeLogger.info({ event: 'instant_check_started', url, targetKeyword }, 'Starting content quality check...');
 
-    // 1. Scrape the page (This natively runs the Jaccard Duplicate Check inside it)
+    // 1. Scrape the page
     routeLogger.info({ event: 'scraping_started', url }, 'Initializing Puppeteer scraper...');
     const scraperResult = await scrapeWithPuppeteer(url);
 
@@ -32,12 +32,13 @@ export const POST = withLogger('/api/seo-agent/audit/content-quality-check', asy
     const titleText = scraperResult.metadata.title?.text;
     const seedKeyword = targetKeyword || h1Text || titleText || 'Target Keyword';
 
-    // 3. Run Deterministic Checks in parallel
-    routeLogger.info({ event: 'nlp_analysis_started', url, seedKeyword }, 'Running grammar and density checks...');
+    // 3. Run Deterministic & AI Checks in parallel
+    routeLogger.info({ event: 'nlp_analysis_started', url, seedKeyword }, 'Running density, grammar, readability, and tone checks...');
 
-    const [densityReport, grammarReport] = await Promise.all([
+    const [densityReport, grammarReport, readabilityAndToneReport] = await Promise.all([
       calculateKeywordDensity(scraperResult.rawText, [seedKeyword]),
-      checkGrammar(scraperResult.rawText)
+      checkGrammar(scraperResult.rawText),
+      analyzeReadabilityAndTone(scraperResult.rawText)
     ]);
 
     routeLogger.info({ event: 'nlp_analysis_success', url }, 'NLP checks completed successfully');
@@ -48,7 +49,9 @@ export const POST = withLogger('/api/seo-agent/audit/content-quality-check', asy
         deterministic_keyword_density: densityReport,
         grammar_issues_found: grammarReport.issues,
         grammar_total_errors: grammarReport.total_errors,
-        readability_score: '--',
+        readability_score: readabilityAndToneReport.readability?.score || '--',
+        readability_data: readabilityAndToneReport.readability, // Passed down for future tabs
+        tone_data: readabilityAndToneReport.tone // Passed down for future tabs
       },
       raw_dom_data: scraperResult.metadata // Required for the Duplicate Content tab
     };
