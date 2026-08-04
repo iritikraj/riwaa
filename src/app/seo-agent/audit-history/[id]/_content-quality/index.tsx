@@ -77,8 +77,8 @@ export default function ContentQualityCard({ contentData }: { contentData: any }
                 <div className="col-span-2 text-center text-neutral-600 font-medium">{kw.density}%</div>
                 <div className="col-span-3 text-right">
                   <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-semibold uppercase tracking-wider border ${kw.status.includes('Critical') ? 'bg-red-50 text-red-700 border-red-200' :
-                      kw.status.includes('Warning') ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                        'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    kw.status.includes('Warning') ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                      'bg-emerald-50 text-emerald-700 border-emerald-200'
                     }`}>
                     {kw.status}
                   </span>
@@ -99,6 +99,11 @@ export default function ContentQualityCard({ contentData }: { contentData: any }
                   <div className="flex items-start gap-3 mb-2">
                     <XCircle size={16} className="text-red-500 mt-0.5 shrink-0" />
                     <div>
+                      {/* ADDED: The Rule Issue Type Badge */}
+                      <span className="inline-block mb-2 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-100">
+                        {issue.rule_issue_type || 'Grammar'}
+                      </span>
+
                       <h4 className="text-sm font-medium text-neutral-900 mb-2">{issue.message}</h4>
                       <p className="text-xs text-neutral-600 bg-neutral-100 p-3 rounded-lg font-mono leading-relaxed border border-neutral-200">
                         &apos;... {issue.context} ...&apos;
@@ -153,15 +158,15 @@ function TabButton({ active, onClick, label, icon, count, alert }: any) {
     <button
       onClick={onClick}
       className={`flex-1 py-4 px-6 flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 ${active
-          ? 'bg-white text-neutral-900 border-b-2 border-neutral-900'
-          : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100/50 border-b-2 border-transparent'
+        ? 'bg-white text-neutral-900 border-b-2 border-neutral-900'
+        : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100/50 border-b-2 border-transparent'
         }`}
     >
       {icon}
       {label}
       <span className={`ml-1 px-1.5 py-0.5 rounded text-[9px] ${alert
-          ? 'bg-red-50 text-red-600 border border-red-200'
-          : 'bg-neutral-200 text-neutral-600'
+        ? 'bg-red-50 text-red-600 border border-red-200'
+        : 'bg-neutral-200 text-neutral-600'
         }`}>
         {count}
       </span>

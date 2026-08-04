@@ -1,23 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // riwaa/src/app/api/seo-agent/audit/content-quality-check/route.ts
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { scrapeWithPuppeteer } from '@/lib/seo-agent/scraper';
 import { calculateKeywordDensity, checkGrammar } from '@/lib/seo-agent/audit/content-analysis';
+import { withLogger } from '@/lib/logs/withLogger';
 
-export async function POST(req: Request) {
+export const POST = withLogger('/api/seo-agent/audit/content-quality-check', async (req: NextRequest, routeLogger) => {
   try {
     const { url, targetKeyword } = await req.json();
 
     if (!url) {
+      routeLogger.warn({ event: 'missing_url' }, 'URL is required for instant check');
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
+    routeLogger.info({ event: 'instant_check_started', url, targetKeyword }, 'Starting content quality check...');
+
     // 1. Scrape the page (This natively runs the Jaccard Duplicate Check inside it)
+    routeLogger.info({ event: 'scraping_started', url }, 'Initializing Puppeteer scraper...');
     const scraperResult = await scrapeWithPuppeteer(url);
 
     if (!scraperResult) {
+      routeLogger.error({ event: 'scraping_failed', url }, 'Failed to scrape URL');
       return NextResponse.json({ error: 'Failed to scrape URL' }, { status: 500 });
     }
+
+    routeLogger.info({ event: 'scraping_success', url }, 'Successfully extracted DOM and raw text');
 
     // 2. Determine the seed keyword (Fallback to H1 or Title if user didn't provide one)
     const h1Text = scraperResult.metadata.headings?.h1?.[0];
@@ -25,10 +33,14 @@ export async function POST(req: Request) {
     const seedKeyword = targetKeyword || h1Text || titleText || 'Target Keyword';
 
     // 3. Run Deterministic Checks in parallel
+    routeLogger.info({ event: 'nlp_analysis_started', url, seedKeyword }, 'Running grammar and density checks...');
+
     const [densityReport, grammarReport] = await Promise.all([
       calculateKeywordDensity(scraperResult.rawText, [seedKeyword]),
       checkGrammar(scraperResult.rawText)
     ]);
+
+    routeLogger.info({ event: 'nlp_analysis_success', url }, 'NLP checks completed successfully');
 
     // 4. Format the output to perfectly match what ContentQualityCard expects
     const instantResult = {
@@ -41,10 +53,11 @@ export async function POST(req: Request) {
       raw_dom_data: scraperResult.metadata // Required for the Duplicate Content tab
     };
 
+    routeLogger.info({ event: 'instant_check_complete', url }, 'Returning instant check results to UI');
     return NextResponse.json({ success: true, data: instantResult });
 
   } catch (error: any) {
-    console.error('Instant Check Error:', error);
+    routeLogger.error({ err: error, event: 'instant_check_error' }, 'Instant Check Error');
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
-}
+});

@@ -30,7 +30,37 @@ export async function scrapeWithPuppeteer(url: string) {
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const html = await page.content();
-    const rawText = await page.evaluate(() => document.body.innerText.substring(0, 8000));
+
+    // const rawText = await page.evaluate(() => document.body.innerText.substring(0, 8000));
+    const rawText = await page.evaluate(() => {
+      // 1. Identify noisy architectural elements
+      const noisyElements = document.querySelectorAll('nav, header, footer, aside, .navbar, .site-footer, #sidebar');
+
+      // 2. Temporarily hide them so .innerText ignores them (innerText respects CSS visibility)
+      noisyElements.forEach(el => {
+        (el as HTMLElement).style.display = 'none';
+      });
+
+      let text = '';
+
+      // 3. Try to grab semantically correct main content first
+      const semanticMain = document.querySelector('main, article, [role="main"], #main-content, .main-content') as HTMLElement;
+
+      if (semanticMain && semanticMain.innerText.trim().length > 200) {
+        text = semanticMain.innerText;
+      } else {
+        text = document.body.innerText;
+      }
+
+      // 5. Clean up excess whitespace and return a safe chunk
+      return text
+        .replace(/[\r\n]+/g, ' ')     // 1. Safely collapse newlines into standard spaces
+        .replace(/\s\s+/g, ' ')       // 2. Collapse duplicate spaces
+        .replace(/\s+\./g, '.')       // 3. Clean up dangling punctuation
+        .trim()
+        .substring(0, 8000);
+    });
+
     const wordCount = rawText.split(/\s+/).filter(word => word.length > 0).length;
 
     const $ = cheerio.load(html);
@@ -127,10 +157,17 @@ export async function scrapeWithPuppeteer(url: string) {
     // ==========================================
     // NEW: IN-PAGE DUPLICATE CONTENT CHECK
     // ==========================================
+    // Load a separate, disposable Cheerio instance so we don't destroy the DOM for Schema extraction
+    const $content = cheerio.load(html);
+
+    // Strip out noisy architectural elements before extracting chunks
+    $content('nav, header, footer, aside, .navbar, .site-footer, #sidebar').remove();
+
     const textChunks: string[] = [];
-    // Extract substantive text blocks (paragraphs, lists, subheadings)
-    $('p, h2, h3, h4, li').each((_, el) => {
-      const text = $(el).text().trim().replace(/\s\s+/g, ' ');
+
+    // Extract substantive text blocks (paragraphs, lists, subheadings) from the CLEANED DOM
+    $content('p, h2, h3, h4, li').each((_, el) => {
+      const text = $content(el).text().trim().replace(/\s\s+/g, ' ');
       // Only check blocks that have at least 15 words to avoid flagging standard UI elements
       if (text.split(/\s+/).length > 15) {
         textChunks.push(text);

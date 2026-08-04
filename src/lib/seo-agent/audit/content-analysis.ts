@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // riwaa/src/lib/seo-agent/audit/content-analysis.ts
+import { GoogleGenAI } from '@google/genai';
 /**
  * Calculates Keyword Density for an array of target keywords.
  * Formula: ((Keyword Count * Words in Keyword) / Total Word Count) * 100
@@ -53,116 +54,83 @@ export function getJaccardSimilarity(str1: string, str2: string): number {
   return intersection.size / union.size;
 }
 
-/**
- * Pings the self-hosted LanguageTool Docker container to check for grammar,
- * spelling, and style issues.
- */
-// export async function checkGrammar(rawText: string) {
-//   if (!rawText || rawText.trim() === '') return { total_errors: 0, issues: [] };
-
-//   // Safety constraint for the t4g.small instance: Limit to 5,000 characters
-//   const safeText = rawText.substring(0, 5000);
-
-//   try {
-//     // const url = `http://127.0.0.1:8010/v2/check`; // Use localhost for Docker container
-//     const url = `https://api.languagetoolplus.com/v2/check`;
-//     const response = await fetch(url, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/x-www-form-urlencoded',
-//       },
-//       body: new URLSearchParams({
-//         text: safeText,
-//         language: 'en-US',
-//       }),
-//     });
-
-//     // Gracefully handle the strict rate limits of the free tier
-//     if (response.status === 429) {
-//       console.warn('LanguageTool API Rate Limit Exceeded (429). You hit the 75k chars/min cap.');
-//       return { total_errors: 0, issues: [], error: 'Rate limit exceeded on free tier' };
-//     }
-
-//     if (!response.ok) {
-//       console.warn(`LanguageTool API responded with status: ${response.status}`);
-//       return { total_errors: 0, issues: [], error: 'Grammar check failed' };
-//     }
-
-//     const data = await response.json();
-//     const matches = data.matches || [];
-
-//     // Map the raw data into a clean, readable format for the frontend
-//     const formattedIssues = matches.map((match: any) => ({
-//       message: match.message,
-//       context: match.context?.text,
-//       suggestions: match.replacements?.slice(0, 3).map((r: any) => r.value) || [],
-//       rule_issue_type: match.rule?.issueType || 'unknown',
-//     }));
-
-//     return {
-//       total_errors: matches.length,
-//       issues: formattedIssues.slice(0, 20),
-//     };
-//   } catch (error) {
-//     console.error('Failed to connect to local LanguageTool container:', error);
-//     return { total_errors: 0, issues: [], error: 'Container unreachable' };
-//   }
-// }
-
-/**
- * Pings the public free-tier LanguageTool API to check for grammar,
- * spelling, and style issues.
- */
 export async function checkGrammar(rawText: string) {
   if (!rawText || rawText.trim() === '') return { total_errors: 0, issues: [] };
+  
+  const rawTruncated = rawText.substring(0, 8000);
+  const safeText = rawTruncated.substring(0, rawTruncated.lastIndexOf('.') + 1);
+  // console.log(safeText);
+  // console.log('----------------------------------------------------------------------------------------------------------------------------');
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-  const safeText = rawText.substring(0, 1500);
+  const prompt = `
+    You are a strict, mechanical spelling and grammar validator. You are NOT a writing coach, and you DO NOT give stylistic advice. Review the text STRICTLY for undeniable, objective typos and broken syntax.
+    
+    CRITICAL NEGATIVE CONSTRAINTS (YOU MUST OBEY THESE OR FAIL):
+    1. NO STYLISTIC CRITIQUES: DO NOT flag phrases for being "awkward," "informal," "vague," "wordy," or "unprofessional." If a phrase is grammatically legal, you MUST ignore it, even if you think it sounds clunky.
+    2. NO VOCABULARY UPGRADES: DO NOT suggest "more precise" or "better" synonyms. 
+    3. IGNORE PERFECT SENTENCES: If a sentence has no objective errors, DO NOT include it. NEVER return a message saying a phrase is correct or sound.
+    4. THE "8-WORD RULE": Completely ignore any sentence or phrase that is fewer than 8 words long.
+    5. ACCEPT CREATIVE COPY: The text is highly stylized marketing copy. Conversational phrasing and compound descriptive clauses are intentional. Do not attempt to "fix" the tone.
+    6. IGNORE REGIONAL TERMS: Do not flag Al Dhafra, Jebel, Falaj, Dirham, AED, Relaam, Ethmar, or Rabdan.
+    7. IGNORE TRUNCATED ENDINGS: The provided text is programmatically truncated at 8,000 characters. If the very last sentence is cut off abruptly or ends mid-word (e.g., "services ranging fr"), you MUST completely ignore that final sentence. Do not flag it as a fragment, typo, or incomplete thought.
+    
+    Expected JSON Format (USE ONLY FOR INDISPUTABLE TYPOS OR BROKEN SYNTAX):
+    [
+      {
+        "message": "Explanation of the undeniable error",
+        "context": "The specific 4-5 word phrase containing the error",
+        "suggestions": ["Fix 1", "Fix 2"],
+        "rule_issue_type": "grammar"
+      }
+    ]
+
+   --- EXAMPLES OF CORRECT BEHAVIOR ---
+    
+    Input Text: "The region supports the country's energy needs and also offers many activities for visitors. People come for desert drives, heritage festivals, and wildlife experiences."
+    Output: []
+    
+    Input Text: "Staying here means trading skyscraper views for stars. Bab Al Nujoum Al Mugheirah Resort sits by the mangroves."
+    Output: []
+
+    Input Text: "The developmnt plans aim to add more waterfront retail at Al Mugheirah Bay."
+    Output: 
+    [
+      {
+        "message": "The word 'developmnt' is misspelled.",
+        "context": "The developmnt plans aim to",
+        "suggestions": ["development"],
+        "rule_issue_type": "typo"
+      }
+    ]
+    -----------------------------------
+
+    FINAL INSTRUCTION: If there are no genuine typos, you MUST return []. Do not invent errors to fill the JSON.
+
+    Text to analyze:
+    "${safeText}"
+  `;
 
   try {
-    // IMPORTANT: Using the .org community endpoint, not the .com premium endpoint
-    const url = `https://api.languagetool.org/v2/check`;
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        // Adding a User-Agent helps prevent the free API from blocking the request
-        'User-Agent': 'Riwaa-SEO-Audit-Demo/1.0',
+    // Upgrading to the highly efficient Flash-Lite tier
+    const response: any = await ai.models.generateContent({
+      model: 'gemini-3.5-flash-lite',
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        responseMimeType: "application/json"
       },
-      body: new URLSearchParams({
-        text: safeText,
-        language: 'en-US',
-      }),
     });
 
-    // Gracefully handle strict rate limits
-    if (response.status === 429) {
-      console.warn('LanguageTool API Rate Limit Exceeded (429).');
-      return { total_errors: 0, issues: [], error: 'Rate limit exceeded on free tier' };
-    }
-
-    if (!response.ok) {
-      console.warn(`LanguageTool API responded with status: ${response.status}`);
-      return { total_errors: 0, issues: [], error: 'Grammar check failed' };
-    }
-
-    const data = await response.json();
-    const matches = data.matches || [];
-
-    // Map the raw data into a clean, readable format for the frontend
-    const formattedIssues = matches.map((match: any) => ({
-      message: match.message,
-      context: match.context?.text,
-      suggestions: match.replacements?.slice(0, 3).map((r: any) => r.value) || [],
-      rule_issue_type: match.rule?.issueType || 'unknown',
-    }));
+    const rawOutput = typeof response.text === 'function' ? response.text() : (response.text || '[]');
+    const issues = JSON.parse(rawOutput);
 
     return {
-      total_errors: matches.length,
-      issues: formattedIssues.slice(0, 20),
+      total_errors: issues.length,
+      issues: issues.slice(0, 20),
     };
   } catch (error) {
-    console.error('Failed to connect to LanguageTool API:', error);
-    return { total_errors: 0, issues: [], error: 'API unreachable' };
+    console.error('Failed to run AI grammar check:', error);
+    return { total_errors: 0, issues: [], error: 'AI check failed' };
   }
 }
