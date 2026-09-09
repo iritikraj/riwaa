@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { ArrowRight, ArrowUpRight, CheckCircle2, FileCheck, LayoutDashboard, MessageCircleMore, Search, Swords, UserCircle } from "lucide-react"
+import { ArrowRight, ArrowUpRight, Building2, CheckCircle2, FileCheck, LayoutDashboard, MessageCircleMore, Search, Swords, UserCircle } from "lucide-react"
 import Link from "next/link"
 
 const ROSTER = [
@@ -38,6 +38,15 @@ const ROSTER = [
     desc: "Crawls your site and the ones outranking you, checks Core Web Vitals and schema, and tells you exactly what to fix first.",
     cta: "Run Audit",
     href: "/seo-agent/audit",
+  },
+  {
+    id: "05",
+    icon: Building2,
+    name: "Developer Advisors",
+    role: "Builds co-branded landing pages",
+    desc: "Generates high-converting credibility pages featuring off-plan projects, interactive maps, and lead capture for specific master developers.",
+    cta: "Open Builder",
+    href: "/real-estate/developer-advisors",
   },
 ];
 
@@ -434,6 +443,69 @@ const Roster = () => {
                 className="inline-flex items-center gap-3 rounded-full border border-[#14181F]/15 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#14181F] transition-colors hover:border-[#14181F]/30"
               >
                 Initiate Audit
+                <ArrowRight size={15} />
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* DEVELOPER ADVISORS MODULE */}
+        <motion.div
+          whileHover={{ y: -8 }}
+          transition={{ duration: 0.35 }}
+          className="group relative flex min-h-117.5 flex-col overflow-hidden rounded-3xl border border-[#14181F]/10 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+        >
+          <div className="absolute -right-20 -top-20 h-75 w-75 rounded-full bg-[#b8924a]/10 blur-[120px]" />
+
+          <div className="relative flex h-full flex-col">
+            <div className="flex items-center justify-between">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#b8924a]/20 bg-[#b8924a]/5">
+                <Building2 size={26} className="text-[#b8924a]" />
+              </div>
+              <span className="rounded-full border border-[#b8924a]/20 bg-[#b8924a]/10 px-3 py-2 text-[10px] uppercase tracking-[0.3em] text-[#b8924a]">
+                New
+              </span>
+            </div>
+
+            <h2 className="mt-8 text-3xl font-medium tracking-tight text-[#14181F]">
+              Developer
+              <br />
+              Advisors
+            </h2>
+
+            <p className="mt-4 text-[14.5px] leading-7 text-[#565C6B]">
+              Build high-converting, co-branded landing pages for specific master developers with interactive project maps.
+            </p>
+
+            {/* Mini Preview */}
+            <div className="mt-8 rounded-2xl border border-[#14181F]/10 bg-[#FCFBF8] p-5">
+              <div className="flex items-center justify-between border-b border-[#14181F]/5 pb-3">
+                <span className="text-[9px] uppercase tracking-[0.3em] text-[#565C6B]">
+                  Active Master Developers
+                </span>
+              </div>
+              <div className="mt-4 space-y-3 font-jost">
+                <div className="flex items-center gap-3 rounded-xl border border-[#14181F]/5 bg-white p-3 shadow-sm">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#b8924a]/10">
+                    <Building2 size={12} className="text-[#b8924a]" />
+                  </div>
+                  <span className="text-xs font-medium text-[#14181F]">Emaar Properties</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl border border-[#14181F]/5 bg-white p-3 shadow-sm">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#b8924a]/10">
+                    <Building2 size={12} className="text-[#b8924a]" />
+                  </div>
+                  <span className="text-xs font-medium text-[#14181F]">Aldar Properties</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-auto pt-8">
+              <Link
+                href="/real-estate/developer-advisors"
+                className="inline-flex items-center gap-3 rounded-full border border-[#14181F]/15 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#14181F] transition-colors hover:border-[#14181F]/30"
+              >
+                Open Builder
                 <ArrowRight size={15} />
               </Link>
             </div>

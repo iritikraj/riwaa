@@ -14,7 +14,7 @@ import {
   updateAuditInStrapi,
   appendResultToStrapi,
   updateCompetitorAuditInStrapi,
-  updateComplianceAuditInStrapi
+  updateComplianceAuditInStrapi,
 } from './strapi';
 
 import * as mammoth from 'mammoth';
@@ -24,6 +24,9 @@ import { extractBriefArchitecture, scrapeMultipleCompetitors, fetchPeopleAlsoAsk
 import { fetchGcpKnowledgeGraphEntities } from './content-brief/gcp-entities';
 import { logger as defaultLogger } from '@/lib/logs/logger';
 import { fetchPageSpeedData } from '@/lib/seo-agent/google-tools/page-speed';
+import { DEVELOPERS_REGISTRY } from '@/config/data/developers';
+import { fetchBrokerData, rewriteBioWithGemini } from '../real-estate-agents/utils';
+import { updateDeveloperAgentInStrapi } from '../real-estate-agents/strapi';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -420,6 +423,52 @@ const createContentBriefWorker = () => new Worker('content-brief-queue', async j
   concurrency: 2
 });
 
+const createDeveloperAgentWorker = () => new Worker('developer-agent-queue', async job => {
+  const { documentId, developerId, propertyFinderUrl } = job.data;
+  console.log(`[DevAgent Worker] Processing Document ID: ${documentId} for ${propertyFinderUrl}`);
+
+  try {
+    const developerConfig = DEVELOPERS_REGISTRY[developerId];
+
+    // 1. Scrape broker with Puppeteer
+    const agentData = await fetchBrokerData(propertyFinderUrl, defaultLogger);
+    if (!agentData || !agentData.brokerName) {
+      throw new Error('Failed to scrape PropertyFinder agent data');
+    }
+
+    // 2. AI bio synthesis
+    const customBio = await rewriteBioWithGemini(agentData.fullText, agentData.brokerName, developerConfig);
+
+    // 3. Update Strapi record and flip status to 'draft'
+    await updateDeveloperAgentInStrapi(documentId, {
+      report_status: 'draft',
+      agent_data: {
+        name: agentData.brokerName,
+        profileImage: agentData.profileImage,
+        companyName: agentData.companyName,
+        companyLogo: agentData.companyLogo,
+        phoneNumber: agentData.phoneNumber,
+        hasWhatsapp: agentData.hasWhatsapp,
+        rating: agentData.rating,
+        summaryStats: agentData.summaryStats
+      },
+      agent_bio: customBio,
+      projects_list: developerConfig.projects,
+      developer_profile: developerConfig.profileText,
+    });
+
+    console.log(`[DevAgent Worker] Job ${job.id} completed for document ${documentId}`);
+    return { documentId, success: true };
+  } catch (error: any) {
+    console.error(`[DevAgent Worker] Failed for document ${documentId}:`, error);
+    await updateDeveloperAgentInStrapi(documentId, { report_status: 'draft' }); // or handle failure state
+    throw error;
+  }
+}, {
+  connection: redisOptions as any,
+  concurrency: 2 // Keeps EC2 memory safe from headless Chrome spikes
+});
+
 /* 2. SINGLETON CACHE (This permanently fixes the stalling/zombie issue) */
 
 const globalForWorkers = globalThis as unknown as {
@@ -428,6 +477,7 @@ const globalForWorkers = globalThis as unknown as {
   competitorWorker: Worker;
   complianceWorker: Worker;
   contentBriefWorker: Worker;
+  developerAgentWorker: Worker;
 };
 
 export const aiAuditWorker = globalForWorkers.aiAuditWorker || createAiAuditWorker();
@@ -435,6 +485,7 @@ export const spiderWorker = globalForWorkers.spiderWorker || createSpiderWorker(
 export const competitorWorker = globalForWorkers.competitorWorker || createCompetitorWorker();
 export const complianceWorker = globalForWorkers.complianceWorker || createComplianceWorker();
 export const contentBriefWorker = globalForWorkers.contentBriefWorker || createContentBriefWorker();
+export const developerAgentWorker = globalForWorkers.developerAgentWorker || createDeveloperAgentWorker();
 
 if (process.env.NODE_ENV !== 'production') {
   globalForWorkers.aiAuditWorker = aiAuditWorker;
@@ -442,6 +493,7 @@ if (process.env.NODE_ENV !== 'production') {
   globalForWorkers.competitorWorker = competitorWorker;
   globalForWorkers.complianceWorker = complianceWorker;
   globalForWorkers.contentBriefWorker = contentBriefWorker;
+  globalForWorkers.developerAgentWorker = developerAgentWorker;
 }
 
 /* 4. OBSERVABILITY LISTENERS */

@@ -44,6 +44,7 @@ const globalForQueues = globalThis as unknown as {
   competitorQueue: Queue;
   complianceQueue: Queue;
   contentBriefQueue: Queue;
+  developerAgentQueue: Queue;
 };
 
 export const spiderQueue = globalForQueues.spiderQueue || new Queue('domain-spider-queue', { connection: redisOptions });
@@ -51,6 +52,7 @@ export const aiAuditQueue = globalForQueues.aiAuditQueue || new Queue('ai-audit-
 export const competitorQueue = globalForQueues.competitorQueue || new Queue('competitor-audit-queue', { connection: redisOptions });
 export const complianceQueue = globalForQueues.complianceQueue || new Queue('compliance-audit-queue', { connection: redisOptions });
 export const contentBriefQueue = globalForQueues.contentBriefQueue || new Queue('content-brief-queue', { connection: redisOptions });
+export const developerAgentQueue = globalForQueues.developerAgentQueue || new Queue('developer-agent-queue', { connection: redisOptions });
 
 if (process.env.NODE_ENV !== 'production') {
   globalForQueues.spiderQueue = spiderQueue;
@@ -58,4 +60,5 @@ if (process.env.NODE_ENV !== 'production') {
   globalForQueues.competitorQueue = competitorQueue;
   globalForQueues.complianceQueue = complianceQueue;
   globalForQueues.contentBriefQueue = contentBriefQueue;
+  globalForQueues.developerAgentQueue = developerAgentQueue;
 }
