@@ -3,7 +3,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowRight, Building2, Link2, X, AlertTriangle, Check, Share2, Clock, Upload } from "lucide-react";
+import { ArrowRight, Building2, Link2, X, AlertTriangle, Check, Share2, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -190,7 +190,7 @@ export default function DeveloperAdvisorBuilder() {
         {error && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-999 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
           >
             <motion.div
               initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
@@ -303,7 +303,7 @@ export default function DeveloperAdvisorBuilder() {
 
                   <div className="space-y-4">
                     <div>
-                      <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-2 block flex items-center gap-2">
+                      <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-2 flex items-center gap-2">
                         <Building2 size={12} /> Master Developer
                       </label>
                       <div className="relative">
@@ -321,7 +321,7 @@ export default function DeveloperAdvisorBuilder() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-2 block flex items-center gap-2">
+                      <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-2 flex items-center gap-2">
                         <Link2 size={12} /> PropertyFinder Agent URL
                       </label>
                       <input
@@ -517,7 +517,7 @@ export default function DeveloperAdvisorBuilder() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-2 block flex justify-between">
+                  <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-2 flex justify-between">
                     <span>RIWAA Generated Bio (Tailored to {draftData.developer_name})</span>
                     <span className="text-[#b8924a] font-medium">RIWAA ✨</span>
                   </label>
@@ -538,8 +538,13 @@ export default function DeveloperAdvisorBuilder() {
               <DeveloperHero
                 developerName={draftData.developer_name}
                 developerProfile={draftData.developer_profile}
-                agentData={draftData.agent_data}
-                agentBio={draftData.agent_bio}
+                // Safely grab the first image of the first project as the hero background
+                heroImage={draftData.projects_list?.[0]?.images?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80"}
+                trustStats={
+                  draftData.developer_name.includes("Emaar")
+                    ? ["Active since 1997", "85,000+ homes delivered", "Global Master Developer"]
+                    : ["Active since 2004", "26,000+ homes delivered", "Leading Developer in Abu Dhabi"]
+                }
               />
               <ProjectsGrid
                 developerName={draftData.developer_name}

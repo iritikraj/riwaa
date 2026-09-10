@@ -30,19 +30,10 @@ export function ProjectsMap({ developerName, projects }: ProjectsMapProps) {
   return (
     <section className="w-full bg-white pb-24 font-jost">
       <div className="max-w-7xl mx-auto px-6">
-        {/* <div className="text-center mb-16">
-          <span className="text-[10px] uppercase tracking-[0.3em] font-semibold text-[#b8924a] mb-3 block">
-            Prime Locations
-          </span>
-          <h2 className="text-3xl md:text-4xl font-light text-neutral-900 tracking-wide">
-            Master-Planned <span className="font-medium text-[#b8924a]">Communities</span>
-          </h2>
-        </div> */}
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[600px] bg-white rounded-3xl p-4 shadow-[0_20px_60px_rgba(0,0,0,0.03)] border border-neutral-100 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-150 md:h-150 bg-white rounded-3xl p-4 shadow-[0_20px_60px_rgba(0,0,0,0.03)] border border-neutral-100 relative z-10">
 
           {/* LEFT: Interactive Locations List */}
-          <div className="lg:col-span-4 flex flex-col bg-neutral-50 rounded-2xl border border-neutral-100 p-6 overflow-y-auto no-scrollbar z-20">
+          <div className="lg:col-span-4 hidden md:flex flex-col bg-neutral-50 rounded-2xl border border-neutral-100 p-6 overflow-y-auto no-scrollbar z-20">
             <div className="flex items-center gap-2 mb-6 text-neutral-900">
               <Compass size={18} className="text-[#b8924a]" />
               <h3 className="font-medium tracking-wide uppercase text-sm">Explore {developerName}</h3>

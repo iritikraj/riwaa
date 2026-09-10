@@ -39,8 +39,13 @@ export default async function DeveloperAdvisorPublicPage({ params }: { params: P
       <DeveloperHero
         developerName={data.developer_name}
         developerProfile={data.developer_profile}
-        agentData={data.agent_data}
-        agentBio={data.agent_bio}
+        // Safely grab the first image of the first project as the hero background
+        heroImage={data.projects_list?.[0]?.images?.[0] || "https://off-planproperties.ae/wp-content/uploads/2021/09/Marina-Sands-Project.jpg"}
+        trustStats={
+          data.developer_name.includes("Emaar")
+            ? ["Active since 1997", "85,000+ homes delivered", "Global Master Developer"]
+            : ["Active since 2004", "26,000+ homes delivered", "Leading Developer in Abu Dhabi"]
+        }
       />
 
       <ProjectsGrid
@@ -54,7 +59,6 @@ export default async function DeveloperAdvisorPublicPage({ params }: { params: P
       />
 
       <DetailedAgentProfile
-        developerName={data.developer_name}
         agentBio={data.agent_bio}
         agentData={data.agent_data}
       />

@@ -1,89 +1,97 @@
-import React from 'react';
-import { Award, CheckCircle } from 'lucide-react';
+"use client";
+
+import { MessageCircle, Phone, Star } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface AgentProfileProps {
-  developerName: string;
-  agentBio: string;
   agentData: {
     name: string;
     profileImage?: string;
     companyLogo?: string;
     companyName?: string;
+    phoneNumber?: string;
+    hasWhatsapp?: boolean;
+    rating?: string;
     summaryStats?: { title: string; value: string }[];
   };
+  agentBio: string;
 }
 
-export function DetailedAgentProfile({ developerName, agentBio, agentData }: AgentProfileProps) {
+export function DetailedAgentProfile({ agentData }: AgentProfileProps) {
   return (
-    <section className="w-full bg-white py-24 border-t border-neutral-100 font-jost">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+      className="max-w-7xl mx-auto px-6 lg:px-8 py-16 w-full"
+    >
+      <div className="bg-white flex flex-col md:flex-row gap-0 md:gap-6 justify-between min-w-full rounded-3xl p-3 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.04)] border border-neutral-100 relative overflow-hidden group">
+        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-[#B8924A] to-[#E3CBA4]" />
 
-          {/* Left: Agent Imagery & Stats */}
-          <div className="lg:col-span-5 flex flex-col gap-8">
-            <div className="relative w-full max-w-sm mx-auto lg:mx-0 rounded-4xl overflow-hidden bg-neutral-100 border border-neutral-200 p-2 shadow-lg">
-              <div className="aspect-[4/5] rounded-3xl overflow-hidden relative">
-                {agentData.profileImage ? (
-                  <img src={agentData.profileImage} alt={agentData.name} className="w-full h-full object-cover grayscale" />
-                ) : (
-                  <div className="w-full h-full bg-neutral-200" />
-                )}
-
-                {/* Overlay Company Logo */}
-                {agentData.companyLogo && (
-                  <div className="absolute bottom-6 right-6 bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-xl border border-white/20">
-                    <img src={agentData.companyLogo} alt={agentData.companyName} className="h-8 object-contain" />
-                  </div>
-                )}
-              </div>
+        <div className="flex items-center gap-6 md:gap-2">
+          <div className="relative">
+            <div className="w-24 md:w-48 h-24 md:h-48 rounded-full overflow-hidden border-2 border-[#B8924A]/20 bg-neutral-50 shadow-sm shrink-0">
+              {agentData.profileImage ? (
+                <img src={agentData.profileImage} alt={agentData.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-neutral-300">No Image</div>
+              )}
             </div>
-
-            {/* The 2x2 Stats Grid from PropertyFinder */}
-            {agentData.summaryStats && agentData.summaryStats.length > 0 && (
-              <div className="grid grid-cols-2 gap-4">
-                {agentData.summaryStats.map((stat, idx) => (
-                  <div key={idx} className="bg-neutral-50 rounded-2xl p-6 text-center border border-neutral-100 hover:border-[#b8924a]/30 transition-colors">
-                    <p className="text-xl font-medium text-neutral-900 mb-1">{stat.value}</p>
-                    <p className="text-[9px] uppercase tracking-widest text-neutral-500">{stat.title}</p>
-                  </div>
-                ))}
+            {agentData.companyLogo && (
+              <div className="absolute -bottom-2 md:-bottom-1 -right-2 md:-right-1 w-10 md:h-20 h-10 md:w-20 bg-white rounded-full p-1 shadow-md border border-neutral-100">
+                <img src={agentData.companyLogo} alt={agentData.companyName} className="w-full h-full object-contain" />
               </div>
             )}
           </div>
 
-          {/* Right: The Full Tailored Bio */}
-          <div className="lg:col-span-7 lg:pl-10">
-            <span className="text-[10px] uppercase tracking-[0.3em] font-semibold text-[#b8924a] mb-4 block flex items-center gap-2">
-              <Award size={14} /> Meet Your Specialist
-            </span>
-            <h2 className="text-4xl font-light text-neutral-900 leading-[1.2] mb-8">
-              Why work with <span className="font-medium">{agentData.name}?</span>
-            </h2>
+          <div className="flex-1 pt-2">
+            <h3 className="text-xl md:text-2xl font-medium text-neutral-900">{agentData.name}</h3>
+            <p className="text-xs md:text-lg font-jost tracking-wide text-[#B8924A] mt-1">
+              {agentData.companyName} Specialist
+            </p>
+            {agentData.rating && (
+              <div className="flex items-center gap-1 mt-2">
+                <Star size={12} className="fill-amber-400 text-amber-400 md:h-6 md:w-6" />
+                <span className="text-xs md:text-base font-jost text-neutral-600">{agentData.rating} Rating</span>
+              </div>
+            )}
+          </div>
+        </div>
 
-            <div className="prose prose-neutral prose-lg text-neutral-600 font-light leading-relaxed mb-10">
-              {agentBio.split('\n\n').map((paragraph, idx) => (
-                <p key={idx} className="mb-6 last:mb-0">{paragraph}</p>
+        <div className="flex-1 p-2">
+          {agentData.summaryStats && agentData.summaryStats.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              {agentData.summaryStats.map((stat, idx) => (
+                <div key={idx} className="bg-neutral-50/70 border border-neutral-100 rounded-2xl p-3 text-center transition-colors hover:bg-neutral-50">
+                  <p className="text-lg md:text-2xl font-semibold text-neutral-900 mb-0.5">{stat.value}</p>
+                  <p className="text-xs font-jost md:text-sm uppercase tracking-widest text-neutral-500">{stat.title}</p>
+                </div>
               ))}
             </div>
+          )}
 
-            <div className="space-y-4 pt-8 border-t border-neutral-100">
-              <div className="flex items-center gap-3">
-                <CheckCircle size={18} className="text-[#b8924a]" />
-                <p className="text-sm font-medium text-neutral-800">Exclusive access to {developerName} inventory</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <CheckCircle size={18} className="text-[#b8924a]" />
-                <p className="text-sm font-medium text-neutral-800">Zero commission or agency fees for off-plan</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <CheckCircle size={18} className="text-[#b8924a]" />
-                <p className="text-sm font-medium text-neutral-800">VIP unit selection before public launch</p>
-              </div>
-            </div>
+          <div className="flex flex-col md:flex-row gap-3">
+            {agentData.hasWhatsapp && (
+              <a
+                href={`https://wa.me/${agentData.phoneNumber?.replace(/\D/g, '')}?text=Hi ${agentData.name}, I am interested in ${agentData.companyName} properties.`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex font-jost items-center justify-center gap-2 bg-[#25D366] hover:bg-[#22bf5b] text-white py-3.5 rounded-xl text-xs md:text-sm font-medium uppercase tracking-widest transition-colors shadow-sm"
+              >
+                <MessageCircle size={16} /> WhatsApp Direct
+              </a>
+            )}
+            {agentData.phoneNumber && agentData.phoneNumber.trim() !== "" && (
+              <a
+                href={`tel:${agentData.phoneNumber}`}
+                className="w-full flex font-jost items-center justify-center gap-2 bg-neutral-900 hover:bg-neutral-800 text-white py-3.5 rounded-xl text-xs md:text-sm font-medium uppercase tracking-widest transition-colors shadow-sm"
+              >
+                <Phone size={16} /> Call Specialist
+              </a>
+            )}
           </div>
-
         </div>
       </div>
-    </section>
+    </motion.div>
   );
 }

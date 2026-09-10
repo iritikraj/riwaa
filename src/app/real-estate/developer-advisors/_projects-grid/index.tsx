@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { MapPin, Bed, CreditCard, ChevronLeft, ChevronRight, Home } from 'lucide-react';
+import { MapPin, Bed, CreditCard, ChevronLeft, ChevronRight, Home, CalendarCheck } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -12,7 +12,8 @@ interface Project {
   bedroomOptions: string[];
   startingPriceAED: string;
   paymentPlan: string;
-  images: string[]; // Updated to support multiple images
+  handoverDate?: string; // Added handover date
+  images: string[];
 }
 
 interface ProjectsGridProps {
@@ -77,7 +78,7 @@ function ProjectCard({ project }: { project: Project }) {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
         />
 
-        {/* Carousel Controls (Only show if multiple images exist) */}
+        {/* Carousel Controls */}
         {images.length > 1 && (
           <>
             <button
@@ -105,8 +106,8 @@ function ProjectCard({ project }: { project: Project }) {
           </>
         )}
 
-        {/* Starting Price Badge Overlay */}
-        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-white/20">
+        {/* TOP RIGHT: Starting Price Badge */}
+        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-white/20 text-right">
           <span className="block text-[8px] uppercase tracking-widest text-neutral-500 font-semibold mb-0.5">Starting From</span>
           <span className="block text-sm font-bold text-neutral-900">AED {project.startingPriceAED}</span>
         </div>
@@ -114,12 +115,25 @@ function ProjectCard({ project }: { project: Project }) {
 
       {/* Content Area */}
       <div className="p-6 flex-1 flex flex-col">
-        <div className="mb-4">
-          <h3 className="text-xl font-medium text-neutral-900 mb-2">{project.title}</h3>
-          <p className="text-xs text-neutral-500 flex items-center gap-1.5">
-            <MapPin size={12} className="text-[#b8924a]" />
-            {project.community}
-          </p>
+
+        {/* Title, Location & Handover Header */}
+        <div className="mb-4 flex justify-between items-start gap-4">
+          <div>
+            <h3 className="text-xl font-medium text-neutral-900 mb-2">{project.title}</h3>
+            <p className="text-xs text-neutral-500 flex items-center gap-1.5">
+              <MapPin size={12} className="text-[#b8924a]" />
+              {project.community}
+            </p>
+          </div>
+
+          {/* Moved Handover Badge */}
+          <div className="shrink-0 text-right">
+            <span className="block text-[8px] uppercase tracking-widest text-neutral-400 mb-1">Handover</span>
+            <div className="inline-flex items-center gap-1.5 bg-[#b8924a]/10 border border-[#b8924a]/20 px-2 py-1 rounded-md">
+              <CalendarCheck size={10} className="text-[#b8924a]" />
+              <span className="text-[10px] font-bold text-[#b8924a] whitespace-nowrap">{project.handoverDate || 'TBA'}</span>
+            </div>
+          </div>
         </div>
 
         {/* Tags (Villas, Apartments, etc.) */}
@@ -145,8 +159,8 @@ function ProjectCard({ project }: { project: Project }) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center">
+            <div className="flex items-center gap-2 text-right">
+              <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center order-last">
                 <CreditCard size={14} className="text-emerald-600" />
               </div>
               <div>

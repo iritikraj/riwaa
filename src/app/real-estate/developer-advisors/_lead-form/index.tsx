@@ -53,7 +53,7 @@ export function LeadCaptureForm({ developerName, agentName, projects }: LeadCapt
           </div>
 
           {/* Right: The Form */}
-          <div className="bg-[#fcfcfb] p-8 md:p-10 rounded-3xl border border-neutral-200/60 shadow-xl shadow-black/[0.02]">
+          <div className="bg-[#fcfcfb] p-8 md:p-10 rounded-3xl border border-neutral-200/60 shadow-xl shadow-black/2">
             {isSuccess ? (
               <div className="text-center py-10">
                 <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -79,7 +79,7 @@ export function LeadCaptureForm({ developerName, agentName, projects }: LeadCapt
                       required
                       type="text"
                       placeholder="John Doe"
-                      className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3.5 text-sm text-neutral-900 outline-none focus:border-[#b8924a] transition-colors shadow-sm"
+                      className="w-full bg-white border border-neutral-200 rounded-sm px-4 py-3.5 text-sm text-neutral-900 outline-none focus:border-[#b8924a] transition-colors "
                     />
                   </div>
                   <div>
@@ -88,7 +88,7 @@ export function LeadCaptureForm({ developerName, agentName, projects }: LeadCapt
                       required
                       type="tel"
                       placeholder="+971 50 000 0000"
-                      className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3.5 text-sm text-neutral-900 outline-none focus:border-[#b8924a] transition-colors shadow-sm"
+                      className="w-full bg-white border border-neutral-200 rounded-sm px-4 py-3.5 text-sm text-neutral-900 outline-none focus:border-[#b8924a] transition-colors "
                     />
                   </div>
                 </div>
@@ -99,13 +99,13 @@ export function LeadCaptureForm({ developerName, agentName, projects }: LeadCapt
                     required
                     type="email"
                     placeholder="john@example.com"
-                    className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3.5 text-sm text-neutral-900 outline-none focus:border-[#b8924a] transition-colors shadow-sm"
+                    className="w-full bg-white border border-neutral-200 rounded-sm px-4 py-3.5 text-sm text-neutral-900 outline-none focus:border-[#b8924a] transition-colors "
                   />
                 </div>
 
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-2 block">Project of Interest</label>
-                  <select className="w-full appearance-none bg-white border border-neutral-200 rounded-xl px-4 py-3.5 text-sm text-neutral-900 outline-none focus:border-[#b8924a] transition-colors shadow-sm">
+                  <select className="w-full appearance-none bg-white border border-neutral-200 rounded-sm px-4 py-3.5 text-sm text-neutral-900 outline-none focus:border-[#b8924a] transition-colors">
                     <option value="General Inquiry">General Inquiry</option>
                     {projects?.map(p => (
                       <option key={p.id} value={p.title}>{p.title}</option>
@@ -116,7 +116,7 @@ export function LeadCaptureForm({ developerName, agentName, projects }: LeadCapt
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full mt-4 bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl py-4 text-xs font-semibold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 shadow-lg shadow-neutral-900/20 group"
+                  className="w-full mt-4 bg-neutral-900 hover:bg-neutral-800 text-white rounded-sm py-4 text-xs font-semibold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 shadow-lg shadow-neutral-900/20 group"
                 >
                   {isSubmitting ? (
                     <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />

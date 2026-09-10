@@ -3,7 +3,7 @@ import { loadEnvConfig } from '@next/env';
 loadEnvConfig(process.cwd());
 
 import { Queue } from 'bullmq';
-import { redisConnection, spiderQueue, aiAuditQueue, contentBriefQueue } from './src/lib/seo-agent/queue';
+import { redisConnection, spiderQueue, aiAuditQueue, contentBriefQueue, developerAgentQueue } from './src/lib/seo-agent/queue';
 
 const competitorQueue = new Queue('competitor-audit-queue', { connection: redisConnection as any });
 const complianceQueue = new Queue('compliance-audit-queue', { connection: redisConnection as any });
@@ -24,7 +24,8 @@ async function wipeQueues() {
   console.log('🧹 Wiping Content Brief Queue...');
   await contentBriefQueue.obliterate({ force: true });
 
-  console.log('✅ All queues completely cleared! You can now test your new URL.');
+  console.log('🧹 Wiping Developer Agent Queue...');
+  await developerAgentQueue.obliterate({ force: true });
   process.exit(0);
 }
 
