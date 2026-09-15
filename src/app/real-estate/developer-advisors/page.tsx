@@ -599,6 +599,59 @@ export default function DeveloperAdvisorBuilder() {
                     className="w-full h-40 bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-sm text-neutral-900 leading-relaxed outline-none focus:border-[#b8924a] transition-colors resize-none"
                   />
                 </div>
+
+                {/* MEDIA PRESENCE EDITOR */}
+                <div className="mt-8 pt-8 border-t border-neutral-100">
+                  <div className="mb-4">
+                    <label className="text-[10px] uppercase tracking-widest text-neutral-500 flex items-center gap-2">
+                      Media & PR Presence (Auto-Fetched)
+                    </label>
+                    <p className="text-xs text-neutral-400 font-light mt-1">Review the automatically discovered articles. Remove any that are irrelevant or belong to someone else with the same name.</p>
+                  </div>
+
+                  {draftData.agent_data?.mediaPresence && draftData.agent_data.mediaPresence.length > 0 ? (
+                    <div className="space-y-2">
+                      {draftData.agent_data.mediaPresence.map((pr: any, idx: number) => {
+                        // Safe URL parser to prevent crash on "#" or invalid links
+                        const getSafeDomain = (url: string) => {
+                          if (!url || url === '#') return 'External Link';
+                          try { return new URL(url).hostname.replace('www.', ''); }
+                          catch { return 'Article'; }
+                        };
+
+                        return (
+                          <div key={idx} className="flex items-center justify-between bg-neutral-50 border border-neutral-200 rounded-xl p-3">
+                            <div className="flex flex-col pr-4 overflow-hidden">
+                              {/* Accepts both title and headline */}
+                              <span className="text-xs font-semibold text-neutral-900 truncate">{pr.title || pr.headline}</span>
+                              {/* Accepts both source and publication, falls back to safe domain */}
+                              <span className="text-[10px] text-neutral-500 uppercase tracking-widest mt-0.5">
+                                {pr.source || pr.publication || getSafeDomain(pr.link || pr.url)}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                const updatedPR = draftData.agent_data.mediaPresence.filter((_: any, index: number) => index !== idx);
+                                setDraftData({
+                                  ...draftData,
+                                  agent_data: { ...draftData.agent_data, mediaPresence: updatedPR }
+                                });
+                                setHasUnsavedChanges(true);
+                              }}
+                              className="w-6 h-6 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0 hover:bg-red-100 transition-colors cursor-pointer"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 bg-neutral-50 border border-neutral-200 border-dashed rounded-xl">
+                      <p className="text-xs text-neutral-400 font-light">No media links were found for this agent.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

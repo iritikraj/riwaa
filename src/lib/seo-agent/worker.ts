@@ -439,6 +439,22 @@ const createDeveloperAgentWorker = () => new Worker('developer-agent-queue', asy
     // 2. AI bio synthesis
     const customBio = await rewriteBioWithGemini(agentData.fullText, agentData.brokerName, developerConfig);
 
+    let mediaPresence: any[] = [];
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const prRes = await fetch(`${baseUrl}/api/real-estate-agents/discover-pr`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: agentData.brokerName, location: "ae" }),
+      });
+      const prData = await prRes.json();
+      if (prData.mediaPresence) {
+        mediaPresence = prData.mediaPresence;
+      }
+    } catch (prError) {
+      console.error(`[DevAgent Worker] Failed to fetch PR for ${agentData.brokerName}:`, prError);
+    }
+
     // 3. Update Strapi record and flip status to 'draft'
     await updateDeveloperAgentInStrapi(documentId, {
       report_status: 'draft',
@@ -452,7 +468,8 @@ const createDeveloperAgentWorker = () => new Worker('developer-agent-queue', asy
         rating: agentData.rating,
         summaryStats: agentData.summaryStats,
         languages: agentData.languages || "",
-        uniqueTag: agentData.uniqueTag || ""
+        uniqueTag: agentData.uniqueTag || "",
+        mediaPresence: mediaPresence
       },
       agent_bio: customBio,
       projects_list: developerConfig.projects,
