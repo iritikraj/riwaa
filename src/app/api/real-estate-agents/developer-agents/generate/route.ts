@@ -25,6 +25,7 @@ export const POST = withLogger('/api/real-estate-agents/developer-agents/generat
       report_status: 'processing',
       developer_profile: developerConfig.profileText,
       projects_list: developerConfig.projects,
+      hero_banner: developerConfig.heroBanner || null,
       agent_data: {},
       agent_bio: '',
     });

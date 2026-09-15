@@ -7,6 +7,7 @@ export interface DeveloperAgentPayload {
   developer_name: string;
   agent_data: any;
   agent_bio: string;
+  hero_banner?: string | null;
   developer_profile: string;
   projects_list: any;
   report_status: 'processing' | 'draft' | 'published';

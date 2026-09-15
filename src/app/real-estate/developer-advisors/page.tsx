@@ -14,8 +14,9 @@ import { LeadCaptureForm } from "./_lead-form";
 
 // Developers list mapping to our backend registry
 const DEVELOPERS = [
+  { id: 'prestige-one', name: 'Prestige One Developments' },
   { id: 'emaar', name: 'Emaar Properties' },
-  { id: 'aldar', name: 'Aldar Properties' }
+  { id: 'aldar', name: 'Aldar Properties' },
 ];
 
 export default function DeveloperAdvisorBuilder() {
@@ -170,6 +171,16 @@ export default function DeveloperAdvisorBuilder() {
       console.error(err);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleCopyOnly = () => {
+    if (draftData?.slug) {
+      navigator.clipboard.writeText(`${window.location.origin}/real-estate/developer-advisors/${draftData.slug}`);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 3000);
+    } else {
+      alert("Please publish the page first to generate a link.");
     }
   };
 
@@ -328,7 +339,7 @@ export default function DeveloperAdvisorBuilder() {
                         type="url"
                         value={propertyFinderUrl}
                         onChange={(e) => setPropertyFinderUrl(e.target.value)}
-                        placeholder="https://www.propertyfinder.ae/en/broker/..."
+                        placeholder="https://www.propertyfinder.ae/en/agent/..."
                         className="w-full rounded-xl border border-white/10 bg-white/2.5 px-4 py-4 text-sm text-neutral-200 placeholder:text-neutral-600 outline-none focus:border-white/20 focus:bg-white/5 transition-all"
                       />
                     </div>
@@ -389,15 +400,44 @@ export default function DeveloperAdvisorBuilder() {
               </span>
             </div>
 
-            <button onClick={handlePublish} disabled={isSaving} className="px-6 py-2 bg-[#b8924a] cursor-pointer hover:bg-[#d4af71] text-white rounded-full text-[10px] font-semibold tracking-widest uppercase transition-all duration-300 flex items-center gap-2">
-              {isSaving ? (
-                <><div className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" /> Saving...</>
-              ) : isCopied ? (
-                <><Check size={12} /> Link Copied!</>
-              ) : (
-                <><Share2 size={12} /> {draftData.report_status === 'published' ? "Update & Copy Link" : "Publish & Copy Link"}</>
-              )}
-            </button>
+            {/* DYNAMIC BUTTON GROUP */}
+            {draftData.report_status === 'published' ? (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleCopyOnly}
+                  className="px-5 py-2 cursor-pointer bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full text-[10px] font-semibold tracking-widest uppercase transition-all duration-300 flex items-center gap-2"
+                >
+                  {isCopied ? <><Check size={12} /> Copied!</> : <><Link2 size={12} /> <span className="hidden sm:block">Copy Link</span></>}
+                </button>
+                {hasUnsavedChanges && (
+                  <button
+                    onClick={handlePublish}
+                    disabled={isSaving}
+                    className="px-5 py-2 bg-[#b8924a] cursor-pointer hover:bg-[#d4af71] disabled:opacity-70 text-white rounded-full text-[10px] font-semibold tracking-widest uppercase transition-all duration-300 flex items-center gap-2 shadow-lg"
+                  >
+                    {isSaving ? (
+                      <><div className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" /> Updating...</>
+                    ) : (
+                      <><Share2 size={12} /> Update & Copy</>
+                    )}
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={handlePublish}
+                disabled={isSaving}
+                className="px-6 py-2 bg-[#b8924a] cursor-pointer hover:bg-[#d4af71] disabled:opacity-70 text-white rounded-full text-[10px] font-semibold tracking-widest uppercase transition-all duration-300 flex items-center gap-2 shadow-lg"
+              >
+                {isSaving ? (
+                  <><div className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" /> Saving...</>
+                ) : isCopied ? (
+                  <><Check size={12} /> Link Copied!</>
+                ) : (
+                  <><Share2 size={12} /> Publish & Copy Link</>
+                )}
+              </button>
+            )}
           </div>
 
           <div className="pt-20 pb-20 max-w-5xl mx-auto px-6">
@@ -436,7 +476,36 @@ export default function DeveloperAdvisorBuilder() {
                       className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-sm text-neutral-900 outline-none focus:border-[#b8924a] transition-colors"
                     />
                   </div>
-
+                  {/* NEW: Languages Spoken Input */}
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-2 block">Languages Spoken</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., English, Arabic, French"
+                      value={draftData.agent_data?.languages || ''}
+                      onChange={(e) => {
+                        setDraftData({ ...draftData, agent_data: { ...draftData.agent_data, languages: e.target.value } });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-sm text-neutral-900 outline-none focus:border-[#b8924a] transition-colors"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-2 block flex justify-between">
+                      <span>Hero Background Video/Image URL</span>
+                      <span className="text-[#b8924a] font-medium">Optional</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., https://domain.com/video.mp4"
+                      value={draftData.hero_banner || ''}
+                      onChange={(e) => {
+                        setDraftData({ ...draftData, hero_banner: e.target.value });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-3 text-sm text-neutral-900 outline-none focus:border-[#b8924a] transition-colors"
+                    />
+                  </div>
                   <div>
                     <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-2 block">Agent Rating</label>
                     <input
@@ -538,12 +607,14 @@ export default function DeveloperAdvisorBuilder() {
               <DeveloperHero
                 developerName={draftData.developer_name}
                 developerProfile={draftData.developer_profile}
-                // Safely grab the first image of the first project as the hero background
                 heroImage={draftData.projects_list?.[0]?.images?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80"}
+                heroBanner={draftData.hero_banner}
                 trustStats={
                   draftData.developer_name.includes("Emaar")
                     ? ["Active since 1997", "85,000+ homes delivered", "Global Master Developer"]
-                    : ["Active since 2004", "26,000+ homes delivered", "Leading Developer in Abu Dhabi"]
+                    : draftData.developer_name.includes("Prestige")
+                      ? ["Boutique Luxury", "Design-Led Architecture", "Prime Dubai Locations"]
+                      : ["Active since 2004", "26,000+ homes delivered", "Leading Developer in Abu Dhabi"]
                 }
               />
               <ProjectsGrid

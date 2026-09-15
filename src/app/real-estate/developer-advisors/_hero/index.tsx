@@ -2,12 +2,12 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen } from "lucide-react";
 
 interface DeveloperHeroProps {
   developerName: string;
   developerProfile?: string;
   heroImage: string;
+  heroBanner?: string; // NEW FIELD
   trustStats: string[];
 }
 
@@ -15,6 +15,7 @@ export function DeveloperHero({
   developerName,
   developerProfile,
   heroImage,
+  heroBanner,
   trustStats,
 }: DeveloperHeroProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,12 +35,25 @@ export function DeveloperHero({
 
       {/* 1. Full-Bleed Background Image with Premium Vignette */}
       <div className="absolute inset-0 z-0 bg-[#050505]">
-        <img
-          src={heroImage}
-          alt={`${developerName} Luxury Properties`}
-          // Reduced opacity slightly to 90% for a richer feel, letting the image breathe
-          className="w-full h-full object-cover object-center scale-105 opacity-90 animate-image-pan"
-        />
+        {heroBanner && heroBanner.endsWith('.mp4') ? (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover object-center opacity-80"
+          >
+            <source src={heroBanner} type="video/mp4" />
+          </video>
+        ) : (
+          <img
+            src={heroBanner || heroImage}
+            alt={`${developerName} Luxury Properties`}
+            className="w-full h-full object-cover object-center scale-105 opacity-90 animate-image-pan"
+          />
+        )}
+
+        {/* Gradient Overlays */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/90 via-[#050505]/40 to-transparent" />
         {/* <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#050505]/60" /> */}
       </div>

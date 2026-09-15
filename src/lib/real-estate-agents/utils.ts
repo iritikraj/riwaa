@@ -28,7 +28,7 @@ export async function fetchBrokerData(url: string, logger: any) {
     await page.setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 15000 });
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 6000));
 
     const data = await page.evaluate(() => {
       const clean = (value?: string | null) => (value || "").replace(/\s+/g, " ").trim();
@@ -41,7 +41,13 @@ export async function fetchBrokerData(url: string, logger: any) {
       const companyName = getAttr('[data-testid="agent-broker-image"]', "title") || getAttr('[data-testid="agent-broker-image"]', "alt");
       const rating = getText('[data-testid="average-rating"]');
       const hasWhatsapp = !!document.querySelector('[data-testid="whatsapp-btn"]');
-      
+
+      const langNode = document.querySelector('div[class*="info--summary"] span') || document.querySelector('div[class*="agent-hero-section__info--summary"]');
+      const languages = clean(langNode?.textContent);
+
+      const uniqueTagNode = document.querySelector('p[class*="unique-tag"]');
+      const uniqueTag = clean(uniqueTagNode?.textContent);
+
       const summaryCards = Array.from(document.querySelectorAll('[data-testid="summary"] > div'));
       const summaryStats = summaryCards.map((card) => {
         const valueText = card.children[0]?.textContent;
@@ -54,9 +60,22 @@ export async function fetchBrokerData(url: string, logger: any) {
 
       const telLink = document.querySelector('a[href^="tel:"]')?.getAttribute("href");
       const phoneNumber = clean(telLink?.replace("tel:", ""));
+
       const fullText = clean(document.body.innerText).substring(0, 8000);
 
-      return { brokerName, profileImage, companyName, companyLogo, rating, hasWhatsapp, phoneNumber, summaryStats, fullText };
+      return {
+        brokerName,
+        profileImage,
+        companyName,
+        companyLogo,
+        rating,
+        hasWhatsapp,
+        phoneNumber,
+        summaryStats,
+        languages,
+        uniqueTag,
+        fullText
+      };
     });
 
     logger.info({ event: 'puppeteer_scrape_success', url, brokerName: data.brokerName });
@@ -76,7 +95,7 @@ export async function fetchBrokerData(url: string, logger: any) {
  */
 export async function rewriteBioWithGemini(rawText: string, brokerName: string, developerConfig: any) {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  
+
   const prompt = `
     You are an elite real estate copywriter. I am providing you with the raw scraped text from a real estate agent's profile, and a specific Master Developer they are now representing.
     
@@ -103,7 +122,7 @@ export async function rewriteBioWithGemini(rawText: string, brokerName: string, 
       contents: prompt,
       config: { temperature: 0.4 },
     });
-    
+
     const text = typeof response.text === 'function' ? response.text() : response.text;
     return text.trim();
   } catch (error) {

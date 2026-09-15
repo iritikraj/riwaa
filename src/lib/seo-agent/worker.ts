@@ -450,7 +450,9 @@ const createDeveloperAgentWorker = () => new Worker('developer-agent-queue', asy
         phoneNumber: agentData.phoneNumber,
         hasWhatsapp: agentData.hasWhatsapp,
         rating: agentData.rating,
-        summaryStats: agentData.summaryStats
+        summaryStats: agentData.summaryStats,
+        languages: agentData.languages || "",
+        uniqueTag: agentData.uniqueTag || ""
       },
       agent_bio: customBio,
       projects_list: developerConfig.projects,
@@ -497,32 +499,41 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 /* 4. OBSERVABILITY LISTENERS */
+aiAuditWorker.on('ready', () => console.log('✅ AI Audit Worker is ready and listening to Redis...'));
 aiAuditWorker.on('completed', job => console.log(`[AI Queue] Job ${job.id} completed successfully`));
 aiAuditWorker.on('failed', (job, err) => {
   if (isDevelopment && err.message.includes('ECONNREFUSED')) return;
   console.log(`[AI Queue] Job ${job?.id} failed with ${err.message}`);
 });
 
+spiderWorker.on('ready', () => console.log('✅ Spider Worker is ready and listening to Redis...'));
 spiderWorker.on('completed', job => console.log(`[Spider Queue] Job ${job.id} completed successfully`));
 spiderWorker.on('failed', (job, err) => {
   if (isDevelopment && err.message.includes('ECONNREFUSED')) return;
   console.log(`[Spider Queue] Job ${job?.id} failed with ${err.message}`);
 });
 
+competitorWorker.on('ready', () => console.log('✅ Competitor Worker is ready and listening to Redis...'));
 competitorWorker.on('completed', job => console.log(`[Competitor Queue] Job ${job.id} completed successfully`));
 competitorWorker.on('failed', (job, err) => {
   if (isDevelopment && err.message.includes('ECONNREFUSED')) return;
   console.log(`[Competitor Queue] Job ${job?.id} failed with ${err.message}`);
 });
 
+complianceWorker.on('ready', () => console.log('✅ Compliance Worker is ready and listening to Redis...'));
 complianceWorker.on('completed', job => console.log(`[Compliance Queue] Job ${job.id} completed successfully`));
 complianceWorker.on('failed', (job, err) => {
   if (isDevelopment && err.message.includes('ECONNREFUSED')) return;
   console.log(`[Compliance Queue] Job ${job?.id} failed with ${err.message}`);
 });
 
+contentBriefWorker.on('ready', () => console.log('✅ Content Brief Worker is ready and listening to Redis...'));
 contentBriefWorker.on('completed', job => console.log(`[Brief Queue] Job ${job.id} completed successfully`));
 contentBriefWorker.on('failed', (job, err) => {
   if (isDevelopment && err.message.includes('ECONNREFUSED')) return;
   console.log(`[Brief Queue] Job ${job?.id} failed with ${err.message}`);
 });
+
+developerAgentWorker.on('ready', () => console.log('✅ Developer Agent Worker is ready and listening to Redis...'));
+developerAgentWorker.on('completed', job => console.log(`[DevAgent Queue] Job ${job.id} completed successfully`));
+developerAgentWorker.on('failed', (job, err) => console.error(`❌ Job ${job?.id} failed with error: ${err.message}`));

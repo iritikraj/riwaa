@@ -1,3 +1,4 @@
+// riwaa/src/app/real-estate/developer-advisors/[id]/page.tsx
 import { notFound } from "next/navigation";
 import { getDeveloperAgentBySlug } from "@/lib/real-estate-agents/strapi";
 import { DeveloperHero } from "../_hero";
@@ -33,19 +34,25 @@ export default async function DeveloperAdvisorPublicPage({ params }: { params: P
     notFound();
   }
 
+  // Safe checks for developer name to dynamically assign the correct trust stats
+  const devName = data.developer_name?.toLowerCase() || "";
+  let trustStats = ["Active since 2004", "26,000+ homes delivered", "Leading Developer in Abu Dhabi"]; // Default Aldar
+
+  if (devName.includes("emaar")) {
+    trustStats = ["Active since 1997", "85,000+ homes delivered", "Global Master Developer"];
+  } else if (devName.includes("prestige")) {
+    trustStats = ["Boutique Luxury", "Design-Led Architecture", "Prime Dubai Locations"];
+  }
+
   return (
     <main className="min-h-screen bg-[#fcfcfb] w-full overflow-x-hidden selection:bg-[#b8924a]/20">
 
       <DeveloperHero
         developerName={data.developer_name}
         developerProfile={data.developer_profile}
-        // Safely grab the first image of the first project as the hero background
+        heroBanner={data.hero_banner}
         heroImage={data.projects_list?.[0]?.images?.[0] || "https://off-planproperties.ae/wp-content/uploads/2021/09/Marina-Sands-Project.jpg"}
-        trustStats={
-          data.developer_name.includes("Emaar")
-            ? ["Active since 1997", "85,000+ homes delivered", "Global Master Developer"]
-            : ["Active since 2004", "26,000+ homes delivered", "Leading Developer in Abu Dhabi"]
-        }
+        trustStats={trustStats}
       />
 
       <ProjectsGrid

@@ -6,7 +6,7 @@ export interface DeveloperProject {
   bedroomOptions: string[];
   startingPriceAED: string;
   paymentPlan: string;
-  handoverDate?: string; // NEW FIELD
+  handoverDate?: string;
   images: string[];
   coordinates?: { lat: number; lng: number };
 }
@@ -16,10 +16,130 @@ export interface DeveloperConfig {
   tagline: string;
   profileText: string;
   logoUrl: string;
+  heroBanner?: string;
   projects: DeveloperProject[];
 }
 
 export const DEVELOPERS_REGISTRY: Record<string, DeveloperConfig> = {
+  "prestige-one": {
+    name: "Prestige One Developments",
+    tagline: "Crafting experiences where luxury intertwines with lifestyle.",
+    profileText:
+      "Prestige One Developments stands as a distinguished name in global real estate, redefining modern living through unique, design-based developments. Headquartered in Dubai, Prestige One focuses on crafting high-end residential and mixed-use projects that deliver immersive lifestyle experiences. With a deep understanding of community needs, their projects integrate visionary design, premium finishes, and curated amenities, focusing on prime locations and long-term value.",
+    logoUrl: "https://prestigeone.ae/assets/images/v3/prestigeone_logo_oneline_white-hr.svg",
+    heroBanner: "https://prestigeone.ae/assets/videos/prestige-one-intro.mp4",
+    projects: [
+      {
+        id: "fauchon-residences",
+        title: "FAUCHON Résidences by Prestige One",
+        community: "Jumeirah Garden City, Dubai",
+        propertyTypes: ["Apartments", "Studios"],
+        bedroomOptions: ["Studio", "1 BR", "2 BR", "3 BR"],
+        startingPriceAED: "1,990,000",
+        paymentPlan: "20/40/40",
+        images: [
+          "https://prestigeone.ae/assets/project-featured-images/fauchon/fauchon-banner.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/fauchon/v3/gallery/06-exterior-private-pool.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/fauchon/v3/gallery/02-exterior-pool.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/fauchon/v3/01X644LUKSPICJUGHV3ND3QGIYDM4QQEMM.png",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/fauchon/v3/gallery/12-amenity-multipurpose-hall.webp",
+
+        ],
+        coordinates: { lat: 25.05257507583646, lng: 55.217104357318185 },
+        handoverDate: "Completed"
+      },
+      {
+        id: "sanctuary-residences",
+        title: "Sanctuary Residences by Prestige One",
+        community: "Meydan Horizon",
+        propertyTypes: ["Apartments"],
+        bedroomOptions: ["1 BR", "2 BR"],
+        startingPriceAED: "625,000",
+        paymentPlan: "20/45/35",
+        images: [
+          "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary/gallery/Sanctuary%20Facade%20Angle%204.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary/gallery/10.-Residential-Amenities---Cinema---Level-9.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary/gallery/1.-Residential-Lobby.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary/gallery/8.-Residential-Amenities---Gym---Level-9---Option-2.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary/gallery/RoofTop-Floor-Sitting-Area.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary/gallery/Rooftop-Pool.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary/gallery/17.-3-Bedroom-Unit---Master-Bedroom.webp",
+        ],
+        coordinates: { lat: 25.03762777236335, lng: 55.221972783294284 },
+        handoverDate: "Completed"
+      },
+      {
+        id: "sanctuary-hive",
+        title: "Sanctuary Hive by Prestige One",
+        community: "Meydan Horizon",
+        propertyTypes: ["Commercial Offices"],
+        bedroomOptions: ["Offices"],
+        startingPriceAED: "2,830,000",
+        paymentPlan: "20/45/35",
+        images: [
+          "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary-Hive/gallery/sanctuary-hive-exterior-evening.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary/gallery/8.-Residential-Amenities---Gym---Level-9---Option-2.webp",
+        ],
+        coordinates: { lat: 25.03813320560613, lng: 55.22141150427357 },
+        handoverDate: "Completed"
+      },
+      {
+        id: "hilton-residences",
+        title: "Hilton Residences by Prestige One",
+        community: "Meydan Horizon",
+        propertyTypes: ["Apartments"],
+        bedroomOptions: ["1 BR", "2 BR", "3 BR"],
+        startingPriceAED: "1,570,000",
+        paymentPlan: "20/40/40",
+        images: [
+          "https://prestigeone.ae/assets/images/v3/project-amenities/hilton/gallery/1-hilton-1.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/hilton/gallery/2-Pool-View-%20Hilton%20Residences%20DMC.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/hilton/gallery/3-SUNSET-CINEMA-LAWN-%20Hilton%20Residences%20DMC.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/hilton/gallery/6-Facade%208-%20Hilton%20Residences%20DMC.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/hilton/gallery/9-Kids-Area-%20Hilton%20Residences%20DMC.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/hilton/gallery/11-Facade%203-%20Hilton%20Residences%20DMC.webp"
+        ],
+        coordinates: { lat: 25.18593384969912, lng: 55.28019540050471 },
+        handoverDate: "Completed"
+      },
+      {
+        id: "berkeley-square-north",
+        title: "Berkeley Square North",
+        community: "Jumeirah Village Circle",
+        propertyTypes: ["Apartments", "Studios"],
+        bedroomOptions: ["Studio", "1 BR", "2 BR", "3 BR"],
+        startingPriceAED: "1,200,000",
+        paymentPlan: "55/10/35",
+        images: [
+          "https://prestigeone.ae/assets/images/v3/project-amenities/berkeley-square-north/gallery/BS_DR_07.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/berkeley-square-north/gallery/Berkeley%20Square%20Courtyard%20Pool%20Night.webp",
+          "https://prestigeone.ae/assets/project-featured-images/berkeley/Berkeley-Square-North.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/berkeley-square-north/gallery/Berkeley%20Square%20Bird's%20Eye%20Night%20View.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/berkeley-square-north/gallery/Berkeley%20Square%20Pool%20Retreat%20Night.webp",
+        ],
+        coordinates: { lat: 25.09899774336412, lng: 55.17688344718675 },
+        handoverDate: "Completed"
+      },
+      {
+        id: "berkeley-square-south",
+        title: "Berkeley Square South",
+        community: "Jumeirah Village Circle",
+        propertyTypes: ["Apartments", "Studios"],
+        bedroomOptions: ["Studio", "1 BR", "2 BR", "3 BR"],
+        startingPriceAED: "1,200,000",
+        paymentPlan: "55/10/35",
+        images: [
+          "https://prestigeone.ae/assets/project-featured-images/berkeley/Berkeley-Square-South.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/berkeley-square-north/gallery/BS_DR_07.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/berkeley-square-north/gallery/Berkeley%20Square%20Courtyard%20Pool%20Night.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/berkeley-square-north/gallery/Berkeley%20Square%20Bird's%20Eye%20Night%20View.webp",
+          "https://prestigeone.ae/assets/images/v3/project-amenities/berkeley-square-north/gallery/Berkeley%20Square%20Pool%20Retreat%20Night.webp",
+        ],
+        coordinates: { lat: 25.07556280248074, lng: 55.140222174476094 },
+        handoverDate: "Completed"
+      }
+    ]
+  },
   emaar: {
     name: "Emaar Properties",
     tagline: "Pioneering master-planned communities across the UAE.",
