@@ -659,6 +659,7 @@ export default function DeveloperAdvisorBuilder() {
             <div className="pointer-events-none shadow-[0_30px_100px_rgba(0,0,0,0.12)] rounded-4xl overflow-hidden border border-neutral-200 mt-10 bg-white">
               <DeveloperHero
                 developerName={draftData.developer_name}
+                developerLogo={draftData.developer_logo}
                 developerProfile={draftData.developer_profile}
                 heroImage={draftData.projects_list?.[0]?.images?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80"}
                 heroBanner={draftData.hero_banner}

@@ -5,6 +5,7 @@ const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
 
 export interface DeveloperAgentPayload {
   developer_name: string;
+  developer_logo: string;
   agent_data: any;
   agent_bio: string;
   hero_banner?: string | null;

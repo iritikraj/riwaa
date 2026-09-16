@@ -49,6 +49,7 @@ export default async function DeveloperAdvisorPublicPage({ params }: { params: P
 
       <DeveloperHero
         developerName={data.developer_name}
+        developerLogo={data.developer_logo}
         developerProfile={data.developer_profile}
         heroBanner={data.hero_banner}
         heroImage={data.projects_list?.[0]?.images?.[0] || "https://off-planproperties.ae/wp-content/uploads/2021/09/Marina-Sands-Project.jpg"}

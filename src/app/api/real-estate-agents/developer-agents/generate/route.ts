@@ -22,6 +22,7 @@ export const POST = withLogger('/api/real-estate-agents/developer-agents/generat
     routeLogger.info({ event: 'creating_placeholder' }, 'Creating initial processing record in Strapi...');
     const record = await createDeveloperAgentInStrapi({
       developer_name: developerConfig.name,
+      developer_logo: developerConfig.logoUrl,
       report_status: 'processing',
       developer_profile: developerConfig.profileText,
       projects_list: developerConfig.projects,

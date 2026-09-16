@@ -5,14 +5,16 @@ import { motion } from "framer-motion";
 
 interface DeveloperHeroProps {
   developerName: string;
+  developerLogo?: string;
   developerProfile?: string;
   heroImage: string;
-  heroBanner?: string; // NEW FIELD
+  heroBanner?: string;
   trustStats: string[];
 }
 
 export function DeveloperHero({
   developerName,
+  developerLogo,
   developerProfile,
   heroImage,
   heroBanner,
@@ -55,10 +57,28 @@ export function DeveloperHero({
 
         {/* Gradient Overlays */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/90 via-[#050505]/40 to-transparent" />
-        {/* <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#050505]/60" /> */}
+
+        {/* NEW: Top Gradient to ensure the navbar logo pops against bright backgrounds */}
+        <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-black/60 to-transparent" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 w-full py-24 mt-10">
+      {/* NEW: Floating Navbar Area */}
+      <div className="absolute top-0 left-0 w-full z-30 px-6 lg:px-12 py-4 md:py-0 flex items-center justify-center">
+        {developerLogo ? (
+          <img
+            src={developerLogo}
+            alt={`${developerName} Logo`}
+            // Reduced height from the original h-20 to look like a sleek nav logo
+            className="h-12 md:h-20 w-auto object-contain drop-shadow-md"
+          />
+        ) : (
+          <span className="text-white text-lg tracking-[0.3em] font-medium uppercase">
+            {developerName}
+          </span>
+        )}
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 w-full py-24 mt-12">
         <div className="gap-12 lg:gap-8 items-center">
 
           {/* LEFT: Headline & Trust Pills */}

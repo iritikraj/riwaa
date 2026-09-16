@@ -45,7 +45,7 @@ export const DEVELOPERS_REGISTRY: Record<string, DeveloperConfig> = {
           "https://prestigeone.ae/assets/images/v3/project-amenities/fauchon/v3/gallery/12-amenity-multipurpose-hall.webp",
 
         ],
-        coordinates: { lat: 25.05257507583646, lng: 55.217104357318185 },
+        coordinates: { lat: 25.21705647356617, lng: 55.27553138422618 },
         handoverDate: "Completed"
       },
       {
@@ -65,7 +65,7 @@ export const DEVELOPERS_REGISTRY: Record<string, DeveloperConfig> = {
           "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary/gallery/Rooftop-Pool.webp",
           "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary/gallery/17.-3-Bedroom-Unit---Master-Bedroom.webp",
         ],
-        coordinates: { lat: 25.03762777236335, lng: 55.221972783294284 },
+        coordinates: { lat: 25.170351151244937, lng: 55.27609979279513 },
         handoverDate: "Completed"
       },
       {
@@ -80,7 +80,7 @@ export const DEVELOPERS_REGISTRY: Record<string, DeveloperConfig> = {
           "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary-Hive/gallery/sanctuary-hive-exterior-evening.webp",
           "https://prestigeone.ae/assets/images/v3/project-amenities/Sanctuary/gallery/8.-Residential-Amenities---Gym---Level-9---Option-2.webp",
         ],
-        coordinates: { lat: 25.03813320560613, lng: 55.22141150427357 },
+        coordinates: { lat: 25.167207740552165, lng: 55.27798665593903 },
         handoverDate: "Completed"
       },
       {
@@ -99,7 +99,7 @@ export const DEVELOPERS_REGISTRY: Record<string, DeveloperConfig> = {
           "https://prestigeone.ae/assets/images/v3/project-amenities/hilton/gallery/9-Kids-Area-%20Hilton%20Residences%20DMC.webp",
           "https://prestigeone.ae/assets/images/v3/project-amenities/hilton/gallery/11-Facade%203-%20Hilton%20Residences%20DMC.webp"
         ],
-        coordinates: { lat: 25.18593384969912, lng: 55.28019540050471 },
+        coordinates: { lat: 25.273948546154003, lng: 55.26766899159383 },
         handoverDate: "Completed"
       },
       {
@@ -117,7 +117,7 @@ export const DEVELOPERS_REGISTRY: Record<string, DeveloperConfig> = {
           "https://prestigeone.ae/assets/images/v3/project-amenities/berkeley-square-north/gallery/Berkeley%20Square%20Bird's%20Eye%20Night%20View.webp",
           "https://prestigeone.ae/assets/images/v3/project-amenities/berkeley-square-north/gallery/Berkeley%20Square%20Pool%20Retreat%20Night.webp",
         ],
-        coordinates: { lat: 25.09899774336412, lng: 55.17688344718675 },
+        coordinates: { lat: 25.049527834207982, lng: 55.20973868418424 },
         handoverDate: "Completed"
       },
       {
@@ -135,7 +135,7 @@ export const DEVELOPERS_REGISTRY: Record<string, DeveloperConfig> = {
           "https://prestigeone.ae/assets/images/v3/project-amenities/berkeley-square-north/gallery/Berkeley%20Square%20Bird's%20Eye%20Night%20View.webp",
           "https://prestigeone.ae/assets/images/v3/project-amenities/berkeley-square-north/gallery/Berkeley%20Square%20Pool%20Retreat%20Night.webp",
         ],
-        coordinates: { lat: 25.07556280248074, lng: 55.140222174476094 },
+        coordinates: { lat: 25.049527834207982, lng: 55.20973868418424 },
         handoverDate: "Completed"
       }
     ]
