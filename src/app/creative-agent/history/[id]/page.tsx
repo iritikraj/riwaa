@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { ArrowLeft, Download, TextQuote, Tag } from 'lucide-react';
 import { getCreativeAgentBySlug } from '@/lib/creative-agent/strapi';
 
-export default async function CreativeDetail({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CreativeDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
-  const agent = await getCreativeAgentBySlug(resolvedParams.slug);
+  const agent = await getCreativeAgentBySlug(resolvedParams.id);
 
   if (!agent) notFound();
 
