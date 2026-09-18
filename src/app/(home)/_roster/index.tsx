@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { ArrowRight, ArrowUpRight, Building2, CheckCircle2, FileCheck, LayoutDashboard, MessageCircleMore, Search, Swords, UserCircle } from "lucide-react"
+import { ArrowRight, ArrowUpRight, Building2, CheckCircle2, FileCheck, LayoutDashboard, MessageCircleMore, Search, Swords, UserCircle, Wand2 } from "lucide-react"
 import Link from "next/link"
 
 const ROSTER = [
@@ -506,6 +506,73 @@ const Roster = () => {
                 className="inline-flex items-center gap-3 rounded-full border border-[#14181F]/15 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#14181F] transition-colors hover:border-[#14181F]/30"
               >
                 Open Builder
+                <ArrowRight size={15} />
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* CREATIVE AGENT MODULE */}
+        <motion.div
+          whileHover={{ y: -8 }}
+          transition={{ duration: 0.35 }}
+          className="group relative flex min-h-117.5 flex-col overflow-hidden rounded-3xl border border-[#14181F]/10 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+        >
+          <div className="absolute right-0 top-0 h-75 w-75 rounded-full bg-indigo-500/10 blur-[120px]" />
+
+          <div className="relative flex h-full flex-col">
+            <div className="flex items-center justify-between">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-200 bg-indigo-50">
+                <Wand2 size={26} className="text-indigo-600" />
+              </div>
+              <span className="rounded-full border border-indigo-200 bg-indigo-100 px-3 py-2 text-[10px] uppercase tracking-[0.3em] text-indigo-700">
+                Art Director
+              </span>
+            </div>
+
+            <h2 className="mt-8 text-3xl font-medium tracking-tight text-[#14181F]">
+              AI Creative
+              <br />
+              Agent
+            </h2>
+
+            <p className="mt-4 text-[14.5px] leading-7 text-[#565C6B]">
+              Programmatically generate professional, agency-grade luxury ad creatives using Gemini Vision and dynamic templates.
+            </p>
+
+            {/* Mini Ad Satori Preview */}
+            <div className="mt-8 rounded-2xl border border-[#14181F]/10 bg-[#FCFBF8] p-5">
+              <div className="flex items-center justify-between border-b border-[#14181F]/5 pb-3">
+                <span className="text-[9px] uppercase tracking-[0.3em] text-[#565C6B]">
+                  Layout Render
+                </span>
+                <span className="rounded-full bg-green-50 px-2 py-1 text-[9px] font-semibold uppercase tracking-widest text-green-600">
+                  Ready
+                </span>
+              </div>
+
+              {/* Miniature representation of the Luxury Ad layout */}
+              <div className="mt-4 relative h-32 w-full overflow-hidden rounded-xl bg-gradient-to-br from-[#14181F] to-neutral-900 flex flex-col justify-between p-4 shadow-inner">
+                <div className="h-3 w-12 rounded-sm bg-white/30 self-end" />
+                <div className="mt-auto relative z-10">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className="h-1.5 w-1.5 rounded-full bg-[#b8924a]" />
+                    <div className="h-1.5 w-16 rounded-sm bg-[#b8924a]" />
+                  </div>
+                  <div className="h-4 w-3/4 rounded bg-white/90 mb-2.5" />
+                  <div className="h-5 w-20 rounded border border-[#b8924a]/50 bg-[#14181F]/60" />
+                </div>
+                {/* Gradient fade simulation */}
+                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 to-transparent" />
+              </div>
+            </div>
+
+            <div className="mt-auto pt-8">
+              <Link
+                href="/creative-agent"
+                className="inline-flex items-center gap-3 rounded-full border border-[#14181F]/15 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#14181F] transition-colors hover:border-[#14181F]/30"
+              >
+                Launch Studio
                 <ArrowRight size={15} />
               </Link>
             </div>

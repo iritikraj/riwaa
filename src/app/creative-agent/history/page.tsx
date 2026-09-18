@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { Sparkles, ArrowRight, LayoutTemplate } from 'lucide-react';
 import { getAllCreativeAgents } from '@/lib/creative-agent/strapi';
+import Image from 'next/image';
 
 export default async function CreativeAgentHistory() {
   const creatives = await getAllCreativeAgents();
@@ -10,15 +11,41 @@ export default async function CreativeAgentHistory() {
   return (
     <div className="min-h-screen bg-[#fcfcfb] font-jost text-neutral-900 selection:bg-[#b8924a]/20">
       {/* Top Navigation */}
-      <nav className="w-full bg-white border-b border-neutral-100 px-8 py-5 flex items-center justify-between sticky top-0 z-50">
+      <nav className="w-full bg-[#fcfcfb] border-b border-neutral-200 md:border-neutral-100 px-8 py-5 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#050505] flex items-center justify-center">
-            <LayoutTemplate size={16} className="text-[#b8924a]" />
-          </div>
-          <div>
-            <h1 className="text-sm font-bold tracking-widest uppercase">Creative Archive</h1>
-            <p className="text-[10px] text-neutral-400 uppercase tracking-wider">Your generated campaigns</p>
-          </div>
+          <Link href="/" className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#14181F]/10 bg-white">
+              <Image
+                src="/riwa-logo-transparent.png"
+                alt="RIWAA"
+                width={30}
+                height={30}
+              />
+            </div>
+
+            <div className="leading-none hidden md:block">
+              <p className="text-[15px] font-medium tracking-[0.22em] text-[#14181F]">
+                RIWAA
+              </p>
+              <p className="mt-1 font-jost text-[9px] uppercase tracking-[0.22em] text-[#565C6B]">
+                powered by
+              </p>
+            </div>
+
+            <div className="mx-2 h-8 w-px bg-[#14181F]/15 hidden md:block" />
+
+            <Image
+              src="/solvetude-logo.png"
+              alt="Solvetude"
+              width={100}
+              height={30}
+              className="object-contain hidden md:block"
+            />
+          </Link>
+        </div>
+        <div className='hidden md:block mr-28'>
+          <h1 className="text-sm font-bold tracking-widest uppercase">Creative Archive</h1>
+          <p className="text-[10px] text-neutral-400 uppercase tracking-wider">Your generated campaigns</p>
         </div>
         <Link
           href="/creative-agent"

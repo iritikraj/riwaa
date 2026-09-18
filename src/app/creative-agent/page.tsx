@@ -3,7 +3,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, UploadCloud, Image as ImageIcon, CheckCircle, Loader2, LayoutTemplate } from 'lucide-react';
+import { Sparkles, UploadCloud, Image as ImageIcon, CheckCircle, Loader2, LayoutTemplate, Clock } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function CreativeAgentBuilder() {
   // 1. Form State
@@ -115,15 +117,43 @@ export default function CreativeAgentBuilder() {
   return (
     <div className="min-h-screen bg-[#fcfcfb] font-jost text-neutral-900 selection:bg-[#b8924a]/20">
       {/* Top Navigation */}
-      <nav className="w-full bg-white border-b border-neutral-100 px-8 py-5 flex items-center justify-between sticky top-0 z-50">
+      <nav className="w-full bg-[#fcfcfb] border-b border-neutral-200 md:border-neutral-100 px-8 py-5 flex items-center justify-between sticky top-0 z-50">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#14181F]/10 bg-white">
+            <Image
+              src="/riwa-logo-transparent.png"
+              alt="RIWAA"
+              width={30}
+              height={30}
+            />
+          </div>
+
+          <div className="leading-none hidden md:block">
+            <p className="text-[15px] font-medium tracking-[0.22em] text-[#14181F]">
+              RIWAA
+            </p>
+            <p className="mt-1 font-jost text-[9px] uppercase tracking-[0.22em] text-[#565C6B]">
+              powered by
+            </p>
+          </div>
+
+          <div className="mx-2 h-8 w-px bg-[#14181F]/15 hidden md:block" />
+
+          <Image
+            src="/solvetude-logo.png"
+            alt="Solvetude"
+            width={100}
+            height={30}
+            className="object-contain hidden md:block"
+          />
+        </Link>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#050505] flex items-center justify-center">
-            <Sparkles size={16} className="text-[#b8924a]" />
-          </div>
-          <div>
-            <h1 className="text-sm font-bold tracking-widest uppercase">Creative Agent</h1>
-            <p className="text-[10px] text-neutral-400 uppercase tracking-wider">Powered by Solvetude</p>
-          </div>
+          <Link
+            href="/creative-agent/history"
+            className="px-4 py-2 bg-neutral-900 text-white rounded-lg text-xs font-semibold uppercase tracking-widest hover:bg-neutral-800 transition-colors flex items-center gap-2"
+          >
+            <Clock size={14} className="text-white" /> Archives
+          </Link>
         </div>
       </nav>
 
