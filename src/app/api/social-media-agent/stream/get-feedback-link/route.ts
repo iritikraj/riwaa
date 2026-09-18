@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/admin';
-import { withLogger } from '@/lib/logs/withLogger';
+import { withLogger } from '@/utils/logs/withLogger';
 
 export const GET = withLogger('/api/social-media-agent/stream/get-feedback-link', async (req: NextRequest, routeLogger) => {
   const { searchParams } = new URL(req.url);

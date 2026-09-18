@@ -3,7 +3,7 @@ import { loadEnvConfig } from '@next/env';
 loadEnvConfig(process.cwd());
 
 import { Queue } from 'bullmq';
-import { redisConnection, spiderQueue, aiAuditQueue, contentBriefQueue, developerAgentQueue } from './src/lib/seo-agent/queue';
+import { redisConnection, spiderQueue, aiAuditQueue, contentBriefQueue, developerAgentQueue, creativeAgentQueue } from './src/workers/queue';
 
 const competitorQueue = new Queue('competitor-audit-queue', { connection: redisConnection as any });
 const complianceQueue = new Queue('compliance-audit-queue', { connection: redisConnection as any });
@@ -26,6 +26,9 @@ async function wipeQueues() {
 
   console.log('🧹 Wiping Developer Agent Queue...');
   await developerAgentQueue.obliterate({ force: true });
+
+  console.log('🧹 Wiping Creative Agent Queue...');
+  await creativeAgentQueue.obliterate({ force: true });
   process.exit(0);
 }
 

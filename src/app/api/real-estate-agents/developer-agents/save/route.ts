@@ -1,7 +1,7 @@
 // riwaa/src/app/api/real-estate-agents/developer-agents/save/route.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
-import { withLogger } from '@/lib/logs/withLogger';
+import { withLogger } from '@/utils/logs/withLogger';
 import { updateDeveloperAgentInStrapi } from '@/lib/real-estate-agents/strapi';
 
 export const POST = withLogger('/api/real-estate-agents/developer-agents/save', async (req: NextRequest, routeLogger) => {

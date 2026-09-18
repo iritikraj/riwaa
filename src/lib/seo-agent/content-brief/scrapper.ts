@@ -4,7 +4,7 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import * as cheerio from 'cheerio';
 import type { Logger } from 'pino';
-import { logger as defaultLogger } from '@/lib/logs/logger';
+import { logger as defaultLogger } from '@/utils/logs/logger';
 
 puppeteer.use(StealthPlugin());
 

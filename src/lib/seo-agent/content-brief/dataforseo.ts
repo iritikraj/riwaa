@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { logger as defaultLogger } from '@/lib/logs/logger';
+import { logger as defaultLogger } from '@/utils/logs/logger';
 import type { Logger } from 'pino';
 
 export async function fetchKeywordData(topic: string, parentLogger: Logger = defaultLogger) {

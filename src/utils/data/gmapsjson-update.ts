@@ -4,7 +4,7 @@ import path from 'path';
 
 export async function updateLocalGmapsData(itemId: string, aiResult: { sentiment: string, reply_draft: string }) {
   // 1. Define the absolute path to your JSON file
-  const filePath = path.join(process.cwd(), 'src/config/data/gmaps-data.json');
+  const filePath = path.join(process.cwd(), 'src/utils/data/gmaps-data.json');
 
   try {
     // 2. Read and parse the current file

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
-import { withLogger } from "@/lib/logs/withLogger";
+import { withLogger } from "@/utils/logs/withLogger";
 
 // Wrap the GET route with your logger
 export const GET = withLogger('/api/real-estate-agents/history', async (req: NextRequest, routeLogger) => {

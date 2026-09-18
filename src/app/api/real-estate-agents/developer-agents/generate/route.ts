@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
-import { developerAgentQueue } from '@/lib/seo-agent/queue';
-import { withLogger } from '@/lib/logs/withLogger';
-import { DEVELOPERS_REGISTRY } from '@/config/data/developers';
+import { developerAgentQueue } from '@/workers/queue';
+import { withLogger } from '@/utils/logs/withLogger';
+import { DEVELOPERS_REGISTRY } from '@/utils/data/developers';
 import { createDeveloperAgentInStrapi } from '@/lib/real-estate-agents/strapi';
 
 export const POST = withLogger('/api/real-estate-agents/developer-agents/generate', async (req: NextRequest, routeLogger) => {

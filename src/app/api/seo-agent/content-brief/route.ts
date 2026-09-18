@@ -1,8 +1,8 @@
 // src/app/api/seo-agent/content-brief/route.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
-import { contentBriefQueue } from '@/lib/seo-agent/queue';
-import { withLogger } from '@/lib/logs/withLogger';
+import { contentBriefQueue } from '@/workers/queue';
+import { withLogger } from '@/utils/logs/withLogger';
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
 const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;

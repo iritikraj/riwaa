@@ -2,8 +2,8 @@
 // riwaa/src/app/api/seo-agent/audit/save-batch/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { saveAuditToStrapi } from '@/lib/seo-agent/strapi';
-import { withLogger } from '@/lib/logs/withLogger';
-import { aiAuditQueue } from '@/lib/seo-agent/queue';
+import { withLogger } from '@/utils/logs/withLogger';
+import { aiAuditQueue } from '@/workers/queue';
 
 export const POST = withLogger('/api/seo-agent/audit/save-batch', async (req: NextRequest, routeLogger) => {
   try {

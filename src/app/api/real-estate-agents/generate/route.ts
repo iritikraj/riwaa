@@ -7,7 +7,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { z } from 'zod';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import { withLogger } from '@/lib/logs/withLogger';
+import { withLogger } from '@/utils/logs/withLogger';
 
 puppeteer.use(StealthPlugin());
 

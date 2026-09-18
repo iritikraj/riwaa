@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { saveCompetitorAuditToStrapi } from '@/lib/seo-agent/strapi'; // We will build this in the next step
-import { withLogger } from '@/lib/logs/withLogger';
-import { competitorQueue } from '@/lib/seo-agent/queue'; // We will add this to queue.ts next
+import { withLogger } from '@/utils/logs/withLogger';
+import { competitorQueue } from '@/workers/queue'; // We will add this to queue.ts next
 
 export const POST = withLogger('/api/seo-agent/competitor', async (req: NextRequest, routeLogger) => {
   try {

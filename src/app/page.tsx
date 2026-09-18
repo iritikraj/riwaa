@@ -11,6 +11,9 @@ import Roster from "./(home)/_roster";
 import Hero from "./(home)/_hero";
 import Navbar from "./(home)/_nav";
 
+const waNumber = "971581980131";
+const waMessage = encodeURIComponent("Hi, I would like to know more about RIWAA.");
+
 const WHY = [
   {
     title: "Built for real estate, not retrofitted",
@@ -80,7 +83,10 @@ export default function RiwaaHomePage() {
               brokerage — no setup required to look.
             </p>
             <a
-              href="mailto:ak@solvetude.com"
+              href={`https://wa.me/${waNumber}?text=${waMessage}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Book a walkthrough"
               className="mt-10 inline-flex items-center gap-2.5 rounded-full bg-[#FCFBF8] px-7 py-3.5 text-[13px] font-medium text-[#14181F] transition-opacity hover:opacity-90"
             >
               Book a walkthrough

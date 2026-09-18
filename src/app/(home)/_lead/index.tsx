@@ -1,9 +1,11 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { CountryCode } from "@/config/data/country-code";
+import { CountryCode } from "@/utils/data/country-code";
 import { motion } from "framer-motion";
+import { submitLeadForm } from "@/utils/server-actions/lead-form";
 
 const LeadModal = ({
   open,
@@ -14,29 +16,7 @@ const LeadModal = ({
 }) => {
   const [mounted, setMounted] = useState(false);
   const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSuccess(false);
-    }
-  }, [open]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!success) return;
-
-    const timer = setTimeout(() => {
-      setSuccess(false);
-      onClose();
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [success, onClose]);
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -46,8 +26,22 @@ const LeadModal = ({
     note: "",
   });
 
-  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (open) setSuccess(false);
+  }, [open]);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!success) return;
+    const timer = setTimeout(() => {
+      setSuccess(false);
+      onClose();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [success, onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,34 +49,24 @@ const LeadModal = ({
     setLoading(true);
 
     try {
-      const response = await fetch("/api/lead-form", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
+      // Calls the server action securely without exposing an API endpoint route
+      const result = await submitLeadForm(form);
+
+      if (!result.success) {
+        throw new Error(result.message || "Something went wrong");
+      }
+
+      setSuccess(true);
+      setForm({
+        name: "",
+        email: "",
+        countryCode: "+971",
+        phone: "",
+        note: "",
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Something went wrong");
-      }
-
-      if (data.success) {
-        setSuccess(true);
-
-        setForm({
-          name: "",
-          email: "",
-          countryCode: "+971",
-          phone: "",
-          note: "",
-        });
-      }
-
     } catch (error) {
       console.error(error);
+      alert("Failed to submit. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -91,7 +75,7 @@ const LeadModal = ({
   if (!open || !mounted) return null;
 
   return createPortal(
-    <div className="fixed font-jost text-black inset-0 z-999 flex min-h-screen items-center justify-center overflow-y-auto bg-[#14181F]/40 px-4 py-8 backdrop-blur-sm">
+    <div className="fixed font-jost text-black inset-0 z-[999] flex min-h-screen items-center justify-center overflow-y-auto bg-[#14181F]/40 px-4 py-8 backdrop-blur-sm">
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -102,41 +86,37 @@ const LeadModal = ({
         className="w-full max-w-md"
       >
         <div className="rounded-3xl border border-[#14181F]/10 bg-[#FCFBF8] p-8 shadow-2xl">
-          {
-            !success && (
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-jost text-[10px] uppercase tracking-[0.25em] text-[#9C7A3C]">
-                    Get started
-                  </p>
-                  <h2 className="mt-3 text-2xl font-medium">
-                    Book a walkthrough
-                  </h2>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setSuccess(false);
-                    onClose();
-                  }}
-                  className="cursor-pointer text-[#565C6B] hover:text-[#14181F]"
-                >
-                  ✕
-                </button>
+          {!success && (
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="font-jost text-[10px] uppercase tracking-[0.25em] text-[#9C7A3C]">
+                  Get started
+                </p>
+                <h2 className="mt-3 text-2xl font-medium">
+                  Book a walkthrough
+                </h2>
               </div>
-            )
-          }
+
+              <button
+                onClick={() => {
+                  setSuccess(false);
+                  onClose();
+                }}
+                className="cursor-pointer text-[#565C6B] hover:text-[#14181F]"
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
           {success ? (
             <div className="py-4 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#1F4D3A]/10 text-[#1F4D3A]">
                 ✓
               </div>
-
               <h3 className="mt-5 text-xl font-medium">
                 Thank you for reaching out.
               </h3>
-
               <p className="mt-2 text-sm leading-6 text-[#565C6B]">
                 Our team will get back to you shortly.
               </p>
@@ -147,12 +127,7 @@ const LeadModal = ({
                 required
                 type="text"
                 value={form.name}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    name: e.target.value,
-                  })
-                }
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Full name"
                 className="w-full rounded-xl border border-[#14181F]/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#1B2A4A]"
               />
@@ -161,27 +136,16 @@ const LeadModal = ({
                 required
                 type="email"
                 value={form.email}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    email: e.target.value,
-                  })
-                }
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="Email address"
                 className="w-full rounded-xl border border-[#14181F]/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#1B2A4A]"
               />
-
 
               <div className="flex gap-2">
                 <select
                   required
                   value={form.countryCode}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      countryCode: e.target.value,
-                    })
-                  }
+                  onChange={(e) => setForm({ ...form, countryCode: e.target.value })}
                   className="w-40 rounded-xl border border-[#14181F]/10 bg-white px-3 text-sm outline-none"
                 >
                   {CountryCode.map((country) => (
@@ -195,12 +159,7 @@ const LeadModal = ({
                   required
                   type="tel"
                   value={form.phone}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      phone: e.target.value,
-                    })
-                  }
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   placeholder="Phone number"
                   className="flex-1 rounded-xl border border-[#14181F]/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#1B2A4A]"
                 />
@@ -208,21 +167,15 @@ const LeadModal = ({
 
               <textarea
                 value={form.note}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    note: e.target.value,
-                  })
-                }
+                onChange={(e) => setForm({ ...form, note: e.target.value })}
                 placeholder={`What would you like "RIWAA" to help your team achieve?`}
                 className="w-full rounded-xl border border-[#14181F]/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#1B2A4A]"
               />
 
-
               <button
                 disabled={loading}
                 type="submit"
-                className="mt-3 w-full rounded-full bg-[#1B2A4A] py-3.5 text-[12px] font-medium uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+                className={`${loading ? "cursor-not-allowed" : "cursor-pointer"} mt-3 w-full rounded-full bg-[#1B2A4A] py-3.5 text-[12px] font-medium uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-90 disabled:opacity-60`}
               >
                 {loading ? "Submitting..." : "Submit request"}
               </button>

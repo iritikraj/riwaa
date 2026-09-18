@@ -1,8 +1,8 @@
 // app/api/social-media-agent/stream/manual-enrichment/route.ts
-import { enrichStreamItemWithAI, gmapsJsonAiEnrichment } from '@/config/ai/data-enrichment';
+import { enrichStreamItemWithAI, gmapsJsonAiEnrichment } from '@/utils/ai/data-enrichment';
 import { NextResponse } from 'next/server';
-import { withLogger } from '@/lib/logs/withLogger';
-import { updateLocalGmapsData } from '@/config/data/gmapsjson-update';
+import { withLogger } from '@/utils/logs/withLogger';
+import { updateLocalGmapsData } from '@/utils/data/gmapsjson-update';
 
 // Wrap your async function with the logger!
 export const POST = withLogger('/api/social-media-agent/stream/manual-enrichment', async (req, routeLogger) => {

@@ -3,7 +3,7 @@ import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { websites } from "@/lib/db/schema";
-import { getUnsplashImage } from "@/lib/images";
+import { getUnsplashImage } from "@/utils/images";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 

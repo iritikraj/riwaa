@@ -2,7 +2,7 @@
 "use client";
 import { useState } from "react";
 import { MapPin, LayoutGrid, Share2, ArrowRight, Bed, Bath, Maximize } from "lucide-react";
-import { brokerageRegistry } from "@/config/brokerage";
+import { brokerageRegistry } from "@/utils/brokerage";
 import ListingsMap from "../_map";
 
 const DUBAI_COORDINATES: Record<string, { lat: number; lng: number }> = {

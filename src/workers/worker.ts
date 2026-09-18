@@ -1,32 +1,34 @@
-// src/lib/seo-agent/worker.ts
+// riwaa/src/workers/worker.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { loadEnvConfig } from '@next/env';
 loadEnvConfig(process.cwd());
 
-import { Worker } from 'bullmq';
+import { Job, Worker } from 'bullmq';
 import { redisOptions, spiderQueue } from './queue';
 import { runDomainSpider } from './spider';
-import { scrapeWithPuppeteer } from './scraper';
-import { analyzeEntities } from './nlp';
+import { scrapeWithPuppeteer } from '../lib/seo-agent/scraper';
+import { analyzeEntities } from '../lib/seo-agent/nlp';
 import { GoogleGenAI } from '@google/genai';
-import { runHeavyAiAudit } from './ai-audit';
+import { runHeavyAiAudit } from '../lib/seo-agent/ai-audit';
 import {
   updateAuditInStrapi,
   appendResultToStrapi,
   updateCompetitorAuditInStrapi,
   updateComplianceAuditInStrapi,
-} from './strapi';
+} from '../lib/seo-agent/strapi';
 
 import * as mammoth from 'mammoth';
-import { extractComplianceData, parseBriefWithGemini, runComparisonEngine } from './compliance/scrapper';
-import { generateContentBrief } from './content-brief/generator';
-import { extractBriefArchitecture, scrapeMultipleCompetitors, fetchPeopleAlsoAsk, extractCompetitorTopicFrequencies } from './content-brief/scrapper';
-import { fetchGcpKnowledgeGraphEntities } from './content-brief/gcp-entities';
-import { logger as defaultLogger } from '@/lib/logs/logger';
+import { extractComplianceData, parseBriefWithGemini, runComparisonEngine } from '../lib/seo-agent/compliance/scrapper';
+import { generateContentBrief } from '../lib/seo-agent/content-brief/generator';
+import { extractBriefArchitecture, scrapeMultipleCompetitors, fetchPeopleAlsoAsk, extractCompetitorTopicFrequencies } from '../lib/seo-agent/content-brief/scrapper';
+import { fetchGcpKnowledgeGraphEntities } from '../lib/seo-agent/content-brief/gcp-entities';
+import { logger as defaultLogger } from '@/utils/logs/logger';
 import { fetchPageSpeedData } from '@/lib/seo-agent/google-tools/page-speed';
-import { DEVELOPERS_REGISTRY } from '@/config/data/developers';
-import { fetchBrokerData, rewriteBioWithGemini } from '../real-estate-agents/utils';
-import { updateDeveloperAgentInStrapi } from '../real-estate-agents/strapi';
+import { DEVELOPERS_REGISTRY } from '@/utils/data/developers';
+import { fetchBrokerData, rewriteBioWithGemini } from '../lib/real-estate-agents/utils';
+import { updateDeveloperAgentInStrapi } from '../lib/real-estate-agents/strapi';
+import { getActiveTemplate, getCreativeAgentById, updateCreativeAgentInStrapi, uploadBufferToStrapi } from '../lib/creative-agent/strapi';
+import { generateCreativeBuffer } from '../lib/creative-agent/satori-engine';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -157,7 +159,7 @@ async function runGeminiCompetitorComparison(targetData: any, competitorData: an
     2. Score each category out of 10 for both Target and Competitor based on strict technical standards.
     3. Provide a clear, actionable "ai_opinion" detailing WHY the target scored less (or higher) than the competitor and exact steps to beat them.
 
-EXPECTED JSON SCHEMA:
+    EXPECTED JSON SCHEMA:
     {
       "overall_winner": "target" | "competitor",
       "categories": {
@@ -488,6 +490,132 @@ const createDeveloperAgentWorker = () => new Worker('developer-agent-queue', asy
   concurrency: 2 // Keeps EC2 memory safe from headless Chrome spikes
 });
 
+const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async (job: Job) => {
+  // Helper to get raw base64 (without the data URI prefix) for Gemini Vision
+  async function getRawBase64Image(url: string) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Failed to fetch image: ${url}`);
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const mimeType = response.headers.get('content-type') || 'image/jpeg';
+    return { data: buffer.toString('base64'), mimeType };
+  }
+
+  // Helper for Satori (needs the full Data URI)
+  function toDataUri(rawBase64: string, mimeType: string) {
+    return `data:${mimeType};base64,${rawBase64}`;
+  }
+
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const { documentId } = job.data;
+
+  try {
+    const agentData = await getCreativeAgentById(documentId);
+    if (!agentData) throw new Error("Creative Agent record not found.");
+
+    console.log(`[Creative Agent] Fetching assets for Gemini Vision & Satori...`);
+    const rawBackgroundUrl = agentData.background_image?.url
+      ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${agentData.background_image.url}`
+      : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1080&q=80';
+
+    const bgImage = await getRawBase64Image(rawBackgroundUrl);
+    const backgroundDataUri = toDataUri(bgImage.data, bgImage.mimeType);
+
+    let logoDataUri = "";
+    if (agentData.logo?.url) {
+      const rawLogoUrl = `${process.env.NEXT_PUBLIC_STRAPI_URL}${agentData.logo.url}`;
+      const logoImage = await getRawBase64Image(rawLogoUrl);
+      logoDataUri = toDataUri(logoImage.data, logoImage.mimeType);
+    }
+
+    // Find the negative space (like an empty sky or dark shadows) to place the typography so it does not obstruct the main subject (buildings, people).
+
+    const campaignData = agentData.campaign_data as any;
+    const designInstructions = agentData.campaign_data?.design_instructions || "Use your best judgment for a luxury and aesthetic real estate layout.";
+
+    console.log(`[Creative Agent] Asking Gemini to analyze the image and generate the layout...`);
+
+    const prompt = `You are an elite Art Director and UI Engineer for luxury real estate brands like Emaar, Prestige One and Relaam.
+    
+    Analyze the provided background image. The user has provided specific design and layout instructions. You must follow their spatial and content instructions EXACTLY while outputting a valid Satori JSON layout.
+    
+    --- CAMPAIGN ASSETS ---
+    Brand: ${agentData.brand_name.toUpperCase()}
+    Location: ${(campaignData?.location || "DUBAI").toUpperCase()}
+    Price: ${campaignData?.starting_price || ""}
+    USPs: ${agentData.usps?.join(', ') || ''}
+    
+    --- USER DESIGN INSTRUCTIONS ---
+    "${designInstructions}"
+
+    Task: Write the specific text the user requested (or generate it based on their goal). Then, generate the complete Satori JSON layout object representing a 1080x1080 ad.
+    
+    Satori JSON Rules:
+    - STRICTLY obey the user's layout requests (e.g., if they say "logo top right with 40px padding", build a container with { "position": "absolute", "top": "40px", "right": "40px" } for the logo).
+    - If the user says to hide the price or brand, DO NOT include them in the JSON.
+    - If no specific positions are requested, analyze the image and use flexbox or absolute positioning to place text in the negative space (uncluttered areas like sky, water, or dark shadows).
+    - If the text is over a bright area, use dark text or a subtle dark text shadow. If over a dark area, use white text.
+    - Keep typography minimalist, elegant, and high-end.
+    - The root object must be: { "type": "container", "style": { "width": "1080px", "height": "1080px", "position": "relative" }, "children": [...] }
+    - The first child MUST be the background image: { "type": "image", "source": "${backgroundDataUri}", "style": { "position": "absolute", "top": 0, "left": 0, "width": "1080px", "height": "1080px", "objectFit": "cover" } }
+    - If a logo is required, use exactly this source: "${logoDataUri}"
+
+    DO NOT output markdown formatting like \`\`\`json. Return the raw JSON object directly.`;
+
+    const aiResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-pro', // Using Pro for advanced spatial reasoning and JSON generation
+      contents: [
+        prompt,
+        { inlineData: { data: bgImage.data, mimeType: bgImage.mimeType } }
+      ],
+      config: {
+        responseMimeType: "application/json",
+        temperature: 0.2, // Low temperature for strict JSON compliance
+      }
+    });
+
+    console.log(`[Creative Agent] Compiling AI-generated layout via Satori...`);
+    let layoutJsonString = aiResponse.text || '{}';
+    layoutJsonString = layoutJsonString.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+
+    // We pass an empty variables object because Gemini has already injected the actual text values into the JSON directly
+    const pngBuffer = await generateCreativeBuffer(layoutJsonString || '{}', {}, 1080, 1080);
+
+    console.log(`[Creative Agent] Uploading finalized creative to Strapi...`);
+    const FINAL_FOLDER_ID = 5;
+    const uploadedUrl = await uploadBufferToStrapi(
+      pngBuffer,
+      `${agentData.brand_name}-feed-ad.png`,
+      FINAL_FOLDER_ID
+    );
+
+    // Extract just the headline from the generated JSON (optional, for Strapi record)
+    let extractedHeadline = "Custom AI Layout";
+    try {
+      const parsed = JSON.parse(layoutJsonString);
+      extractedHeadline = JSON.stringify(parsed).match(/"content":"([^"]+)"/)?.[1] || extractedHeadline;
+    } catch(e) {}
+
+    await updateCreativeAgentInStrapi(documentId, {
+      report_status: 'draft',
+      ai_copy: { headline: extractedHeadline, cta: "See Design" },
+      generated_creatives: { feed_square: uploadedUrl }
+    });
+
+    console.log(`[Creative Agent] Job completed! Creative ready at ${uploadedUrl}`);
+
+  } catch (error: any) {
+    console.error(`[Creative Agent] Failed: ${error.message}`);
+    await updateCreativeAgentInStrapi(documentId, { report_status: 'failed' }).catch(() => { });
+    throw error;
+  }
+},
+  {
+    connection: redisOptions as any,
+    concurrency: 2
+  }
+);
+
 /* 2. SINGLETON CACHE (This permanently fixes the stalling/zombie issue) */
 
 const globalForWorkers = globalThis as unknown as {
@@ -497,6 +625,7 @@ const globalForWorkers = globalThis as unknown as {
   complianceWorker: Worker;
   contentBriefWorker: Worker;
   developerAgentWorker: Worker;
+  creativeAgentWorker: Worker;
 };
 
 export const aiAuditWorker = globalForWorkers.aiAuditWorker || createAiAuditWorker();
@@ -505,6 +634,7 @@ export const competitorWorker = globalForWorkers.competitorWorker || createCompe
 export const complianceWorker = globalForWorkers.complianceWorker || createComplianceWorker();
 export const contentBriefWorker = globalForWorkers.contentBriefWorker || createContentBriefWorker();
 export const developerAgentWorker = globalForWorkers.developerAgentWorker || createDeveloperAgentWorker();
+export const creativeAgentWorker = globalForWorkers.creativeAgentWorker || createCreativeAgentWorker();
 
 if (process.env.NODE_ENV !== 'production') {
   globalForWorkers.aiAuditWorker = aiAuditWorker;
@@ -513,6 +643,7 @@ if (process.env.NODE_ENV !== 'production') {
   globalForWorkers.complianceWorker = complianceWorker;
   globalForWorkers.contentBriefWorker = contentBriefWorker;
   globalForWorkers.developerAgentWorker = developerAgentWorker;
+  globalForWorkers.creativeAgentWorker = creativeAgentWorker;
 }
 
 /* 4. OBSERVABILITY LISTENERS */
@@ -554,3 +685,7 @@ contentBriefWorker.on('failed', (job, err) => {
 developerAgentWorker.on('ready', () => console.log('✅ Developer Agent Worker is ready and listening to Redis...'));
 developerAgentWorker.on('completed', job => console.log(`[DevAgent Queue] Job ${job.id} completed successfully`));
 developerAgentWorker.on('failed', (job, err) => console.error(`❌ Job ${job?.id} failed with error: ${err.message}`));
+
+creativeAgentWorker.on('ready', () => console.log('✅ Developer Agent Worker is ready and listening to Redis...'));
+creativeAgentWorker.on('completed', job => console.log(`[DevAgent Queue] Job ${job.id} completed successfully`));
+creativeAgentWorker.on('failed', (job, err) => console.error(`❌ Job ${job?.id} failed with error: ${err.message}`));

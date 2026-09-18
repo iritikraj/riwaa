@@ -1,4 +1,4 @@
-import { spiderWorker } from "@/lib/seo-agent/worker";
+import { spiderWorker } from "@/workers/worker";
 
 console.log('🕷️ Domain Spider Worker successfully booted and listening to Redis queue...');
 

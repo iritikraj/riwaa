@@ -1,7 +1,7 @@
 // src/lib/seo-agent/content-brief/generator.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GoogleGenAI } from '@google/genai';
-import { logger as defaultLogger } from '@/lib/logs/logger';
+import { logger as defaultLogger } from '@/utils/logs/logger';
 import type { Logger } from 'pino';
 
 export async function generateContentBrief(

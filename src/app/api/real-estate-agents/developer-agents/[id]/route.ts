@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
-import { withLogger } from '@/lib/logs/withLogger';
+import { withLogger } from '@/utils/logs/withLogger';
 import { getDeveloperAgentById } from '@/lib/real-estate-agents/strapi';
 
 export const GET = withLogger('/api/real-estate-agents/developer-agents/[id]', async (

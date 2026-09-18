@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { Queue } from 'bullmq';
-import { redisConnection } from '@/lib/seo-agent/queue';
-import { withLogger } from '@/lib/logs/withLogger';
+import { redisConnection } from '@/workers/queue';
+import { withLogger } from '@/utils/logs/withLogger';
 // import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 // import { v4 as uuidv4 } from 'uuid';
 

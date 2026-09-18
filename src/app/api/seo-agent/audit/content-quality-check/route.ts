@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { scrapeWithPuppeteer } from '@/lib/seo-agent/scraper';
 import { calculateKeywordDensity, checkGrammar, analyzeReadabilityAndTone } from '@/lib/seo-agent/audit/content-analysis';
-import { withLogger } from '@/lib/logs/withLogger';
+import { withLogger } from '@/utils/logs/withLogger';
 
 export const POST = withLogger('/api/seo-agent/audit/content-quality-check', async (req: NextRequest, routeLogger) => {
   try {

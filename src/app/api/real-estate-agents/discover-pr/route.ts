@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
-import { withLogger } from '@/lib/logs/withLogger';
+import { withLogger } from '@/utils/logs/withLogger';
 
 export const POST = withLogger('/api/real-estate-agents/discover-pr', async (req: NextRequest, routeLogger) => {
   try {

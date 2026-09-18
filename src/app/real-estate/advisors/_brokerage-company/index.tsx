@@ -1,6 +1,6 @@
 // app/agents/_brokerage-company.tsx
 import { Quote, Globe, Building2, MapPin, Trophy, CheckCircle2, Images } from "lucide-react";
-import { brokerageRegistry } from "@/config/brokerage";
+import { brokerageRegistry } from "@/utils/brokerage";
 
 export function BrokerageFooter({ brokerName, logoUrl }: { brokerName: string, logoUrl?: string }) {
   const rawName = brokerName?.toLowerCase().trim() || "";

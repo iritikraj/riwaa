@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withLogger } from "@/lib/logs/withLogger";
+import { withLogger } from "@/utils/logs/withLogger";
 import { saveRiwaaLeadToStrapi } from "@/lib/strapi/lead-form";
 
 export const POST = withLogger("/api/lead-form", async (req: NextRequest, routeLogger) => {

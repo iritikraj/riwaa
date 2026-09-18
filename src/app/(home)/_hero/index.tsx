@@ -86,7 +86,7 @@ const Hero = () => {
           <div className="mt-9 flex flex-wrap items-center gap-4">
             <button
               onClick={() => setLeadOpen(true)}
-              className="group inline-flex items-center gap-2.5 rounded-full bg-[#1B2A4A] px-7 py-3.5 text-[13px] font-medium text-white transition-opacity hover:opacity-90"
+              className="group cursor-pointer inline-flex items-center gap-2.5 rounded-full bg-[#1B2A4A] px-7 py-3.5 text-[13px] font-medium text-white transition-opacity hover:opacity-90"
             >
               Book a walkthrough
               <ArrowRight

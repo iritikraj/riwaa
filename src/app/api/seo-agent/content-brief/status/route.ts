@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { withLogger } from '@/lib/logs/withLogger';
+import { withLogger } from '@/utils/logs/withLogger';
 
 export const GET = withLogger('/api/content-brief/status', async (req: NextRequest, routeLogger) => {
   routeLogger.info({ event: 'fetch_content_brief_status' }, 'Fetching content brief status...');

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { enrichStreamItemWithAI } from '@/config/ai/data-enrichment';
+import { enrichStreamItemWithAI } from '@/utils/ai/data-enrichment';
 import { supabase } from '@/lib/supabase/admin';
 import { NextRequest, NextResponse } from 'next/server';
 

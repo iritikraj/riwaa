@@ -5,6 +5,6 @@ export async function register() {
     console.log('🤖 Next.js Server Booting: Initializing BullMQ Background Workers...');
 
     // Dynamically import the worker file so it executes and starts listening to Redis
-    await import('./lib/seo-agent/worker');
+    await import('./workers/worker');
   }
 }

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { Queue } from 'bullmq';
-import { redisConnection } from '@/lib/seo-agent/queue';
-import { logger } from '@/lib/logs/logger';
+import { redisConnection } from '@/workers/queue';
+import { logger } from '@/utils/logs/logger';
 
 const complianceQueue = new Queue('compliance-audit-queue', {
   connection: redisConnection as any,

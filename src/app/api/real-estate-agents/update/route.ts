@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { withLogger } from "@/lib/logs/withLogger";
+import { withLogger } from "@/utils/logs/withLogger";
 
 // Wrap the POST route with your logger
 export const POST = withLogger('/api/real-estate-agents/update', async (req: NextRequest, routeLogger) => {

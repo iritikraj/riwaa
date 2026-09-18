@@ -1,7 +1,7 @@
 // lib/ai/enrichment.ts
 import { GoogleGenAI } from '@google/genai';
 import { supabase } from '@/lib/supabase/admin';
-import { logger as defaultLogger } from '@/lib/logs/logger';
+import { logger as defaultLogger } from '@/utils/logs/logger';
 import type { Logger } from 'pino';
 
 // Initialize the new Gemini AI SDK

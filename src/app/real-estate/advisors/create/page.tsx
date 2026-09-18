@@ -30,7 +30,7 @@ import { AgentPartnershipsVersionTwo } from "../_partnership/index.v2";
 import dynamic from 'next/dynamic';
 
 // --- NEW IMPORTS ---
-import { mockDrivenListings } from '@/config/data/mock-driven-listings';
+import { mockDrivenListings } from '@/utils/data/mock-driven-listings';
 import { BrokerageFooter } from "../_brokerage-company";
 import Link from "next/link";
 
@@ -324,7 +324,7 @@ export default function AgentBuilderPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-999 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
           >
             <motion.div
               initial={{ scale: 0.95, y: 20 }}

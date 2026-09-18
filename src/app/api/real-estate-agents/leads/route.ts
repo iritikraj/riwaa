@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { agentLeads } from "@/lib/db/schema";
-import { withLogger } from "@/lib/logs/withLogger";
+import { withLogger } from "@/utils/logs/withLogger";
 
 // Wrap the POST route with your logger
 export const POST = withLogger('/api/real-estate-agents/leads', async (req: NextRequest, routeLogger) => {

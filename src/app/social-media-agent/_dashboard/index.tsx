@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import ConnectMetaButton from '../_connect-meta';
 import PlatformIcon from '../_icon';
-import useLiveWorkspaceStream from '@/hooks/useLiveWorkspaceStream';
+import useLiveWorkspaceStream from '@/utils/useLiveWorkspaceStream';
 
 interface DashboardStreamProps {
   workspaceId: string;

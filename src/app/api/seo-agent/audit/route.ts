@@ -5,7 +5,7 @@ import { GoogleGenAI } from '@google/genai';
 import { saveAuditToStrapi } from '@/lib/seo-agent/strapi';
 import { scrapeWithPuppeteer } from '@/lib/seo-agent/scraper';
 import { analyzeEntities } from '@/lib/seo-agent/nlp';
-import { withLogger } from '@/lib/logs/withLogger'; // Your custom logger
+import { withLogger } from '@/utils/logs/withLogger'; // Your custom logger
 import { generateKeywordMatrix } from '@/lib/seo-agent/keyword-research';
 import { fetchPageSpeedData } from '@/lib/seo-agent/google-tools/page-speed';
 
