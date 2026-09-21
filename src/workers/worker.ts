@@ -523,6 +523,8 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
   }
 
   // Helper to get raw base64 (without the data URI prefix) for Gemini Vision
+  const STRAPI_URL = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_STRAPI_URL : 'http://localhost:1338';
+
   async function getRawBase64Image(url: string) {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Failed to fetch image: ${url}`);
@@ -546,15 +548,17 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
 
     console.log(`[Creative Agent] Fetching assets for Gemini Vision & Satori...`);
     const rawBackgroundUrl = agentData.background_image?.url
-      ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${agentData.background_image.url}`
+      ? `${STRAPI_URL}${agentData.background_image.url}`
       : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1080&q=80';
+
+    console.log({ rawBackgroundUrl });
 
     const bgImage = await getRawBase64Image(rawBackgroundUrl);
     const backgroundDataUri = toDataUri(bgImage.data, bgImage.mimeType);
 
     let logoDataUri = "";
     if (agentData.logo?.url) {
-      const rawLogoUrl = `${process.env.NEXT_PUBLIC_STRAPI_URL}${agentData.logo.url}`;
+      const rawLogoUrl = `${STRAPI_URL}${agentData.logo.url}`;
       const logoImage = await getRawBase64Image(rawLogoUrl);
       logoDataUri = toDataUri(logoImage.data, logoImage.mimeType);
     }

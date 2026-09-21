@@ -9,7 +9,7 @@ export default async function CreativeDetail({ params }: { params: Promise<{ id:
 
   if (!agent) notFound();
 
-  const STRAPI_BASE = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
+  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com';
 
   // Resolve image URLs
   const finalImage = agent.generated_creatives?.feed_square

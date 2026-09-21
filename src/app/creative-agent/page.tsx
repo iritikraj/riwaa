@@ -188,9 +188,9 @@ export default function CreativeAgentBuilder() {
                   className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] focus:ring-1 focus:ring-[#b8924a] transition-all appearance-none"
                 >
                   <option value="real_estate">Real Estate & Property</option>
-                  <option value="saas">SaaS & Software</option>
-                  <option value="ecommerce">E-Commerce & Retail</option>
-                  <option value="service">Service Business</option>
+                  <option value="saas" disabled>SaaS & Software</option>
+                  <option value="ecommerce" disabled>E-Commerce & Retail</option>
+                  <option value="service" disabled>Service Business</option>
                 </select>
               </div>
             </div>
@@ -198,7 +198,7 @@ export default function CreativeAgentBuilder() {
             {/* Dynamic Campaign Data */}
             <div className="p-5 bg-neutral-50 border border-neutral-100 rounded-2xl space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-900 flex items-center gap-2">
-                <LayoutTemplate size={14} className="text-[#b8924a]" /> Dynamic Parameters
+                <LayoutTemplate size={14} className="text-[#b8924a]" /> Additional Parameters
               </h3>
 
               {category === 'real_estate' && (
@@ -248,7 +248,7 @@ export default function CreativeAgentBuilder() {
               <textarea
                 onChange={(e) => handleCampaignDataChange('design_instructions', e.target.value)}
                 placeholder="e.g., 'Put the logo in the top right. Focus the headline on post-handover payments. Place text at the bottom left.'"
-                className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] min-h-[100px] resize-none"
+                className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] min-h-25 resize-none"
               />
               <p className="text-[10px] text-neutral-400 mt-1">Tell the Riwaa exactly where to place elements and what the core message should be.</p>
             </div>
@@ -258,7 +258,7 @@ export default function CreativeAgentBuilder() {
               <div className="border border-dashed border-neutral-300 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-white hover:bg-neutral-50 cursor-pointer relative overflow-hidden group">
                 <input type="file" accept="image/*" onChange={(e) => setBgFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                 {bgFile ? <CheckCircle className="text-green-500 mb-2" size={24} /> : <ImageIcon className="text-neutral-400 mb-2 group-hover:text-[#b8924a] transition-colors" size={24} />}
-                <span className="text-xs font-medium text-neutral-700">{bgFile ? 'Background Selected' : 'Upload Background'}</span>
+                <span className="text-xs font-medium text-neutral-700">{bgFile ? 'Renders Selected' : 'Building Render'}</span>
                 <span className="text-[9px] text-neutral-400 mt-1 uppercase tracking-widest">Required</span>
               </div>
 
@@ -282,7 +282,7 @@ export default function CreativeAgentBuilder() {
         </div>
 
         {/* RIGHT COLUMN: Output & Preview */}
-        <div className="lg:col-span-7 bg-neutral-100/50 rounded-4xl border border-neutral-100 p-8 flex flex-col items-center justify-center min-h-[600px] relative overflow-hidden">
+        <div className="lg:col-span-7 bg-neutral-100/50 rounded-4xl border border-neutral-100 p-8 flex flex-col items-center justify-center min-h-150 relative overflow-hidden">
 
           <AnimatePresence mode="wait">
             {/* STATE 1: Idle */}
@@ -312,15 +312,15 @@ export default function CreativeAgentBuilder() {
               <motion.div key="done" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full flex flex-col items-center">
 
                 {/* Image Showcase */}
-                <div className="w-full max-w-[400px] aspect-square bg-white rounded-2xl shadow-2xl overflow-hidden border border-neutral-200 relative group">
+                <div className="w-full max-w-100 aspect-square bg-white rounded-2xl shadow-2xl overflow-hidden border border-neutral-200 relative group">
                   {/* Since Strapi returns relative URLs for media, prefix with your Strapi URL */}
                   <img
-                    src={`${process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338'}${finalCreative.generated_creatives?.feed_square}`}
+                    src={`${process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com'}${finalCreative.generated_creatives?.feed_square}`}
                     alt="Final Creative"
                     className="w-full h-full object-contain"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                    <a href={`${process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338'}${finalCreative.generated_creatives?.feed_square}`} download target="_blank" rel="noopener noreferrer" className="bg-white text-black px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors">
+                    <a href={`${process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com'}${finalCreative.generated_creatives?.feed_square}`} download target="_blank" rel="noopener noreferrer" className="bg-white text-black px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors">
                       Download PNG
                     </a>
                   </div>
