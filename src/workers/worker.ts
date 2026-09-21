@@ -491,37 +491,6 @@ const createDeveloperAgentWorker = () => new Worker('developer-agent-queue', asy
 });
 
 const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async (job: Job) => {
-  function buildSatoriTree(element: any): any {
-    if (element.type === 'text') {
-      return {
-        type: 'div',
-        props: {
-          style: { display: 'flex', ...element.style },
-          // Accept multiple standard keys to prevent LLM hallucination failures
-          children: element.content || element.value || element.text || '',
-        },
-      };
-    }
-
-    if (element.type === 'image') {
-      return {
-        type: 'img',
-        props: {
-          style: { display: 'flex', ...element.style },
-          src: element.source || element.src,
-        },
-      };
-    }
-
-    return {
-      type: 'div',
-      props: {
-        style: { display: 'flex', ...element.style },
-        children: element.children ? element.children.map(buildSatoriTree) : [],
-      },
-    };
-  }
-
   // Helper to get raw base64 (without the data URI prefix) for Gemini Vision
   const STRAPI_URL = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_STRAPI_URL : 'https://riwaa.solvetude.com';
 
@@ -530,7 +499,11 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     if (!response.ok) throw new Error(`Failed to fetch image: ${url}`);
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const mimeType = response.headers.get('content-type') || 'image/jpeg';
+    // Grab the header, but aggressively sanitize it for Resvg
+    let mimeType = response.headers.get('content-type');
+    if (!mimeType || mimeType.includes('octet-stream')) {
+      mimeType = url.toLowerCase().includes('.png') ? 'image/png' : 'image/jpeg';
+    }
     return { data: buffer.toString('base64'), mimeType };
   }
 
@@ -590,7 +563,7 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     
     LUXURY DESIGN SYSTEM (STRICT CSS, FLEXIBLE PLACEMENT):
     - Text nodes MUST use the "content" key. Never use "value" or "text".
-    - Background must be the first child.
+    - The first child MUST be the background using this EXACT syntax: { "type": "image", "source": "{{background_image}}", "style": { "position": "absolute", "top": 0, "left": 0, "width": "1080px", "height": "1080px", "objectFit": "cover" } }
     - Readability Gradients: ALWAYS wrap your typography container in a gradient that fades seamlessly into the image. Match the gradient direction to the anchor point (e.g., "to top" for bottom-anchored text, "to right" for left-anchored, "to bottom" for top-anchored).
     - Extreme Typographic Contrast: Massive bold headlines (60px-72px) paired with tiny, wide-tracked metadata (12px-14px, letterSpacing: "6px", color: "#b8924a").
     - Architectural Accents: Feel free to use thin gold dividers (e.g., 1px height/width) to separate elements elegantly.
@@ -614,18 +587,23 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     let layoutJsonString = aiResponse.text || '{}';
     layoutJsonString = layoutJsonString.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
 
-    // console.log('--------------------------------------------------------------------------------');
+    // console.log('-------------------------------- BEFORE REGEX --------------------------------');
     // console.log(layoutJsonString);
-    // console.log('--------------------------------------------------------------------------------');
+    // console.log('------------------------------------------------------------------------------');
 
-    // Re-introduce the variables object to inject the massive strings safely
-    const satoriVariables: Record<string, string> = {
-      background_image: backgroundDataUri,
-    };
-    if (logoDataUri) satoriVariables.logo_image = logoDataUri;
+    // 1. Force the massive Base64 strings into the JSON string directly via Regex
+    layoutJsonString = layoutJsonString.replace(/\{\{\s*background_image\s*\}\}/g, backgroundDataUri);
+    if (logoDataUri) {
+      layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_image\s*\}\}/g, logoDataUri);
+    }
 
-    // We pass an empty variables object because Gemini has already injected the actual text values into the JSON directly
-    const pngBuffer = await generateCreativeBuffer(layoutJsonString || '{}', satoriVariables, 1080, 1080);
+    // console.log('-------------------------------- AFTER REGEX --------------------------------');
+    // console.log(layoutJsonString);
+    // console.log('-----------------------------------------------------------------------------');
+
+
+    // 2. Pass the pre-injected string to the generator
+    const pngBuffer = await generateCreativeBuffer(layoutJsonString, {}, 1080, 1080);
 
     console.log(`[Creative Agent] Uploading finalized creative to Strapi...`);
     const FINAL_FOLDER_ID = 5;

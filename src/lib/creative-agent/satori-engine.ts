@@ -5,34 +5,35 @@ import fs from 'fs';
 import path from 'path';
 
 // 1. Load the font required by Satori
-const fontPath = path.join(process.cwd(), 'public/fonts/Jost-Regular.ttf');
-const defaultFont = fs.readFileSync(fontPath);
+// const fontPath = path.join(process.cwd(), 'public/fonts/Jost-Regular.ttf');
+// const defaultFont = fs.readFileSync(fontPath);
 
 /**
  * Maps our custom simplified JSON layout to Satori's expected React-like VDOM object
  */
-function buildSatoriTree(element: any): any {
+export function buildSatoriTree(element: any): any {
   if (element.type === 'text') {
     return {
       type: 'div',
       props: {
         style: { display: 'flex', ...element.style },
-        children: element.content,
+        children: element.content || element.value || element.text || '',
       },
     };
   }
 
-  if (element.type === 'image') {
+  // Catch both "image" and "img" to prevent fallback to empty divs
+  if (element.type === 'image' || element.type === 'img') {
     return {
       type: 'img',
       props: {
         style: { display: 'flex', ...element.style },
-        src: element.source,
+        // Safely extract src from either the root or a nested props object
+        src: element.source || element.src || (element.props && element.props.src) || '',
       },
     };
   }
 
-  // Handle container or groups
   return {
     type: 'div',
     props: {
@@ -48,39 +49,35 @@ function buildSatoriTree(element: any): any {
 export async function generateCreativeBuffer(
   layoutJsonString: string,
   variables: Record<string, string>,
-  width: number,
-  height: number
+  width: number = 1080,
+  height: number = 1080
 ): Promise<Buffer> {
 
-  // 1. Inject variables dynamically into the JSON string (e.g., replacing "{{headline}}" with actual text)
-  let injectedJson = layoutJsonString;
-  for (const [key, value] of Object.entries(variables)) {
-    // Uses global regex to replace all instances of the variable
-    const regex = new RegExp(`{{${key}}}`, 'g');
-    injectedJson = injectedJson.replace(regex, value);
-  }
+  // A. Parse the AI's raw JSON string into a JavaScript object
+  const rawLayout = JSON.parse(layoutJsonString);
 
-  // 2. Parse the injected JSON and map it to a Satori Virtual DOM
-  const rawLayout = JSON.parse(injectedJson);
-  const satoriVdom = buildSatoriTree(rawLayout);
+  // B. THIS IS WHERE IT'S USED: Translate the AI's object into a Satori tree
+  const satoriElementTree = buildSatoriTree(rawLayout);
 
-  // 3. Compile VDOM to SVG using Satori
-  const svg = await satori(satoriVdom, {
+  // Load your fonts (Update these paths to point to your actual local font files)
+  const jostRegular = fs.readFileSync(path.join(process.cwd(), 'public/fonts/Jost-Regular.ttf'));
+  const jostMedium = fs.readFileSync(path.join(process.cwd(), 'public/fonts/Jost-Regular.ttf'));
+  const jostBold = fs.readFileSync(path.join(process.cwd(), 'public/fonts/Jost-Regular.ttf'));
+
+  // C. Pass the translated tree to Satori
+  const svg = await satori(satoriElementTree, {
     width,
     height,
     fonts: [
-      {
-        name: 'Jost',
-        data: defaultFont,
-        weight: 400,
-        style: 'normal',
-      },
+      { name: 'Jost', data: jostRegular, weight: 400, style: 'normal' },
+      { name: 'Jost', data: jostMedium, weight: 500, style: 'normal' },
+      { name: 'Jost', data: jostBold, weight: 700, style: 'normal' },
     ],
   });
 
-  // 4. Convert the SVG to a crisp PNG using Resvg
+  // D. Convert the SVG to a crisp PNG Buffer
   const resvg = new Resvg(svg, {
-    background: '#ffffff',
+    background: 'rgba(20, 24, 31, 1)', // Dark background fallback
     fitTo: { mode: 'original' },
   });
 
