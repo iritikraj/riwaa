@@ -491,6 +491,37 @@ const createDeveloperAgentWorker = () => new Worker('developer-agent-queue', asy
 });
 
 const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async (job: Job) => {
+  function buildSatoriTree(element: any): any {
+    if (element.type === 'text') {
+      return {
+        type: 'div',
+        props: {
+          style: { display: 'flex', ...element.style },
+          // Accept multiple standard keys to prevent LLM hallucination failures
+          children: element.content || element.value || element.text || '',
+        },
+      };
+    }
+
+    if (element.type === 'image') {
+      return {
+        type: 'img',
+        props: {
+          style: { display: 'flex', ...element.style },
+          src: element.source || element.src,
+        },
+      };
+    }
+
+    return {
+      type: 'div',
+      props: {
+        style: { display: 'flex', ...element.style },
+        children: element.children ? element.children.map(buildSatoriTree) : [],
+      },
+    };
+  }
+
   // Helper to get raw base64 (without the data URI prefix) for Gemini Vision
   async function getRawBase64Image(url: string) {
     const response = await fetch(url);
@@ -535,9 +566,12 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
 
     console.log(`[Creative Agent] Asking Gemini to analyze the image and generate the layout...`);
 
-    const prompt = `You are an elite Art Director and UI Engineer for luxury real estate brands like Emaar, Prestige One and Relaam.
+    const prompt = `You are an elite Art Director and UI Engineer for luxury real estate brands.
     
-    Analyze the provided background image. The user has provided specific design and layout instructions. You must follow their spatial and content instructions EXACTLY while outputting a valid Satori JSON layout.
+    CRITICAL VISION TASKS & DYNAMIC LAYOUT:
+    1. THE LOGO: Place the logo EXACTLY where the user requests. If unspecified, place it where it visually balances the typography (e.g., opposite corners).
+    2. NEGATIVE SPACE HUNTING: The main architecture is usually in the center. Anchor typography in the top 20%, bottom 20%, or a clean side margin depending entirely on where the empty sky, water, or dark road is.
+    3. ADAPTIVE ALIGNMENT: DO NOT use the exact same layout every time. Adapt your flexbox alignment based on the anchor point. If text is anchored left, left-align it. If anchored bottom-center, center-align it. 
     
     --- CAMPAIGN ASSETS ---
     Brand: ${agentData.brand_name.toUpperCase()}
@@ -548,22 +582,20 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     --- USER DESIGN INSTRUCTIONS ---
     "${designInstructions}"
 
-    Task: Write the specific text the user requested (or generate it based on their goal). Then, generate the complete Satori JSON layout object representing a 1080x1080 ad.
+    Task: Generate a completely unique, valid Satori JSON layout object representing a 1080x1080 ad. 
     
-    Satori JSON Rules:
-    - STRICTLY obey the user's layout requests (e.g., if they say "logo top right with 40px padding", build a container with { "position": "absolute", "top": "40px", "right": "40px" } for the logo).
-    - If the user says to hide the price or brand, DO NOT include them in the JSON.
-    - If no specific positions are requested, analyze the image and use flexbox or absolute positioning to place text in the negative space (uncluttered areas like sky, water, or dark shadows).
-    - If the text is over a bright area, use dark text or a subtle dark text shadow. If over a dark area, use white text.
-    - Keep typography minimalist, elegant, and high-end.
-    - The root object must be: { "type": "container", "style": { "width": "1080px", "height": "1080px", "position": "relative" }, "children": [...] }
-    - The first child MUST be the background image: { "type": "image", "source": "${backgroundDataUri}", "style": { "position": "absolute", "top": 0, "left": 0, "width": "1080px", "height": "1080px", "objectFit": "cover" } }
-    - If a logo is required, use exactly this source: "${logoDataUri}"
-
-    DO NOT output markdown formatting like \`\`\`json. Return the raw JSON object directly.`;
+    LUXURY DESIGN SYSTEM (STRICT CSS, FLEXIBLE PLACEMENT):
+    - Text nodes MUST use the "content" key. Never use "value" or "text".
+    - Background must be the first child.
+    - Readability Gradients: ALWAYS wrap your typography container in a gradient that fades seamlessly into the image. Match the gradient direction to the anchor point (e.g., "to top" for bottom-anchored text, "to right" for left-anchored, "to bottom" for top-anchored).
+    - Extreme Typographic Contrast: Massive bold headlines (60px-72px) paired with tiny, wide-tracked metadata (12px-14px, letterSpacing: "6px", color: "#b8924a").
+    - Architectural Accents: Feel free to use thin gold dividers (e.g., 1px height/width) to separate elements elegantly.
+    - The CTA Button: Must use an elegant frosted glass style, for example: { "type": "container", "style": { "display": "flex", "padding": "16px 40px", "border": "1px solid rgba(184, 146, 74, 0.5)", "backgroundColor": "rgba(20, 24, 31, 0.6)" }, "children": [{ "type": "text", "content": "DISCOVER MORE", "style": { "color": "#ffffff", "fontSize": "14px", "letterSpacing": "4px", "textTransform": "uppercase" } }] }
+    
+    You have full creative freedom to arrange these components based on the image's focal point, but you MUST strictly use the luxury CSS styles above and obey the user's specific spatial instructions. Return ONLY valid JSON. No markdown.`;
 
     const aiResponse = await ai.models.generateContent({
-      model: 'gemini-2.5-pro', // Using Pro for advanced spatial reasoning and JSON generation
+      model: 'gemini-3.1-pro-preview', // Using Pro for advanced spatial reasoning and JSON generation
       contents: [
         prompt,
         { inlineData: { data: bgImage.data, mimeType: bgImage.mimeType } }
@@ -578,8 +610,18 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     let layoutJsonString = aiResponse.text || '{}';
     layoutJsonString = layoutJsonString.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
 
+    // console.log('--------------------------------------------------------------------------------');
+    // console.log(layoutJsonString);
+    // console.log('--------------------------------------------------------------------------------');
+
+    // Re-introduce the variables object to inject the massive strings safely
+    const satoriVariables: Record<string, string> = {
+      background_image: backgroundDataUri,
+    };
+    if (logoDataUri) satoriVariables.logo_image = logoDataUri;
+
     // We pass an empty variables object because Gemini has already injected the actual text values into the JSON directly
-    const pngBuffer = await generateCreativeBuffer(layoutJsonString || '{}', {}, 1080, 1080);
+    const pngBuffer = await generateCreativeBuffer(layoutJsonString || '{}', satoriVariables, 1080, 1080);
 
     console.log(`[Creative Agent] Uploading finalized creative to Strapi...`);
     const FINAL_FOLDER_ID = 5;
@@ -594,7 +636,7 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     try {
       const parsed = JSON.parse(layoutJsonString);
       extractedHeadline = JSON.stringify(parsed).match(/"content":"([^"]+)"/)?.[1] || extractedHeadline;
-    } catch(e) {}
+    } catch (e) { }
 
     await updateCreativeAgentInStrapi(documentId, {
       report_status: 'draft',
