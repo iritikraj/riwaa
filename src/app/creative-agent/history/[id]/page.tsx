@@ -9,7 +9,7 @@ export default async function CreativeDetail({ params }: { params: Promise<{ id:
 
   if (!agent) notFound();
 
-  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'http://localhost:1337';
+  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com';
 
   // Extract the array of variations instead of a single image
   const variations: string[] = agent.generated_creatives?.variations || [];

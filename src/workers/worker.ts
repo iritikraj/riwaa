@@ -493,7 +493,7 @@ const createDeveloperAgentWorker = () => new Worker('developer-agent-queue', asy
 const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async (job: Job) => {
   console.log(`🔥 [Creative Worker] WAKE UP! Grabbed Job ID: ${job.id}`);
   // Helper to get raw base64 (without the data URI prefix) for Gemini Vision
-  const STRAPI_URL = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_STRAPI_URL : 'http://localhost:1337';
+  const STRAPI_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com';
 
   async function getRawBase64Image(url: string) {
     const response = await fetch(url);

@@ -157,7 +157,7 @@ export default function CreativeAgentBuilder() {
     setCampaignData(prev => ({ ...prev, [key]: value }));
   };
 
-  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'http://localhost:1337'; // Update prod URL
+  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com'; // Update prod URL
   const variationsCount = finalCreative?.generated_creatives?.variations?.length || 0;
   const isIdle = !isGenerating && variationsCount === 0;
   const isInitialLoading = isGenerating && variationsCount === 0;
