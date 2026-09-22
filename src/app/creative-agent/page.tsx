@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, UploadCloud, Image as ImageIcon, CheckCircle, Loader2, LayoutTemplate, Clock, Moon, Sun } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, CheckCircle, Loader2, LayoutTemplate, Clock, Moon, Sun, FolderOpen, Upload } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+
+const BACKGROUND_FOLDER_ID = 4
+const LOGO_FOLDER_ID = 3;
 
 export default function CreativeAgentBuilder() {
   // 1. Form State
@@ -14,15 +17,48 @@ export default function CreativeAgentBuilder() {
   const [usps, setUsps] = useState('');
   const [campaignData, setCampaignData] = useState<Record<string, string>>({});
 
-  // 2. File State (Swarm + Smart Logos)
-  const [bgFiles, setBgFiles] = useState<File[]>([]);
-  const [logoLight, setLogoLight] = useState<File | null>(null);
-  const [logoDark, setLogoDark] = useState<File | null>(null);
+  // 2. Asset Mode & Library State
+  const [assetMode, setAssetMode] = useState<'upload' | 'library'>('library');
+  const [libraryBackgrounds, setLibraryBackgrounds] = useState<any[]>([]);
+  const [libraryLogos, setLibraryLogos] = useState<any[]>([]);
+  const [isLoadingLibrary, setIsLoadingLibrary] = useState(false);
 
-  // 3. System State
+  // 3. Selection State (Files for Upload vs IDs for Existing)
+  const [bgFiles, setBgFiles] = useState<File[]>([]);
+  const [selectedBgIds, setSelectedBgIds] = useState<number[]>([]);
+
+  const [logoLightFile, setLogoLightFile] = useState<File | null>(null);
+  const [selectedLogoLightId, setSelectedLogoLightId] = useState<number | null>(null);
+
+  const [logoDarkFile, setLogoDarkFile] = useState<File | null>(null);
+  const [selectedLogoDarkId, setSelectedLogoDarkId] = useState<number | null>(null);
+
+  // 4. System State
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusText, setStatusText] = useState('');
   const [finalCreative, setFinalCreative] = useState<any>(null);
+
+  // Fetch Strapi Library Assets
+  useEffect(() => {
+    if (assetMode === 'library') {
+      const fetchLibrary = async () => {
+        setIsLoadingLibrary(true);
+        try {
+          const [bgRes, logoRes] = await Promise.all([
+            fetch(`/api/strapi-upload?folder=${BACKGROUND_FOLDER_ID}`),
+            fetch(`/api/strapi-upload?folder=${LOGO_FOLDER_ID}`)
+          ]);
+          setLibraryBackgrounds(await bgRes.json());
+          setLibraryLogos(await logoRes.json());
+        } catch (error) {
+          console.error("Failed to load media library", error);
+        } finally {
+          setIsLoadingLibrary(false);
+        }
+      };
+      fetchLibrary();
+    }
+  }, [assetMode]);
 
   // Helper: Upload file to our Next.js Proxy -> Strapi
   const uploadToStrapi = async (file: File, folderId: number) => {
@@ -37,22 +73,21 @@ export default function CreativeAgentBuilder() {
   };
 
   const handleGenerate = async () => {
-    if (!brandName || bgFiles.length === 0) return alert("Brand Name and at least one Background Image are required.");
+    const totalBgs = bgFiles.length + selectedBgIds.length;
+    if (!brandName || totalBgs === 0) return alert("Brand Name and at least one Background Image are required.");
 
     try {
       setIsGenerating(true);
       setFinalCreative(null);
-      setStatusText('Uploading raw assets to secure vault...');
+      setStatusText('Processing assets...');
 
-      const BACKGROUND_FOLDER_ID = 4;
-      const LOGO_FOLDER_ID = 3;
-
-      // 1. Upload files in parallel
+      // 1. Upload new files if present, otherwise use selected IDs
       const bgUploadPromises = bgFiles.map(file => uploadToStrapi(file, BACKGROUND_FOLDER_ID));
-      const bgIds = await Promise.all(bgUploadPromises);
+      const newlyUploadedBgIds = await Promise.all(bgUploadPromises);
+      const finalBgIds = [...selectedBgIds, ...newlyUploadedBgIds]; // Merge existing with new
 
-      const lightId = logoLight ? await uploadToStrapi(logoLight, LOGO_FOLDER_ID) : null;
-      const darkId = logoDark ? await uploadToStrapi(logoDark, LOGO_FOLDER_ID) : null;
+      const finalLightId = logoLightFile ? await uploadToStrapi(logoLightFile, LOGO_FOLDER_ID) : selectedLogoLightId;
+      const finalDarkId = logoDarkFile ? await uploadToStrapi(logoDarkFile, LOGO_FOLDER_ID) : selectedLogoDarkId;
 
       // 2. Trigger Generation API
       setStatusText('Dispatching Swarm to AI Art Directors...');
@@ -66,9 +101,9 @@ export default function CreativeAgentBuilder() {
           category,
           usps: splitUsps,
           campaign_data: campaignData,
-          logo_light_id: lightId,
-          logo_dark_id: darkId,
-          background_image_ids: bgIds,
+          logo_light_id: finalLightId,
+          logo_dark_id: finalDarkId,
+          background_image_ids: finalBgIds,
         })
       });
 
@@ -90,10 +125,8 @@ export default function CreativeAgentBuilder() {
       try {
         const res = await fetch(`/api/creative-agent/${documentId}`);
         const data = await res.json();
-
         const currentVariations = data.generated_creatives?.variations || [];
 
-        // UPDATE STATE ON EVERY POLL TO ENABLE PROGRESSIVE RENDERING
         setFinalCreative(data);
 
         if (data.report_status === 'failed') {
@@ -116,15 +149,20 @@ export default function CreativeAgentBuilder() {
     }, 5000);
   };
 
+  const toggleBgSelection = (id: number) => {
+    setSelectedBgIds(prev => prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id]);
+  };
+
   const handleCampaignDataChange = (key: string, value: string) => {
     setCampaignData(prev => ({ ...prev, [key]: value }));
   };
 
-  // Helper to determine what state the UI is in
+  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'http://localhost:1337'; // Update prod URL
   const variationsCount = finalCreative?.generated_creatives?.variations?.length || 0;
   const isIdle = !isGenerating && variationsCount === 0;
   const isInitialLoading = isGenerating && variationsCount === 0;
   const hasPartialOrFullResults = variationsCount > 0;
+  const totalSelectedBgs = bgFiles.length + selectedBgIds.length;
 
   return (
     <div className="min-h-screen bg-[#fcfcfb] font-jost text-neutral-900 selection:bg-[#b8924a]/20">
@@ -160,9 +198,8 @@ export default function CreativeAgentBuilder() {
             <div className="space-y-4">
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-1.5 block">Brand / Project Name</label>
-                <input type="text" value={brandName} onChange={(e) => setBrandName(e.target.value)} placeholder="e.g. Prestige One Developments" className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] focus:ring-1 focus:ring-[#b8924a] transition-all" />
+                <input type="text" value={brandName} onChange={(e) => setBrandName(e.target.value)} placeholder="e.g. Prestige One" className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] transition-all" />
               </div>
-
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-1.5 block">Industry Category</label>
                 <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] focus:ring-1 focus:ring-[#b8924a] transition-all appearance-none">
@@ -176,18 +213,16 @@ export default function CreativeAgentBuilder() {
               <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-900 flex items-center gap-2">
                 <LayoutTemplate size={14} className="text-[#b8924a]" /> Additional Parameters
               </h3>
-              {category === 'real_estate' && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 block">Location</label>
-                    <input type="text" onChange={(e) => handleCampaignDataChange('location', e.target.value)} placeholder="e.g. Dubai Marina" className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-xs" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 block">Starting Price</label>
-                    <input type="text" onChange={(e) => handleCampaignDataChange('starting_price', e.target.value)} placeholder="e.g. AED 1.2M" className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-xs" />
-                  </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 block">Location</label>
+                  <input type="text" onChange={(e) => setCampaignData(p => ({ ...p, location: e.target.value }))} placeholder="e.g. Dubai Marina" className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-xs" />
                 </div>
-              )}
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 block">Starting Price</label>
+                  <input type="text" onChange={(e) => setCampaignData(p => ({ ...p, starting_price: e.target.value }))} placeholder="e.g. AED 1.2M" className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-xs" />
+                </div>
+              </div>
             </div>
 
             <div>
@@ -200,39 +235,98 @@ export default function CreativeAgentBuilder() {
               <textarea onChange={(e) => handleCampaignDataChange('design_instructions', e.target.value)} placeholder="e.g., 'Put the logo in the top right. Focus the headline on post-handover payments.'" className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] min-h-25 resize-none" />
             </div>
 
-            {/* Smart Asset Uploads */}
-            <div className="space-y-4">
-              {/* Background Swarm Uploader */}
-              <div className="border border-dashed border-neutral-300 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-white hover:bg-neutral-50 cursor-pointer relative overflow-hidden group">
-                <input type="file" multiple accept="image/jpeg, image/png" onChange={(e) => setBgFiles(Array.from(e.target.files || []))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                {bgFiles.length > 0 ? <CheckCircle className="text-green-500 mb-2" size={24} /> : <ImageIcon className="text-neutral-400 mb-2 group-hover:text-[#b8924a] transition-colors" size={24} />}
-                <span className="text-xs font-medium text-neutral-700">{bgFiles.length > 0 ? `${bgFiles.length} Renders Selected` : 'Select Multiple Building Renders'}</span>
-                <span className="text-[9px] text-neutral-400 mt-1 uppercase tracking-widest">Required</span>
-              </div>
-
-              {/* Light/Dark Logo Uploaders */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="border border-dashed border-neutral-300 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-[#14181F] cursor-pointer relative overflow-hidden group">
-                  <input type="file" accept="image/png, image/svg+xml" onChange={(e) => setLogoLight(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                  {logoLight ? <CheckCircle className="text-green-400 mb-2" size={20} /> : <Sun className="text-white/60 mb-2 group-hover:text-white transition-colors" size={20} />}
-                  <span className="text-[10px] font-medium text-white">{logoLight ? 'Selected' : 'Light Logo (For Dark BGs)'}</span>
-                </div>
-
-                <div className="border border-dashed border-neutral-300 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-white cursor-pointer relative overflow-hidden group">
-                  <input type="file" accept="image/png, image/svg+xml" onChange={(e) => setLogoDark(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                  {logoDark ? <CheckCircle className="text-green-500 mb-2" size={20} /> : <Moon className="text-neutral-400 mb-2 group-hover:text-black transition-colors" size={20} />}
-                  <span className="text-[10px] font-medium text-neutral-700">{logoDark ? 'Selected' : 'Dark Logo (For Bright BGs)'}</span>
+            {/* Smart Asset Uploads & Selection */}
+            <div className="space-y-4 pt-4 border-t border-neutral-200">
+              <div className="flex items-center justify-between mb-4">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-900 block">Brand Assets</label>
+                <div className="flex bg-neutral-100 p-1 rounded-lg">
+                  <button onClick={() => setAssetMode('library')} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md flex items-center gap-1.5 transition-colors ${assetMode === 'library' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'}`}>
+                    <FolderOpen size={12} /> Library
+                  </button>
+                  <button onClick={() => setAssetMode('upload')} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md flex items-center gap-1.5 transition-colors ${assetMode === 'upload' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500 hover:text-neutral-900'}`}>
+                    <Upload size={12} /> Upload New
+                  </button>
                 </div>
               </div>
+              {/* UPLOAD MODE */}
+              {assetMode === 'upload' && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                  <div className="border border-dashed border-neutral-300 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-white hover:bg-neutral-50 cursor-pointer relative overflow-hidden group">
+                    <input type="file" multiple accept="image/jpeg, image/png" onChange={(e) => setBgFiles(Array.from(e.target.files || []))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                    {bgFiles.length > 0 ? <CheckCircle className="text-green-500 mb-2" size={24} /> : <ImageIcon className="text-neutral-400 mb-2 group-hover:text-[#b8924a] transition-colors" size={24} />}
+                    <span className="text-xs font-medium text-neutral-700">{bgFiles.length > 0 ? `${bgFiles.length} Renders Selected` : 'Select Multiple Building Renders'}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="border border-dashed border-neutral-300 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-[#14181F] cursor-pointer relative group">
+                      <input type="file" accept="image/png, image/svg+xml" onChange={(e) => setLogoLightFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                      {logoLightFile ? <CheckCircle className="text-green-400 mb-2" size={20} /> : <Sun className="text-white/60 mb-2 group-hover:text-white" size={20} />}
+                      <span className="text-[10px] font-medium text-white">{logoLightFile ? 'Selected' : 'Light Logo'}</span>
+                    </div>
+                    <div className="border border-dashed border-neutral-300 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-white cursor-pointer relative group">
+                      <input type="file" accept="image/png, image/svg+xml" onChange={(e) => setLogoDarkFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                      {logoDarkFile ? <CheckCircle className="text-green-500 mb-2" size={20} /> : <Moon className="text-neutral-400 mb-2 group-hover:text-black" size={20} />}
+                      <span className="text-[10px] font-medium text-neutral-700">{logoDarkFile ? 'Selected' : 'Dark Logo'}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* LIBRARY MODE */}
+              {assetMode === 'library' && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                  {isLoadingLibrary ? (
+                    <div className="flex items-center justify-center py-10"><Loader2 className="animate-spin text-neutral-400" /></div>
+                  ) : (
+                    <>
+                      {/* Background Library */}
+                      <div>
+                        <label className="text-[9px] font-bold uppercase tracking-widest text-neutral-500 mb-2 block">Select Backgrounds ({selectedBgIds.length})</label>
+                        <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1">
+                          {libraryBackgrounds.map(img => (
+                            <div key={img.id} onClick={() => toggleBgSelection(img.id)} className={`aspect-square rounded-xl cursor-pointer overflow-hidden border-2 transition-all relative ${selectedBgIds.includes(img.id) ? 'border-[#b8924a] shadow-md' : 'border-transparent hover:border-neutral-300'}`}>
+                              <img src={`${STRAPI_BASE}${img.formats?.small?.url || img.url}`} className="w-full h-full object-cover" />
+                              {selectedBgIds.includes(img.id) && <div className="absolute inset-0 bg-[#b8924a]/20 flex items-center justify-center"><CheckCircle className="text-white drop-shadow-md" size={16} /></div>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Logo Library */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[9px] font-bold uppercase tracking-widest text-neutral-500 mb-2 block">Select Light Logo</label>
+                          <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-2 bg-[#14181F] rounded-xl">
+                            {libraryLogos.map(img => (
+                              <div key={img.id} onClick={() => setSelectedLogoLightId(img.id === selectedLogoLightId ? null : img.id)} className={`aspect-square rounded-lg cursor-pointer overflow-hidden border-2 p-2 flex items-center justify-center ${selectedLogoLightId === img.id ? 'border-green-400 bg-white/10' : 'border-transparent hover:border-white/20 bg-gray-400'}`}>
+                                <img src={`${STRAPI_BASE}${img.url}`} className="max-w-full max-h-full object-contain" />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold uppercase tracking-widest text-neutral-500 mb-2 block">Select Dark Logo</label>
+                          <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-2 bg-neutral-100 rounded-xl">
+                            {libraryLogos.map(img => (
+                              <div key={img.id} onClick={() => setSelectedLogoDarkId(img.id === selectedLogoDarkId ? null : img.id)} className={`aspect-square rounded-lg cursor-pointer overflow-hidden border-2 p-2 flex items-center justify-center ${selectedLogoDarkId === img.id ? 'border-[#b8924a] bg-white' : 'border-transparent hover:border-neutral-300 bg-gray-300'}`}>
+                                <img src={`${STRAPI_BASE}${img.url}`} className="max-w-full max-h-full object-contain" />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </motion.div>
+              )}
             </div>
 
             <button
               onClick={handleGenerate}
-              disabled={isGenerating}
-              className="w-full bg-[#050505] hover:bg-black text-white rounded-xl py-4 flex items-center justify-center gap-2 font-semibold uppercase tracking-widest text-xs transition-all shadow-xl shadow-black/10 disabled:opacity-70 disabled:cursor-not-allowed"
+              disabled={isGenerating || totalSelectedBgs === 0}
+              className="w-full bg-[#050505] hover:bg-black text-white rounded-xl py-4 flex items-center justify-center gap-2 font-semibold uppercase tracking-widest text-xs transition-all shadow-xl shadow-black/10 disabled:opacity-70 disabled:cursor-not-allowed mt-4"
             >
               {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} className="text-[#b8924a]" />}
-              {isGenerating ? 'Processing...' : 'Generate Batch Variations'}
+              {isGenerating ? 'Processing...' : `Generate Batch (${totalSelectedBgs} Renders)`}
             </button>
           </div>
         </div>
@@ -241,7 +335,6 @@ export default function CreativeAgentBuilder() {
         <div className="lg:col-span-7 bg-neutral-100/50 rounded-4xl border border-neutral-100 p-8 flex flex-col items-center justify-center min-h-150 relative overflow-hidden">
           <AnimatePresence mode="wait">
 
-            {/* STATE 1: IDLE */}
             {isIdle && (
               <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
@@ -252,7 +345,6 @@ export default function CreativeAgentBuilder() {
               </motion.div>
             )}
 
-            {/* STATE 2: INITIAL LOADING (No images ready yet) */}
             {isInitialLoading && (
               <motion.div key="loading" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center text-center">
                 <div className="relative">
@@ -263,11 +355,8 @@ export default function CreativeAgentBuilder() {
               </motion.div>
             )}
 
-            {/* STATE 3: PROGRESSIVE OR FINAL RENDERING */}
             {hasPartialOrFullResults && (
               <motion.div key="done" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full flex flex-col">
-
-                {/* Mini Status Banner for ongoing generation */}
                 {isGenerating && (
                   <div className="mb-6 flex items-center justify-center gap-2 bg-white border border-neutral-200 py-2 px-4 rounded-full shadow-sm mx-auto animate-pulse">
                     <Loader2 size={14} className="animate-spin text-[#b8924a]" />
@@ -275,43 +364,29 @@ export default function CreativeAgentBuilder() {
                   </div>
                 )}
 
-                {/* AI Copy Reveal (Top) */}
                 <div className="mb-8 bg-white p-5 rounded-2xl border border-neutral-100 w-full shadow-sm text-center">
                   <p className="text-[9px] uppercase tracking-widest text-[#b8924a] font-bold mb-3">AI Copywriting Output</p>
                   <p className="text-sm font-semibold text-neutral-900 leading-tight mb-2">&quot;{finalCreative.ai_copy?.headline || 'Analyzing layout for copy...'}&quot;</p>
                 </div>
 
-                {/* Grid Gallery for Variations */}
                 <div className="grid grid-cols-2 gap-4 w-full">
                   {finalCreative.generated_creatives.variations.map((url: string, index: number) => (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      key={index}
-                      className="w-full aspect-square bg-white rounded-2xl shadow-lg overflow-hidden border border-neutral-200 relative group"
-                    >
-                      <img
-                        src={`${process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'http://localhost:1337'}${url}`}
-                        alt={`Variation ${index + 1}`}
-                        className="w-full h-full object-contain"
-                      />
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} key={index} className="w-full aspect-square bg-white rounded-2xl shadow-lg overflow-hidden border border-neutral-200 relative group">
+                      <img src={`${STRAPI_BASE}${url}`} alt={`Variation ${index + 1}`} className="w-full h-full object-contain" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center backdrop-blur-sm gap-3">
-                        <span className="text-white text-[10px] uppercase tracking-widest font-bold">Variation {index + 1}</span>
-                        <a href={`${process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'http://localhost:1337'}${url}`} download target="_blank" rel="noopener noreferrer" className="bg-white text-black px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors">
+                        <a href={`${STRAPI_BASE}${url}`} download target="_blank" rel="noopener noreferrer" className="bg-white text-black px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors">
                           Download
                         </a>
                       </div>
                     </motion.div>
                   ))}
 
-                  {/* Empty placeholders for items still processing */}
-                  {isGenerating && Array.from({ length: Math.max(0, bgFiles.length - variationsCount) }).map((_, i) => (
+                  {isGenerating && Array.from({ length: Math.max(0, totalSelectedBgs - variationsCount) }).map((_, i) => (
                     <div key={`skeleton-${i}`} className="w-full aspect-square bg-neutral-200/50 rounded-2xl border border-neutral-200 relative overflow-hidden animate-pulse flex items-center justify-center">
                       <Loader2 size={24} className="text-neutral-400 animate-spin" />
                     </div>
                   ))}
                 </div>
-
               </motion.div>
             )}
           </AnimatePresence>

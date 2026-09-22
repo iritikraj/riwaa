@@ -55,3 +55,43 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function GET(req: NextRequest) {
+  try {
+    // Fetch the 100 most recent files from the main media library
+    const fetchUrl = `${STRAPI_URL}/api/upload/files?sort=createdAt:desc&pagination[limit]=100`;
+
+    const response = await fetch(fetchUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${STRAPI_TOKEN}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch media: ${await response.text()}`);
+    }
+
+    const data = await response.json();
+
+    // Safely filter the array to only return .png, .jpg, and .jpeg
+    if (Array.isArray(data)) {
+      const allowedExtensions = ['.png', '.jpg', '.jpeg', '.svg'];
+
+      const imageFiles = data.filter((file: any) => {
+        if (!file.ext) return false;
+        return allowedExtensions.includes(file.ext.toLowerCase());
+      });
+
+      return NextResponse.json(imageFiles);
+    }
+
+    // Fallback if data is not an array for some reason
+    return NextResponse.json(data);
+
+  } catch (error: any) {
+    console.error('Fetch Media Proxy Error:', error);
+    // Return an empty array on error so the frontend map() doesn't crash
+    return NextResponse.json([]);
+  }
+}
