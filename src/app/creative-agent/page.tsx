@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, UploadCloud, Image as ImageIcon, CheckCircle, Loader2, LayoutTemplate, Clock } from 'lucide-react';
+import { Sparkles, UploadCloud, Image as ImageIcon, CheckCircle, Loader2, LayoutTemplate, Clock, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -14,9 +14,10 @@ export default function CreativeAgentBuilder() {
   const [usps, setUsps] = useState('');
   const [campaignData, setCampaignData] = useState<Record<string, string>>({});
 
-  // 2. File State
-  const [bgFile, setBgFile] = useState<File | null>(null);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
+  // 2. File State (Swarm + Smart Logos)
+  const [bgFiles, setBgFiles] = useState<File[]>([]);
+  const [logoLight, setLogoLight] = useState<File | null>(null);
+  const [logoDark, setLogoDark] = useState<File | null>(null);
 
   // 3. System State
   const [isGenerating, setIsGenerating] = useState(false);
@@ -24,40 +25,37 @@ export default function CreativeAgentBuilder() {
   const [finalCreative, setFinalCreative] = useState<any>(null);
 
   // Helper: Upload file to our Next.js Proxy -> Strapi
-  // Helper: Upload file to our Next.js Proxy -> Strapi
   const uploadToStrapi = async (file: File, folderId: number) => {
     const formData = new FormData();
     formData.append('files', file);
-
-    // Append the routing instruction for Strapi
     formData.append('fileInfo', JSON.stringify({ folder: folderId }));
 
     const res = await fetch('/api/strapi-upload', { method: 'POST', body: formData });
-
     if (!res.ok) throw new Error('Upload failed');
-
     const data = await res.json();
-    return data[0].id; // Return Strapi Media ID
+    return data[0].id;
   };
 
   const handleGenerate = async () => {
-    if (!brandName || !bgFile) return alert("Brand Name and Background Image are required.");
+    if (!brandName || bgFiles.length === 0) return alert("Brand Name and at least one Background Image are required.");
 
     try {
       setIsGenerating(true);
       setFinalCreative(null);
       setStatusText('Uploading raw assets to secure vault...');
 
-      // Plug in your actual Strapi Folder IDs here
       const BACKGROUND_FOLDER_ID = 4;
       const LOGO_FOLDER_ID = 3;
 
-      // 1. Upload files directly to their respective folders
-      const bgId = await uploadToStrapi(bgFile, BACKGROUND_FOLDER_ID);
-      const logoId = logoFile ? await uploadToStrapi(logoFile, LOGO_FOLDER_ID) : null;
+      // 1. Upload files in parallel
+      const bgUploadPromises = bgFiles.map(file => uploadToStrapi(file, BACKGROUND_FOLDER_ID));
+      const bgIds = await Promise.all(bgUploadPromises);
+
+      const lightId = logoLight ? await uploadToStrapi(logoLight, LOGO_FOLDER_ID) : null;
+      const darkId = logoDark ? await uploadToStrapi(logoDark, LOGO_FOLDER_ID) : null;
 
       // 2. Trigger Generation API
-      setStatusText('Briefing AI Art Director...');
+      setStatusText('Dispatching Swarm to AI Art Directors...');
       const splitUsps = usps.split(',').map(s => s.trim()).filter(Boolean);
 
       const res = await fetch('/api/creative-agent/generate', {
@@ -68,17 +66,17 @@ export default function CreativeAgentBuilder() {
           category,
           usps: splitUsps,
           campaign_data: campaignData,
-          logo_id: logoId,
-          background_image_id: bgId,
+          logo_light_id: lightId,
+          logo_dark_id: darkId,
+          background_image_ids: bgIds,
         })
       });
 
-      const { documentId } = await res.json();
+      const { documentId, expectedCount } = await res.json();
       if (!documentId) throw new Error("Failed to get Document ID");
 
       // 3. Start Polling
-      setStatusText('Satori Engine rendering pixels...');
-      pollForCompletion(documentId);
+      pollForCompletion(documentId, expectedCount);
 
     } catch (error) {
       console.error(error);
@@ -87,32 +85,46 @@ export default function CreativeAgentBuilder() {
     }
   };
 
-  const pollForCompletion = (documentId: string) => {
+  const pollForCompletion = (documentId: string, expectedCount: number) => {
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/creative-agent/${documentId}`);
         const data = await res.json();
 
-        if (data.report_status === 'draft' || data.report_status === 'published') {
-          clearInterval(interval);
-          setFinalCreative(data);
-          setStatusText('Creative Generated Successfully!');
-          setIsGenerating(false);
-        } else if (data.report_status === 'failed') {
+        const currentVariations = data.generated_creatives?.variations || [];
+
+        // UPDATE STATE ON EVERY POLL TO ENABLE PROGRESSIVE RENDERING
+        setFinalCreative(data);
+
+        if (data.report_status === 'failed') {
           clearInterval(interval);
           setStatusText('Generation failed. Please try again.');
           setIsGenerating(false);
+          return;
+        }
+
+        if (currentVariations.length === expectedCount) {
+          clearInterval(interval);
+          setStatusText('Creatives Generated Successfully!');
+          setIsGenerating(false);
+        } else {
+          setStatusText(`Rendering pixels... (${currentVariations.length}/${expectedCount} ready)`);
         }
       } catch (err) {
         console.error("Polling error", err);
       }
-    }, 3000); // Check every 3 seconds
+    }, 5000);
   };
 
-  // Dynamic input handler
   const handleCampaignDataChange = (key: string, value: string) => {
     setCampaignData(prev => ({ ...prev, [key]: value }));
   };
+
+  // Helper to determine what state the UI is in
+  const variationsCount = finalCreative?.generated_creatives?.variations?.length || 0;
+  const isIdle = !isGenerating && variationsCount === 0;
+  const isInitialLoading = isGenerating && variationsCount === 0;
+  const hasPartialOrFullResults = variationsCount > 0;
 
   return (
     <div className="min-h-screen bg-[#fcfcfb] font-jost text-neutral-900 selection:bg-[#b8924a]/20">
@@ -120,45 +132,23 @@ export default function CreativeAgentBuilder() {
       <nav className="w-full bg-[#fcfcfb] border-b border-neutral-200 md:border-neutral-100 px-8 py-5 flex items-center justify-between sticky top-0 z-50">
         <Link href="/" className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#14181F]/10 bg-white">
-            <Image
-              src="/riwa-logo-transparent.png"
-              alt="RIWAA"
-              width={30}
-              height={30}
-            />
+            <Image src="/riwa-logo-transparent.png" alt="RIWAA" width={30} height={30} />
           </div>
-
           <div className="leading-none hidden md:block">
-            <p className="text-[15px] font-medium tracking-[0.22em] text-[#14181F]">
-              RIWAA
-            </p>
-            <p className="mt-1 font-jost text-[9px] uppercase tracking-[0.22em] text-[#565C6B]">
-              powered by
-            </p>
+            <p className="text-[15px] font-medium tracking-[0.22em] text-[#14181F]">RIWAA</p>
+            <p className="mt-1 font-jost text-[9px] uppercase tracking-[0.22em] text-[#565C6B]">powered by</p>
           </div>
-
           <div className="mx-2 h-8 w-px bg-[#14181F]/15 hidden md:block" />
-
-          <Image
-            src="/solvetude-logo.png"
-            alt="Solvetude"
-            width={100}
-            height={30}
-            className="object-contain hidden md:block"
-          />
+          <Image src="/solvetude-logo.png" alt="Solvetude" width={100} height={30} className="object-contain hidden md:block" />
         </Link>
         <div className="flex items-center gap-3">
-          <Link
-            href="/creative-agent/history"
-            className="px-4 py-2 bg-neutral-900 text-white rounded-lg text-xs font-semibold uppercase tracking-widest hover:bg-neutral-800 transition-colors flex items-center gap-2"
-          >
+          <Link href="/creative-agent/history" className="px-4 py-2 bg-neutral-900 text-white rounded-lg text-xs font-semibold uppercase tracking-widest hover:bg-neutral-800 transition-colors flex items-center gap-2">
             <Clock size={14} className="text-white" /> Archives
           </Link>
         </div>
       </nav>
 
       <main className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
-
         {/* LEFT COLUMN: The Brief Builder */}
         <div className="lg:col-span-5 space-y-10">
           <div>
@@ -167,40 +157,25 @@ export default function CreativeAgentBuilder() {
           </div>
 
           <div className="space-y-6">
-            {/* Core Details */}
             <div className="space-y-4">
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-1.5 block">Brand / Project Name</label>
-                <input
-                  type="text"
-                  value={brandName}
-                  onChange={(e) => setBrandName(e.target.value)}
-                  placeholder="e.g. Prestige One Developments"
-                  className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] focus:ring-1 focus:ring-[#b8924a] transition-all"
-                />
+                <input type="text" value={brandName} onChange={(e) => setBrandName(e.target.value)} placeholder="e.g. Prestige One Developments" className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] focus:ring-1 focus:ring-[#b8924a] transition-all" />
               </div>
 
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-1.5 block">Industry Category</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] focus:ring-1 focus:ring-[#b8924a] transition-all appearance-none"
-                >
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] focus:ring-1 focus:ring-[#b8924a] transition-all appearance-none">
                   <option value="real_estate">Real Estate & Property</option>
                   <option value="saas" disabled>SaaS & Software</option>
-                  <option value="ecommerce" disabled>E-Commerce & Retail</option>
-                  <option value="service" disabled>Service Business</option>
                 </select>
               </div>
             </div>
 
-            {/* Dynamic Campaign Data */}
             <div className="p-5 bg-neutral-50 border border-neutral-100 rounded-2xl space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-900 flex items-center gap-2">
                 <LayoutTemplate size={14} className="text-[#b8924a]" /> Additional Parameters
               </h3>
-
               {category === 'real_estate' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -213,60 +188,41 @@ export default function CreativeAgentBuilder() {
                   </div>
                 </div>
               )}
-
-              {category === 'saas' && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 block">Monthly Price</label>
-                    <input type="text" onChange={(e) => handleCampaignDataChange('price', e.target.value)} placeholder="e.g. $29/mo" className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-xs" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 block">Trial Offer</label>
-                    <input type="text" onChange={(e) => handleCampaignDataChange('trial', e.target.value)} placeholder="e.g. 14-Day Free Trial" className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-xs" />
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* USPs */}
             <div>
               <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-1.5 block">Unique Selling Propositions</label>
-              <textarea
-                value={usps}
-                onChange={(e) => setUsps(e.target.value)}
-                placeholder="Comma separated (e.g. Post-Handover Payment, Smart Home, Beach Access)"
-                className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] min-h-20 resize-none"
-              />
+              <textarea value={usps} onChange={(e) => setUsps(e.target.value)} placeholder="Comma separated (e.g. Post-Handover Payment, Smart Home)" className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] min-h-20 resize-none" />
             </div>
-
-            {/* Inside your Campaign Brief section in page.tsx */}
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-1.5 block">
-                Art Director Instructions (Optional)
-              </label>
-              <textarea
-                onChange={(e) => handleCampaignDataChange('design_instructions', e.target.value)}
-                placeholder="e.g., 'Put the logo in the top right. Focus the headline on post-handover payments. Place text at the bottom left.'"
-                className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] min-h-25 resize-none"
-              />
-              <p className="text-[10px] text-neutral-400 mt-1">Tell the Riwaa exactly where to place elements and what the core message should be.</p>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-1.5 block">Art Director Instructions (Optional)</label>
+              <textarea onChange={(e) => handleCampaignDataChange('design_instructions', e.target.value)} placeholder="e.g., 'Put the logo in the top right. Focus the headline on post-handover payments.'" className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#b8924a] min-h-25 resize-none" />
             </div>
 
-            {/* Asset Uploads */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Smart Asset Uploads */}
+            <div className="space-y-4">
+              {/* Background Swarm Uploader */}
               <div className="border border-dashed border-neutral-300 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-white hover:bg-neutral-50 cursor-pointer relative overflow-hidden group">
-                <input type="file" accept="image/*" onChange={(e) => setBgFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                {bgFile ? <CheckCircle className="text-green-500 mb-2" size={24} /> : <ImageIcon className="text-neutral-400 mb-2 group-hover:text-[#b8924a] transition-colors" size={24} />}
-                <span className="text-xs font-medium text-neutral-700">{bgFile ? 'Renders Selected' : 'Building Render'}</span>
+                <input type="file" multiple accept="image/jpeg, image/png" onChange={(e) => setBgFiles(Array.from(e.target.files || []))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                {bgFiles.length > 0 ? <CheckCircle className="text-green-500 mb-2" size={24} /> : <ImageIcon className="text-neutral-400 mb-2 group-hover:text-[#b8924a] transition-colors" size={24} />}
+                <span className="text-xs font-medium text-neutral-700">{bgFiles.length > 0 ? `${bgFiles.length} Renders Selected` : 'Select Multiple Building Renders'}</span>
                 <span className="text-[9px] text-neutral-400 mt-1 uppercase tracking-widest">Required</span>
               </div>
 
-              <div className="border border-dashed border-neutral-300 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-white hover:bg-neutral-50 cursor-pointer relative overflow-hidden group">
-                <input type="file" accept="image/png, image/svg+xml" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                {logoFile ? <CheckCircle className="text-green-500 mb-2" size={24} /> : <UploadCloud className="text-neutral-400 mb-2 group-hover:text-[#b8924a] transition-colors" size={24} />}
-                <span className="text-xs font-medium text-neutral-700">{logoFile ? 'Logo Selected' : 'Upload Transparent Logo'}</span>
-                <span className="text-[9px] text-neutral-400 mt-1 uppercase tracking-widest">Optional</span>
+              {/* Light/Dark Logo Uploaders */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="border border-dashed border-neutral-300 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-[#14181F] cursor-pointer relative overflow-hidden group">
+                  <input type="file" accept="image/png, image/svg+xml" onChange={(e) => setLogoLight(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                  {logoLight ? <CheckCircle className="text-green-400 mb-2" size={20} /> : <Sun className="text-white/60 mb-2 group-hover:text-white transition-colors" size={20} />}
+                  <span className="text-[10px] font-medium text-white">{logoLight ? 'Selected' : 'Light Logo (For Dark BGs)'}</span>
+                </div>
+
+                <div className="border border-dashed border-neutral-300 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-white cursor-pointer relative overflow-hidden group">
+                  <input type="file" accept="image/png, image/svg+xml" onChange={(e) => setLogoDark(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                  {logoDark ? <CheckCircle className="text-green-500 mb-2" size={20} /> : <Moon className="text-neutral-400 mb-2 group-hover:text-black transition-colors" size={20} />}
+                  <span className="text-[10px] font-medium text-neutral-700">{logoDark ? 'Selected' : 'Dark Logo (For Bright BGs)'}</span>
+                </div>
               </div>
             </div>
 
@@ -276,28 +232,28 @@ export default function CreativeAgentBuilder() {
               className="w-full bg-[#050505] hover:bg-black text-white rounded-xl py-4 flex items-center justify-center gap-2 font-semibold uppercase tracking-widest text-xs transition-all shadow-xl shadow-black/10 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} className="text-[#b8924a]" />}
-              {isGenerating ? 'Processing...' : 'Generate Master Creative'}
+              {isGenerating ? 'Processing...' : 'Generate Batch Variations'}
             </button>
           </div>
         </div>
 
         {/* RIGHT COLUMN: Output & Preview */}
         <div className="lg:col-span-7 bg-neutral-100/50 rounded-4xl border border-neutral-100 p-8 flex flex-col items-center justify-center min-h-150 relative overflow-hidden">
-
           <AnimatePresence mode="wait">
-            {/* STATE 1: Idle */}
-            {!isGenerating && !finalCreative && (
+
+            {/* STATE 1: IDLE */}
+            {isIdle && (
               <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                   <LayoutTemplate size={24} className="text-neutral-300" />
                 </div>
                 <h3 className="text-sm font-semibold text-neutral-900">Awaiting Brief</h3>
-                <p className="text-xs text-neutral-500 mt-1">Configure your parameters to start generation.</p>
+                <p className="text-xs text-neutral-500 mt-1">Configure your parameters to start swarm generation.</p>
               </motion.div>
             )}
 
-            {/* STATE 2: Loading / Polling */}
-            {isGenerating && (
+            {/* STATE 2: INITIAL LOADING (No images ready yet) */}
+            {isInitialLoading && (
               <motion.div key="loading" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center text-center">
                 <div className="relative">
                   <div className="w-24 h-24 border-4 border-neutral-200 rounded-full border-t-[#b8924a] animate-spin" />
@@ -307,36 +263,58 @@ export default function CreativeAgentBuilder() {
               </motion.div>
             )}
 
-            {/* STATE 3: Final Output */}
-            {!isGenerating && finalCreative && (
-              <motion.div key="done" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full flex flex-col items-center">
+            {/* STATE 3: PROGRESSIVE OR FINAL RENDERING */}
+            {hasPartialOrFullResults && (
+              <motion.div key="done" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full flex flex-col">
 
-                {/* Image Showcase */}
-                <div className="w-full max-w-100 aspect-square bg-white rounded-2xl shadow-2xl overflow-hidden border border-neutral-200 relative group">
-                  {/* Since Strapi returns relative URLs for media, prefix with your Strapi URL */}
-                  <img
-                    src={`${process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com'}${finalCreative.generated_creatives?.feed_square}`}
-                    alt="Final Creative"
-                    className="w-full h-full object-contain"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                    <a href={`${process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com'}${finalCreative.generated_creatives?.feed_square}`} download target="_blank" rel="noopener noreferrer" className="bg-white text-black px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors">
-                      Download PNG
-                    </a>
+                {/* Mini Status Banner for ongoing generation */}
+                {isGenerating && (
+                  <div className="mb-6 flex items-center justify-center gap-2 bg-white border border-neutral-200 py-2 px-4 rounded-full shadow-sm mx-auto animate-pulse">
+                    <Loader2 size={14} className="animate-spin text-[#b8924a]" />
+                    <span className="text-xs font-semibold uppercase tracking-widest text-neutral-700">{statusText}</span>
                   </div>
+                )}
+
+                {/* AI Copy Reveal (Top) */}
+                <div className="mb-8 bg-white p-5 rounded-2xl border border-neutral-100 w-full shadow-sm text-center">
+                  <p className="text-[9px] uppercase tracking-widest text-[#b8924a] font-bold mb-3">AI Copywriting Output</p>
+                  <p className="text-sm font-semibold text-neutral-900 leading-tight mb-2">&quot;{finalCreative.ai_copy?.headline || 'Analyzing layout for copy...'}&quot;</p>
                 </div>
 
-                {/* AI Copy Reveal */}
-                <div className="mt-8 bg-white p-5 rounded-2xl border border-neutral-100 w-full max-w-100 shadow-sm">
-                  <p className="text-[9px] uppercase tracking-widest text-[#b8924a] font-bold mb-3">Riwaa Copywriting Output</p>
-                  <p className="text-sm font-semibold text-neutral-900 leading-tight mb-2">&quot;{finalCreative.ai_copy?.headline}&quot;</p>
-                  <p className="text-xs text-neutral-500 uppercase tracking-wider font-medium">CTA: {finalCreative.ai_copy?.cta}</p>
+                {/* Grid Gallery for Variations */}
+                <div className="grid grid-cols-2 gap-4 w-full">
+                  {finalCreative.generated_creatives.variations.map((url: string, index: number) => (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      key={index}
+                      className="w-full aspect-square bg-white rounded-2xl shadow-lg overflow-hidden border border-neutral-200 relative group"
+                    >
+                      <img
+                        src={`${process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'http://localhost:1337'}${url}`}
+                        alt={`Variation ${index + 1}`}
+                        className="w-full h-full object-contain"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center backdrop-blur-sm gap-3">
+                        <span className="text-white text-[10px] uppercase tracking-widest font-bold">Variation {index + 1}</span>
+                        <a href={`${process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'http://localhost:1337'}${url}`} download target="_blank" rel="noopener noreferrer" className="bg-white text-black px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors">
+                          Download
+                        </a>
+                      </div>
+                    </motion.div>
+                  ))}
+
+                  {/* Empty placeholders for items still processing */}
+                  {isGenerating && Array.from({ length: Math.max(0, bgFiles.length - variationsCount) }).map((_, i) => (
+                    <div key={`skeleton-${i}`} className="w-full aspect-square bg-neutral-200/50 rounded-2xl border border-neutral-200 relative overflow-hidden animate-pulse flex items-center justify-center">
+                      <Loader2 size={24} className="text-neutral-400 animate-spin" />
+                    </div>
+                  ))}
                 </div>
 
               </motion.div>
             )}
           </AnimatePresence>
-
         </div>
       </main>
     </div>

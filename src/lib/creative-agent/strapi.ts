@@ -21,8 +21,9 @@ export interface CreativeAgentPayload {
   usps: string[];
 
   // Media fields in Strapi are often referenced by their ID when uploading/updating
-  logo?: number | null;
-  background_image?: number | null;
+  logo_light?: number | null;
+  logo_dark?: number | null;
+  background_images?: number[] | null; // <--- Updated to Array for Swarm
 
   ai_copy?: {
     headline: string;
@@ -35,6 +36,7 @@ export interface CreativeAgentPayload {
     feed_square?: string;
     story_vertical?: string;
     social_landscape?: string;
+    variations?: string[]; // <--- Added to store the batch swarm outputs
   } | null;
 
   report_status: 'processing' | 'draft' | 'published' | 'failed';

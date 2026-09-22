@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 export default async function CreativeAgentHistory() {
   const creatives = await getAllCreativeAgents();
-  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com';
+  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'http://localhost:1337';
 
   return (
     <div className="min-h-screen bg-[#fcfcfb] font-jost text-neutral-900 selection:bg-[#b8924a]/20">
@@ -58,11 +58,11 @@ export default async function CreativeAgentHistory() {
       <main className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {creatives.map((item: any) => {
-            // Find the image to display (Prefer the final generated ad, fallback to raw background)
-            const displayImage = item.generated_creatives?.feed_square
-              ? `${STRAPI_BASE}${item.generated_creatives.feed_square}`
-              : item.background_image?.url
-                ? `${STRAPI_BASE}${item.background_image.url}`
+            // Find the image to display (Prefer the first finalized variation, fallback to raw background)
+            const displayImage = item.generated_creatives?.variations?.[0]
+              ? `${STRAPI_BASE}${item.generated_creatives.variations[0]}`
+              : item.background_images?.[0]?.url
+                ? `${STRAPI_BASE}${item.background_images[0].url}`
                 : "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80";
 
             return (

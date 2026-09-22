@@ -1,4 +1,4 @@
-// src/lib/seo-agent/queue.ts
+// riwaa/src/workers/queue.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { loadEnvConfig } from '@next/env';
 loadEnvConfig(process.cwd());

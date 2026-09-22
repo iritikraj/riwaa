@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Download, TextQuote, Tag } from 'lucide-react';
+import { ArrowLeft, Download, TextQuote, Tag, LayoutTemplate } from 'lucide-react';
 import { getCreativeAgentBySlug } from '@/lib/creative-agent/strapi';
 
 export default async function CreativeDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -9,16 +9,10 @@ export default async function CreativeDetail({ params }: { params: Promise<{ id:
 
   if (!agent) notFound();
 
-  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com';
+  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'http://localhost:1337';
 
-  // Resolve image URLs
-  const finalImage = agent.generated_creatives?.feed_square
-    ? `${STRAPI_BASE}${agent.generated_creatives.feed_square}`
-    : null;
-
-  const rawBg = agent.background_image?.url
-    ? `${STRAPI_BASE}${agent.background_image.url}`
-    : null;
+  // Extract the array of variations instead of a single image
+  const variations: string[] = agent.generated_creatives?.variations || [];
 
   return (
     <div className="min-h-screen bg-[#fcfcfb] font-jost text-neutral-900 selection:bg-[#b8924a]/20 pb-20">
@@ -34,44 +28,56 @@ export default async function CreativeDetail({ params }: { params: Promise<{ id:
             <p className="text-[10px] text-neutral-400 uppercase tracking-wider">{agent.category.replace('_', ' ')} Campaign</p>
           </div>
         </div>
-        {finalImage && (
-          <a
-            href={finalImage}
-            download={`${agent.slug}-ad.png`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 bg-[#b8924a] text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#a17e3f] transition-colors flex items-center gap-2 shadow-lg shadow-[#b8924a]/20"
-          >
-            <Download size={14} /> Download Asset
-          </a>
-        )}
+
+        {/* Status Indicator inside Nav */}
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Status</span>
+          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${agent.report_status === 'draft' ? "bg-green-50 text-green-600" : "bg-amber-50 text-amber-600 animate-pulse"}`}>
+            {agent.report_status}
+          </span>
+        </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <main className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
 
-        {/* LEFT: The Final Creative Asset */}
-        <div className="lg:col-span-6 flex flex-col gap-4">
-          <div className="w-full bg-white rounded-3xl p-4 shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-neutral-100">
-            {finalImage ? (
-              <img src={finalImage} alt="Final Creative" className="w-full rounded-2xl aspect-square object-contain bg-neutral-50" />
+        {/* LEFT: Swarm Gallery */}
+        <div className="lg:col-span-7 flex flex-col gap-6">
+          <h2 className="text-sm font-bold tracking-widest uppercase text-neutral-400">Generated Variations</h2>
+
+          <div className="w-full bg-white rounded-4xl p-6 shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-neutral-100 min-h-100">
+            {variations.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {variations.map((url, idx) => (
+                  <div key={idx} className="relative group aspect-square rounded-2xl overflow-hidden border border-neutral-100 bg-neutral-50 shadow-sm">
+                    <img src={`${STRAPI_BASE}${url}`} alt={`Variation ${idx + 1}`} className="w-full h-full object-contain" />
+
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center backdrop-blur-sm gap-3">
+                      <span className="text-white text-[10px] uppercase tracking-widest font-bold">Variation {idx + 1}</span>
+                      <a
+                        href={`${STRAPI_BASE}${url}`}
+                        download={`${agent.slug}-var-${idx + 1}.png`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-white text-black rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors flex items-center gap-2"
+                      >
+                        <Download size={12} /> Download
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
-              <div className="w-full aspect-square rounded-2xl bg-neutral-50 border border-neutral-200 border-dashed flex items-center justify-center text-neutral-400">
-                <span className="text-xs uppercase tracking-widest font-semibold">Still Processing...</span>
+              <div className="w-full h-full min-h-75 rounded-2xl bg-neutral-50 border border-neutral-200 border-dashed flex flex-col gap-3 items-center justify-center text-neutral-400">
+                <LayoutTemplate size={32} className="text-neutral-300 opacity-50" />
+                <span className="text-xs uppercase tracking-widest font-semibold">Generating Swarm...</span>
               </div>
             )}
-          </div>
-
-          {/* Status Indicator */}
-          <div className="bg-white border border-neutral-100 rounded-xl p-4 flex items-center justify-between text-xs font-semibold uppercase tracking-widest shadow-sm">
-            <span className="text-neutral-500">Render Status</span>
-            <span className={agent.report_status === 'draft' ? "text-green-500" : "text-amber-500 animate-pulse"}>
-              {agent.report_status}
-            </span>
           </div>
         </div>
 
         {/* RIGHT: Campaign Details & AI Copy */}
-        <div className="lg:col-span-6 space-y-8">
+        <div className="lg:col-span-5 space-y-8">
 
           {/* AI Copy Block */}
           {agent.ai_copy && (
@@ -79,7 +85,6 @@ export default async function CreativeDetail({ params }: { params: Promise<{ id:
               <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#b8924a] flex items-center gap-2 mb-6">
                 <TextQuote size={14} /> AI Art Director Output
               </h3>
-
               <div className="space-y-6">
                 <div>
                   <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block mb-1">Generated Headline</span>

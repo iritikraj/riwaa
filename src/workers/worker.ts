@@ -491,8 +491,9 @@ const createDeveloperAgentWorker = () => new Worker('developer-agent-queue', asy
 });
 
 const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async (job: Job) => {
+  console.log(`🔥 [Creative Worker] WAKE UP! Grabbed Job ID: ${job.id}`);
   // Helper to get raw base64 (without the data URI prefix) for Gemini Vision
-  const STRAPI_URL = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_STRAPI_URL : 'https://riwaa.solvetude.com';
+  const STRAPI_URL = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_STRAPI_URL : 'http://localhost:1337';
 
   async function getRawBase64Image(url: string) {
     const response = await fetch(url);
@@ -513,27 +514,43 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
   }
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  const { documentId } = job.data;
+  const { documentId, imageId } = job.data;
 
   try {
     const agentData = await getCreativeAgentById(documentId);
     if (!agentData) throw new Error("Creative Agent record not found.");
 
-    console.log(`[Creative Agent] Fetching assets for Gemini Vision & Satori...`);
-    const rawBackgroundUrl = agentData.background_image?.url
-      ? `${STRAPI_URL}${agentData.background_image.url}`
-      : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1080&q=80';
+    console.log(`[Creative Agent Worker] Processing image ${imageId} for Document ${documentId}...`);
+
+    // 2. Find the specific background image from the array that matches this job's imageId
+    const targetImage = agentData.background_images?.find((img: any) => img.id === imageId);
+
+    // 3. Fallback to large/medium compressed formats to save memory if available
+    const safeStrapiUrl = targetImage?.formats?.large?.url || targetImage?.formats?.medium?.url || targetImage?.url;
+
+    const rawBackgroundUrl = safeStrapiUrl
+      ? `${STRAPI_URL}${safeStrapiUrl}`
+      : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1080&q=80&fm=jpg';
 
     console.log({ rawBackgroundUrl });
 
     const bgImage = await getRawBase64Image(rawBackgroundUrl);
     const backgroundDataUri = toDataUri(bgImage.data, bgImage.mimeType);
 
-    let logoDataUri = "";
-    if (agentData.logo?.url) {
-      const rawLogoUrl = `${STRAPI_URL}${agentData.logo.url}`;
+    // Fetch Light Logo (For dark backgrounds)
+    let logoLightDataUri = "";
+    if (agentData.logo_light?.url) {
+      const rawLogoUrl = `${STRAPI_URL}${agentData.logo_light.url}`;
       const logoImage = await getRawBase64Image(rawLogoUrl);
-      logoDataUri = toDataUri(logoImage.data, logoImage.mimeType);
+      logoLightDataUri = toDataUri(logoImage.data, logoImage.mimeType);
+    }
+
+    // Fetch Dark Logo (For light backgrounds)
+    let logoDarkDataUri = "";
+    if (agentData.logo_dark?.url) {
+      const rawLogoUrl = `${STRAPI_URL}${agentData.logo_dark.url}`;
+      const logoImage = await getRawBase64Image(rawLogoUrl);
+      logoDarkDataUri = toDataUri(logoImage.data, logoImage.mimeType);
     }
 
     // Find the negative space (like an empty sky or dark shadows) to place the typography so it does not obstruct the main subject (buildings, people).
@@ -564,6 +581,7 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     LUXURY DESIGN SYSTEM (STRICT CSS, FLEXIBLE PLACEMENT):
     - Text nodes MUST use the "content" key. Never use "value" or "text".
     - The first child MUST be the background using this EXACT syntax: { "type": "image", "source": "{{background_image}}", "style": { "position": "absolute", "top": 0, "left": 0, "width": "1080px", "height": "1080px", "objectFit": "cover" } }
+    - SMART LOGO CONTRAST: Analyze the exact pixels where you are placing the logo. If placing it over a dark area (e.g., night sky, shadows), you MUST use this EXACT syntax: { "type": "image", "source": "{{logo_light}}", "style": { "height": "60px", "objectFit": "contain" } }. If placing it over a bright area (e.g., daytime sky, white building), swap the source to "{{logo_dark}}".
     - Readability Gradients: ALWAYS wrap your typography container in a gradient that fades seamlessly into the image. Match the gradient direction to the anchor point (e.g., "to top" for bottom-anchored text, "to right" for left-anchored, "to bottom" for top-anchored).
     - Extreme Typographic Contrast: Massive bold headlines (60px-72px) paired with tiny, wide-tracked metadata (12px-14px, letterSpacing: "6px", color: "#b8924a").
     - Architectural Accents: Feel free to use thin gold dividers (e.g., 1px height/width) to separate elements elegantly.
@@ -587,29 +605,31 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     let layoutJsonString = aiResponse.text || '{}';
     layoutJsonString = layoutJsonString.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
 
-    // console.log('-------------------------------- BEFORE REGEX --------------------------------');
-    // console.log(layoutJsonString);
-    // console.log('------------------------------------------------------------------------------');
-
-    // 1. Force the massive Base64 strings into the JSON string directly via Regex
+    // Force inject the massive Base64 strings via Regex to bypass LLM spacing formatting
     layoutJsonString = layoutJsonString.replace(/\{\{\s*background_image\s*\}\}/g, backgroundDataUri);
-    if (logoDataUri) {
-      layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_image\s*\}\}/g, logoDataUri);
+
+    if (logoLightDataUri) {
+      layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_light\s*\}\}/g, logoLightDataUri);
+    }
+    if (logoDarkDataUri) {
+      layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_dark\s*\}\}/g, logoDarkDataUri);
     }
 
-    // console.log('-------------------------------- AFTER REGEX --------------------------------');
-    // console.log(layoutJsonString);
-    // console.log('-----------------------------------------------------------------------------');
+    // Fallback: If the LLM hallucinates and just writes "logo_image", default to the light logo
+    if (logoLightDataUri) {
+      layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_image\s*\}\}/g, logoLightDataUri);
+    }
 
-
-    // 2. Pass the pre-injected string to the generator
+    // Pass the pre-injected string to the generator
     const pngBuffer = await generateCreativeBuffer(layoutJsonString, {}, 1080, 1080);
 
-    console.log(`[Creative Agent] Uploading finalized creative to Strapi...`);
+    console.log(`[Creative Agent] Uploading finalized variation for image ${imageId}...`);
     const FINAL_FOLDER_ID = 5;
+
+    // Add the imageId to the filename so they don't overwrite each other in the Strapi media library
     const uploadedUrl = await uploadBufferToStrapi(
       pngBuffer,
-      `${agentData.brand_name}-feed-ad.png`,
+      `${agentData.brand_name.replace(/\s+/g, '-')}-variation-${imageId}.png`,
       FINAL_FOLDER_ID
     );
 
@@ -620,13 +640,17 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
       extractedHeadline = JSON.stringify(parsed).match(/"content":"([^"]+)"/)?.[1] || extractedHeadline;
     } catch (e) { }
 
+    const freshData = await getCreativeAgentById(documentId);
+    const currentVariations = freshData.generated_creatives?.variations || [];
+    currentVariations.push(uploadedUrl);
+
     await updateCreativeAgentInStrapi(documentId, {
       report_status: 'draft',
       ai_copy: { headline: extractedHeadline, cta: "See Design" },
-      generated_creatives: { feed_square: uploadedUrl }
+      generated_creatives: { variations: currentVariations }
     });
 
-    console.log(`[Creative Agent] Job completed! Creative ready at ${uploadedUrl}`);
+    console.log(`[Creative Agent] Job completed for image ${imageId}! Variation appended.`);
 
   } catch (error: any) {
     console.error(`[Creative Agent] Failed: ${error.message}`);
@@ -652,13 +676,20 @@ const globalForWorkers = globalThis as unknown as {
   creativeAgentWorker: Worker;
 };
 
+if (process.env.NODE_ENV !== 'production') {
+  if (globalForWorkers.creativeAgentWorker) {
+    console.log('🔄 Turbopack Reload: Closing old Creative Agent Worker...');
+    globalForWorkers.creativeAgentWorker.close();
+  }
+}
+
 export const aiAuditWorker = globalForWorkers.aiAuditWorker || createAiAuditWorker();
 export const spiderWorker = globalForWorkers.spiderWorker || createSpiderWorker();
 export const competitorWorker = globalForWorkers.competitorWorker || createCompetitorWorker();
 export const complianceWorker = globalForWorkers.complianceWorker || createComplianceWorker();
 export const contentBriefWorker = globalForWorkers.contentBriefWorker || createContentBriefWorker();
 export const developerAgentWorker = globalForWorkers.developerAgentWorker || createDeveloperAgentWorker();
-export const creativeAgentWorker = globalForWorkers.creativeAgentWorker || createCreativeAgentWorker();
+export const creativeAgentWorker = createCreativeAgentWorker();
 
 if (process.env.NODE_ENV !== 'production') {
   globalForWorkers.aiAuditWorker = aiAuditWorker;
@@ -710,6 +741,8 @@ developerAgentWorker.on('ready', () => console.log('✅ Developer Agent Worker i
 developerAgentWorker.on('completed', job => console.log(`[DevAgent Queue] Job ${job.id} completed successfully`));
 developerAgentWorker.on('failed', (job, err) => console.error(`❌ Job ${job?.id} failed with error: ${err.message}`));
 
-creativeAgentWorker.on('ready', () => console.log('✅ Developer Agent Worker is ready and listening to Redis...'));
-creativeAgentWorker.on('completed', job => console.log(`[DevAgent Queue] Job ${job.id} completed successfully`));
+creativeAgentWorker.on('ready', () => console.log('✅ Creative Agent Worker is ready and listening to Redis...'));
+creativeAgentWorker.on('active', job => console.log(`🚀 [Creative Queue] Job ${job.id} moved from waiting to ACTIVE!`));
+creativeAgentWorker.on('completed', job => console.log(`✅ [Creative Queue] Job ${job.id} completed successfully`));
+creativeAgentWorker.on('error', (err) => console.error(`❌ [Worker] Critical Redis Error:: ${err.message}`));
 creativeAgentWorker.on('failed', (job, err) => console.error(`❌ Job ${job?.id} failed with error: ${err.message}`));
