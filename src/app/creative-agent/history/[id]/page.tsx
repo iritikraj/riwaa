@@ -2,14 +2,13 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Download, TextQuote, Tag, LayoutTemplate } from 'lucide-react';
 import { getCreativeAgentBySlug } from '@/lib/creative-agent/strapi';
+import { STRAPI_URL as STRAPI_BASE } from '@/utils/constants';
 
 export default async function CreativeDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
   const agent = await getCreativeAgentBySlug(resolvedParams.id);
 
   if (!agent) notFound();
-
-  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com';
 
   // Extract the array of variations instead of a single image
   const variations: string[] = agent.generated_creatives?.variations || [];

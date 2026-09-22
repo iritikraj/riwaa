@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import { getAllCreativeAgents } from '@/lib/creative-agent/strapi';
 import Image from 'next/image';
+import { STRAPI_URL as STRAPI_BASE } from '@/utils/constants';
 
 export default async function CreativeAgentHistory() {
   const creatives = await getAllCreativeAgents();
-  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com';
 
   return (
     <div className="min-h-screen bg-[#fcfcfb] font-jost text-neutral-900 selection:bg-[#b8924a]/20">

@@ -29,6 +29,7 @@ import { fetchBrokerData, rewriteBioWithGemini } from '../lib/real-estate-agents
 import { updateDeveloperAgentInStrapi } from '../lib/real-estate-agents/strapi';
 import { getActiveTemplate, getCreativeAgentById, updateCreativeAgentInStrapi, uploadBufferToStrapi } from '../lib/creative-agent/strapi';
 import { generateCreativeBuffer } from '../lib/creative-agent/satori-engine';
+import { STRAPI_URL } from '@/utils/constants';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -492,8 +493,6 @@ const createDeveloperAgentWorker = () => new Worker('developer-agent-queue', asy
 
 const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async (job: Job) => {
   console.log(`🔥 [Creative Worker] WAKE UP! Grabbed Job ID: ${job.id}`);
-  // Helper to get raw base64 (without the data URI prefix) for Gemini Vision
-  const STRAPI_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com';
 
   async function getRawBase64Image(url: string) {
     const response = await fetch(url);

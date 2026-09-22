@@ -10,7 +10,7 @@ export const metadata = {
   title: 'Compliance Audit Report - Riwaa SEO Agent',
 };
 
-const BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : `${process.env.NEXT_PUBLIC_APP_URL}`;
+const BASE_URL = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_STRAPI_URL : `${process.env.NEXT_PUBLIC_APP_URL}`;
 
 export default async function ComplianceReportPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

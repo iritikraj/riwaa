@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Image as ImageIcon, CheckCircle, Loader2, LayoutTemplate, Clock, Moon, Sun, FolderOpen, Upload } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { STRAPI_URL as STRAPI_BASE } from '@/utils/constants';
 
 const BACKGROUND_FOLDER_ID = 4
 const LOGO_FOLDER_ID = 3;
@@ -157,7 +158,6 @@ export default function CreativeAgentBuilder() {
     setCampaignData(prev => ({ ...prev, [key]: value }));
   };
 
-  const STRAPI_BASE = process.env.NODE_ENV === 'development' ? 'http://localhost:1337' : 'https://riwaa.solvetude.com'; // Update prod URL
   const variationsCount = finalCreative?.generated_creatives?.variations?.length || 0;
   const isIdle = !isGenerating && variationsCount === 0;
   const isInitialLoading = isGenerating && variationsCount === 0;
