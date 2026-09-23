@@ -1,5 +1,5 @@
-import { STRAPI_URL } from '@/utils/constants';
 import { NextRequest, NextResponse } from 'next/server';
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1338';
 
 export async function GET(req: NextRequest) {
   const token = req.cookies.get('riwaa_session')?.value;
