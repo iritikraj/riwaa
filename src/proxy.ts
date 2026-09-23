@@ -3,16 +3,15 @@ import type { NextRequest } from 'next/server';
 
 // 1. Use a Set for O(1) ultra-fast exact path lookups
 const PROTECTED_ROUTES = new Set([
-  // '/creative-agent',
-  // '/real-estate',
-  // '/real-estate/advisors/create',
-  // '/real-estate/web-studio/create',
-  // '/seo-agent/audit',
-  // '/seo-agent/competitor',
-  // '/seo-agent/compliance',
-  // '/real-estate/developer-advisors',
-  // '/social-media-agent'
-  '/test'
+  '/creative-agent',
+  '/real-estate',
+  '/real-estate/advisors/create',
+  '/real-estate/web-studio/create',
+  '/seo-agent/audit',
+  '/seo-agent/competitor',
+  '/seo-agent/compliance',
+  '/real-estate/developer-advisors',
+  '/social-media-agent'
 ]);
 
 export function proxy(request: NextRequest) {
