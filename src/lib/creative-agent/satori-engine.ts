@@ -9,36 +9,60 @@ import path from 'path';
 // const defaultFont = fs.readFileSync(fontPath);
 
 /**
- * Maps our custom simplified JSON layout to Satori's expected React-like VDOM object
+ * Maps our custom simplified JSON layout to Satori's expected React-like VDOM object.
+ * Bulletproofed to handle both raw LLM outputs and strict AST formats.
  */
 export function buildSatoriTree(element: any): any {
-  if (element.type === 'text') {
-    return {
-      type: 'div',
-      props: {
-        style: { display: 'flex', ...element.style },
-        children: element.content || element.value || element.text || '',
-      },
-    };
-  }
+  // 1. Defensively extract properties whether they are at the root or inside `props`
+  const props = element.props || {};
+  const style = element.style || props.style || {};
+  const children = element.children || props.children;
+  const src = element.source || element.src || props.src || '';
 
-  // Catch both "image" and "img" to prevent fallback to empty divs
+  // Try to find text content wherever the LLM might have hidden it
+  const textContent = element.content || element.value || element.text || (typeof children === 'string' ? children : '');
+
+  // 2. Handle Images
   if (element.type === 'image' || element.type === 'img') {
     return {
       type: 'img',
       props: {
-        style: { display: 'flex', ...element.style },
-        // Safely extract src from either the root or a nested props object
-        src: element.source || element.src || (element.props && element.props.src) || '',
+        style: { display: 'flex', ...style },
+        src: src,
       },
     };
   }
 
+  // 3. Handle Explicit Text Nodes (if Gemini uses them)
+  if (element.type === 'text') {
+    return {
+      type: 'div',
+      props: {
+        style: { display: 'flex', ...style },
+        children: textContent,
+      },
+    };
+  }
+
+  // 4. Handle Divs and recursively process children
+  let processedChildren: any = [];
+
+  if (Array.isArray(children)) {
+    // If it's an array of child nodes, process each one
+    processedChildren = children.map(buildSatoriTree);
+  } else if (typeof children === 'string') {
+    // If the child is just a text string, pass it directly
+    processedChildren = children;
+  } else if (textContent) {
+    // Fallback if the LLM used a "content" key instead of children
+    processedChildren = textContent;
+  }
+
   return {
-    type: 'div',
+    type: 'div', // Enforce standard div wrapper for layout containers
     props: {
-      style: { display: 'flex', ...element.style },
-      children: element.children ? element.children.map(buildSatoriTree) : [],
+      style: { display: 'flex', ...style },
+      children: processedChildren,
     },
   };
 }

@@ -499,7 +499,7 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     if (!response.ok) throw new Error(`Failed to fetch image: ${url}`);
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    // Grab the header, but aggressively sanitize it for Resvg
+
     let mimeType = response.headers.get('content-type');
     if (!mimeType || mimeType.includes('octet-stream')) {
       mimeType = url.toLowerCase().includes('.png') ? 'image/png' : 'image/jpeg';
@@ -507,7 +507,6 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     return { data: buffer.toString('base64'), mimeType };
   }
 
-  // Helper for Satori (needs the full Data URI)
   function toDataUri(rawBase64: string, mimeType: string) {
     return `data:${mimeType};base64,${rawBase64}`;
   }
@@ -515,28 +514,26 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   const { documentId, imageId } = job.data;
 
+  // A 1x1 invisible pixel. If Gemini hallucinates a logo when none exists, Satori renders this instead of crashing.
+  const TRANSPARENT_PIXEL = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+
   try {
     const agentData = await getCreativeAgentById(documentId);
     if (!agentData) throw new Error("Creative Agent record not found.");
 
     console.log(`[Creative Agent Worker] Processing image ${imageId} for Document ${documentId}...`);
 
-    // 2. Find the specific background image from the array that matches this job's imageId
     const targetImage = agentData.background_images?.find((img: any) => img.id === imageId);
-
-    // 3. Fallback to large/medium compressed formats to save memory if available
     const safeStrapiUrl = targetImage?.formats?.large?.url || targetImage?.formats?.medium?.url || targetImage?.url;
 
     const rawBackgroundUrl = safeStrapiUrl
       ? `${STRAPI_URL}${safeStrapiUrl}`
       : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1080&q=80&fm=jpg';
 
-    console.log({ rawBackgroundUrl });
-
     const bgImage = await getRawBase64Image(rawBackgroundUrl);
     const backgroundDataUri = toDataUri(bgImage.data, bgImage.mimeType);
 
-    // Fetch Light Logo (For dark backgrounds)
+    // Fetch Light Logo
     let logoLightDataUri = "";
     if (agentData.logo_light?.url) {
       const rawLogoUrl = `${STRAPI_URL}${agentData.logo_light.url}`;
@@ -544,7 +541,7 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
       logoLightDataUri = toDataUri(logoImage.data, logoImage.mimeType);
     }
 
-    // Fetch Dark Logo (For light backgrounds)
+    // Fetch Dark Logo
     let logoDarkDataUri = "";
     if (agentData.logo_dark?.url) {
       const rawLogoUrl = `${STRAPI_URL}${agentData.logo_dark.url}`;
@@ -552,17 +549,28 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
       logoDarkDataUri = toDataUri(logoImage.data, logoImage.mimeType);
     }
 
-    // Find the negative space (like an empty sky or dark shadows) to place the typography so it does not obstruct the main subject (buildings, people).
+    // Dynamically build the logo instructions using the strict Satori AST format
+    let logoInstructions = "1. THE LOGO: No logo was provided. DO NOT include any logo image blocks in your layout.";
+    const defaultPlacement = "Place the logo EXACTLY where the user requests. If no instruction is given, place it at the top (left, center, or right) based on where the image has the most free space.";
+
+    if (logoLightDataUri && logoDarkDataUri) {
+      logoInstructions = `1. SMART LOGO CONTRAST: ${defaultPlacement} Analyze the exact pixels where you are placing the logo. If placing it over a dark area, you MUST use this EXACT syntax: { "type": "img", "props": { "src": "{{logo_light}}", "style": { "height": "60px", "objectFit": "contain" } } }. If placing it over a bright area, swap the src to "{{logo_dark}}".`;
+    } else if (logoLightDataUri) {
+      logoInstructions = `1. THE LOGO: ${defaultPlacement} You MUST use this EXACT syntax: { "type": "img", "props": { "src": "{{logo_light}}", "style": { "height": "60px", "objectFit": "contain" } } }.`;
+    } else if (logoDarkDataUri) {
+      logoInstructions = `1. THE LOGO: ${defaultPlacement} You MUST use this EXACT syntax: { "type": "img", "props": { "src": "{{logo_dark}}", "style": { "height": "60px", "objectFit": "contain" } } }.`;
+    }
 
     const campaignData = agentData.campaign_data as any;
     const designInstructions = agentData.campaign_data?.design_instructions || "Use your best judgment for a luxury and aesthetic real estate layout.";
 
     console.log(`[Creative Agent] Asking Gemini to analyze the image and generate the layout...`);
 
-    const prompt = `You are an elite Art Director and UI Engineer for luxury real estate brands.
+    const prompt = `You are an elite Print Art Director and Graphic Designer for luxury real estate brands. 
+    CRITICAL CONTEXT: Your JSON output will be compiled directly into a flat, static JPEG/PNG image for print and social media advertising. You are designing a flat picture, NOT a webpage.
     
     CRITICAL VISION TASKS & DYNAMIC LAYOUT:
-    1. THE LOGO: Place the logo EXACTLY where the user requests. If unspecified, place it where it visually balances the typography (e.g., opposite corners).
+    ${logoInstructions}
     2. NEGATIVE SPACE HUNTING: The main architecture is usually in the center. Anchor typography in the top 20%, bottom 20%, or a clean side margin depending entirely on where the empty sky, water, or dark road is.
     3. ADAPTIVE ALIGNMENT: DO NOT use the exact same layout every time. Adapt your flexbox alignment based on the anchor point. If text is anchored left, left-align it. If anchored bottom-center, center-align it. 
     
@@ -575,68 +583,68 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     --- USER DESIGN INSTRUCTIONS ---
     "${designInstructions}"
 
-    Task: Generate a completely unique, valid Satori JSON layout object representing a 1080x1080 ad. 
+    Task: Generate a completely unique, valid Satori AST JSON object representing a static 1080x1080 advertisement picture.
     
-    LUXURY DESIGN SYSTEM (STRICT CSS, FLEXIBLE PLACEMENT):
-    - Text nodes MUST use the "content" key. Never use "value" or "text".
-    - The first child MUST be the background using this EXACT syntax: { "type": "image", "source": "{{background_image}}", "style": { "position": "absolute", "top": 0, "left": 0, "width": "1080px", "height": "1080px", "objectFit": "cover" } }
-    - SMART LOGO CONTRAST: Analyze the exact pixels where you are placing the logo. If placing it over a dark area (e.g., night sky, shadows), you MUST use this EXACT syntax: { "type": "image", "source": "{{logo_light}}", "style": { "height": "60px", "objectFit": "contain" } }. If placing it over a bright area (e.g., daytime sky, white building), swap the source to "{{logo_dark}}".
-    - Readability Gradients: ALWAYS wrap your typography container in a gradient that fades seamlessly into the image. Match the gradient direction to the anchor point (e.g., "to top" for bottom-anchored text, "to right" for left-anchored, "to bottom" for top-anchored).
-    - Extreme Typographic Contrast: Massive bold headlines (60px-72px) paired with tiny, wide-tracked metadata (12px-14px, letterSpacing: "6px", color: "#b8924a").
-    - Architectural Accents: Feel free to use thin gold dividers (e.g., 1px height/width) to separate elements elegantly.
-    - The CTA Button: Must use an elegant frosted glass style, for example: { "type": "container", "style": { "display": "flex", "padding": "16px 40px", "border": "1px solid rgba(184, 146, 74, 0.5)", "backgroundColor": "rgba(20, 24, 31, 0.6)" }, "children": [{ "type": "text", "content": "DISCOVER MORE", "style": { "color": "#ffffff", "fontSize": "14px", "letterSpacing": "4px", "textTransform": "uppercase" } }] }
+    SATORI AST JSON RULES (STRICT PARSING REQUIRED):
+    - You MUST use the exact React-style AST that Satori expects. Every node has ONLY "type" and "props" keys at the top level.
+    - Text MUST be passed inside a "children" key inside "props". Example: { "type": "div", "props": { "style": { "color": "#fff", "fontSize": "40px" }, "children": "LUXURY LIVING" } }
+    - If a div has multiple children, pass them as an array inside "children": { "type": "div", "props": { "style": { "display": "flex" }, "children": [ { "type": "div", "props": { "children": "A" } }, { "type": "div", "props": { "children": "B" } } ] } }
+    - The root node must be exactly: { "type": "div", "props": { "style": { "display": "flex", "width": "1080px", "height": "1080px", "position": "relative" }, "children": [ ... ] } }
+    - The first child MUST be the background: { "type": "img", "props": { "src": "{{background_image}}", "style": { "position": "absolute", "top": 0, "left": 0, "width": "1080px", "height": "1080px", "objectFit": "cover" } } }
+    - DO NOT use the keys "content", "source", or "text" anywhere in your JSON. Use "type" and "props" ONLY.
+    - BANNED CSS: NEVER use the "zIndex" property. Satori does not support it. Rely entirely on array order for layering (elements later in the children array appear on top).
     
-    You have full creative freedom to arrange these components based on the image's focal point, but you MUST strictly use the luxury CSS styles above and obey the user's specific spatial instructions. Return ONLY valid JSON. No markdown.`;
+    LUXURY ADVERTISEMENT DESIGN SYSTEM:
+    - Readability Gradients: ALWAYS wrap your typography container in a gradient that fades seamlessly into the image to ensure text is readable. Match the gradient direction to the anchor point.
+    - Dynamic Color Palette: Adapt your typography and accent colors dynamically to complement the tones and lighting of the specific background image.
+    - Extreme Typographic Contrast: Massive bold headlines (60px-80px) paired with tiny, wide-tracked metadata (12px-14px, letterSpacing: "6px"). Use your dynamic palette for text colors.
+    - Call-To-Action (NO BUTTONS!): This is a static image. NEVER generate web-style UI buttons. Instead, create a subtle, elegant text banner or footer (e.g., "REGISTER YOUR INTEREST"). ONLY include a website URL or phone number if it is explicitly provided in the User Design Instructions above.
+    - Architectural Accents: Feel free to use thin elegant lines (e.g., 1px solid) to frame the contact text or separate the metadata.
+    
+    You have full creative freedom to arrange these components based on the image's focal point, but you MUST strictly obey the Satori AST JSON rules. Return ONLY valid JSON. No markdown.`;
 
     const aiResponse = await ai.models.generateContent({
-      model: 'gemini-3.1-pro-preview', // Using Pro for advanced spatial reasoning and JSON generation
+      model: 'gemini-3.1-pro-preview',
       contents: [
         prompt,
         { inlineData: { data: bgImage.data, mimeType: bgImage.mimeType } }
       ],
       config: {
         responseMimeType: "application/json",
-        temperature: 0.2, // Low temperature for strict JSON compliance
+        temperature: 0.2,
       }
     });
 
     console.log(`[Creative Agent] Compiling AI-generated layout via Satori...`);
+
+    console.log('-----------------------------------------------------------------');
+    console.log(aiResponse.text);
+    console.log('-----------------------------------------------------------------');
+
     let layoutJsonString = aiResponse.text || '{}';
     layoutJsonString = layoutJsonString.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
 
-    // Force inject the massive Base64 strings via Regex to bypass LLM spacing formatting
     layoutJsonString = layoutJsonString.replace(/\{\{\s*background_image\s*\}\}/g, backgroundDataUri);
+    layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_light\s*\}\}/g, logoLightDataUri || TRANSPARENT_PIXEL);
+    layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_dark\s*\}\}/g, logoDarkDataUri || logoLightDataUri || TRANSPARENT_PIXEL);
+    layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_image\s*\}\}/g, logoLightDataUri || logoDarkDataUri || TRANSPARENT_PIXEL);
 
-    if (logoLightDataUri) {
-      layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_light\s*\}\}/g, logoLightDataUri);
-    }
-    if (logoDarkDataUri) {
-      layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_dark\s*\}\}/g, logoDarkDataUri);
-    }
-
-    // Fallback: If the LLM hallucinates and just writes "logo_image", default to the light logo
-    if (logoLightDataUri) {
-      layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_image\s*\}\}/g, logoLightDataUri);
-    }
-
-    // Pass the pre-injected string to the generator
     const pngBuffer = await generateCreativeBuffer(layoutJsonString, {}, 1080, 1080);
 
     console.log(`[Creative Agent] Uploading finalized variation for image ${imageId}...`);
     const FINAL_FOLDER_ID = 5;
 
-    // Add the imageId to the filename so they don't overwrite each other in the Strapi media library
     const uploadedUrl = await uploadBufferToStrapi(
       pngBuffer,
       `${agentData.brand_name.replace(/\s+/g, '-')}-variation-${imageId}.png`,
       FINAL_FOLDER_ID
     );
 
-    // Extract just the headline from the generated JSON (optional, for Strapi record)
+    // Extract headline by targeting the new "children" structure
     let extractedHeadline = "Custom AI Layout";
     try {
       const parsed = JSON.parse(layoutJsonString);
-      extractedHeadline = JSON.stringify(parsed).match(/"content":"([^"]+)"/)?.[1] || extractedHeadline;
+      extractedHeadline = JSON.stringify(parsed).match(/"children":"([^"]+)"/)?.[1] || extractedHeadline;
     } catch (e) { }
 
     const freshData = await getCreativeAgentById(documentId);
