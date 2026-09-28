@@ -13,7 +13,7 @@ export const GET = withLogger('/api/cron/auto-enrich', async (req, routeLogger) 
   // Security Check
   const authHeader = req.headers.get('authorization');
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return new NextResponse('Unauthorized', { status: 401 });
+    return new NextResponse('You do not have permission to access this resource.', { status: 401 });
   }
 
   routeLogger.info({ event: 'cron_batch_enrichment_started' });

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { ArrowRight, ArrowUpRight, Building2, CheckCircle2, FileCheck, LayoutDashboard, MessageCircleMore, Search, Swords, UserCircle, Wand2 } from "lucide-react"
+import { ArrowRight, ArrowUpRight, Building2, CheckCircle2, FileCheck, LayoutDashboard, MessageCircleMore, Search, Swords, Target, UserCircle, Wand2 } from "lucide-react"
 import Link from "next/link"
 
 const ROSTER = [
@@ -58,7 +58,7 @@ const Roster = () => {
           The roster
         </span>
         <h2 className="mt-5 text-4xl font-medium tracking-[-0.01em] sm:text-5xl">
-          Four agents. One powerful workspace.
+          Multiple agents. One powerful workspace.
         </h2>
         <p className="mt-5 text-[15px] leading-7 text-[#565C6B]">
           Each one is built to do a single job well, instead of one
@@ -573,6 +573,70 @@ const Roster = () => {
                 className="inline-flex items-center gap-3 rounded-full border border-[#14181F]/15 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#14181F] transition-colors hover:border-[#14181F]/30"
               >
                 Launch Studio
+                <ArrowRight size={15} />
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* META ADS AI AGENT MODULE */}
+        <motion.div
+          whileHover={{ y: -8 }}
+          transition={{ duration: 0.35 }}
+          className="group relative flex min-h-117.5 flex-col overflow-hidden rounded-3xl border border-[#14181F]/10 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+        >
+          <div className="absolute right-0 top-0 h-75 w-75 rounded-full bg-cyan-500/10 blur-[120px]" />
+
+          <div className="relative flex h-full flex-col">
+            <div className="flex items-center justify-between">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-200 bg-cyan-50">
+                <Target size={26} className="text-cyan-600" />
+              </div>
+              <span className="rounded-full border border-cyan-200 bg-cyan-100 px-3 py-2 text-[10px] uppercase tracking-[0.3em] text-cyan-700">
+                Optimizer
+              </span>
+            </div>
+
+            <h2 className="mt-8 text-3xl font-medium tracking-tight text-[#14181F]">
+              Meta Ads
+              <br />
+              AI Agent
+            </h2>
+
+            <p className="mt-4 text-[14.5px] leading-7 text-[#565C6B]">
+              Generate campaign structures, define targeting, set budgets, and push directly to Meta Ads Manager via Graph API.
+            </p>
+
+            {/* Mini Approval Queue Preview */}
+            <div className="mt-8 rounded-2xl border border-[#14181F]/10 bg-[#FCFBF8] p-5">
+              <div className="flex items-center justify-between border-b border-[#14181F]/5 pb-3">
+                <span className="text-[9px] uppercase tracking-[0.3em] text-[#565C6B]">
+                  Approval Queue
+                </span>
+                <span className="flex h-2 w-2 rounded-full bg-cyan-500 animate-pulse" />
+              </div>
+              <div className="mt-4 space-y-3 font-jost">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium text-[#14181F]">Increase Budget</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest bg-emerald-50 text-emerald-700 px-2 py-1 rounded border border-emerald-100">
+                    +20%
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium text-[#14181F]">New Campaign</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest bg-cyan-50 text-cyan-700 px-2 py-1 rounded border border-cyan-100">
+                    Drafted
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-auto pt-8">
+              <Link
+                href="/meta-agent"
+                className="inline-flex items-center gap-3 rounded-full border border-[#14181F]/15 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#14181F] transition-colors hover:border-[#14181F]/30"
+              >
+                Open Dashboard
                 <ArrowRight size={15} />
               </Link>
             </div>

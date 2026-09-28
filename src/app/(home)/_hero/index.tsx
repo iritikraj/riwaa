@@ -51,12 +51,12 @@ const Hero = () => {
           transition={{ duration: 0.7, ease: "easeOut" }}
           className="flex flex-col justify-center"
         >
-          <span className="font-jost font-medium text-[11px] uppercase tracking-[0.28em] text-[#9C7A3C]">
-            Agent infrastructure for real estate brokerages
-          </span>
+          <h1 className="font-jost font-medium text-[11px] uppercase tracking-[0.28em] text-[#9C7A3C]">
+            AI Agents for real estate
+          </h1>
 
-          <h1 className="mt-7 max-w-xl text-[2.75rem] font-medium leading-[1.08] tracking-[-0.02em] sm:text-6xl">
-            The staff you
+          <h2 className="mt-7 max-w-xl text-[2.75rem] font-medium leading-[1.08] tracking-[-0.02em] sm:text-6xl">
+            The staff you 
             <br />
             never have to{" "}
             <span className="relative inline-block">
@@ -75,7 +75,7 @@ const Hero = () => {
                 />
               </svg>
             </span>
-          </h1>
+          </h2>
 
           <p className="mt-7 max-w-md text-[15px] leading-7 text-[#565C6B]">
             RIWAA runs AI agents that build advisor portfolios, answer your

@@ -22,7 +22,7 @@ export default function DashboardPage() {
       )}
 
       {/* 1. SIDEBAR COMMAND CENTER (Responsive: Slides in on mobile, fixed on desktop) */}
-      <aside className={`fixed lg:static top-0 left-0 h-full w-[280px] bg-white border-r border-zinc-100 flex flex-col justify-between shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40 transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <aside className={`fixed lg:static top-0 left-0 h-full w-70 bg-white border-r border-zinc-100 flex flex-col justify-between shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40 transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
 
         <div className="flex flex-col flex-1 overflow-hidden">
           {/* BRAND HEAD */}
@@ -115,7 +115,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3 p-2 rounded-2xl bg-white border border-zinc-200 shadow-sm cursor-pointer hover:border-zinc-300 transition-all duration-300">
-            <div className="w-10 h-10 rounded-xl bg-zinc-100 border border-zinc-200 overflow-hidden flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-zinc-100 border border-zinc-200 overflow-hidden shrink-0">
               <img src="https://ui-avatars.com/api/?name=Ritik&background=f4f4f5&color=18181b" alt="User Avatar" className="w-full h-full object-cover" />
             </div>
             <div className="flex flex-col overflow-hidden">

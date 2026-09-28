@@ -1,37 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from "next/image"
 import Link from "next/link"
-import { User, LogOut, Loader2 } from 'lucide-react';
-import BookWalkthroughButton from "../_lead-button";
+import { User, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import BookWalkthroughButton from '@/app/(home)/_lead-button';
 
-const Navbar = ({ hideLoginButton }: { hideLoginButton?: boolean }) => {
-  const [user, setUser] = useState<{ username: string; email: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+const NavbarClient = ({ initialUser, hideLoginButton }: { initialUser?: any, hideLoginButton?: boolean }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
 
   const waNumber = "971581980131";
   const waMessage = encodeURIComponent("Hi, I would like to know more about RIWAA.");
+  const router = useRouter();
 
-  // Fetch user session on mount
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch('/api/auth/user');
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user);
-        }
-      } catch (error) {
-        console.error("Auth check failed", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchUser();
-  }, []);
+  // Directly assign the server-passed prop to our user variable
+  const user = initialUser;
+  const hideLogin = hideLoginButton && !user;
 
   // Close popup if clicked outside
   useEffect(() => {
@@ -47,8 +34,8 @@ const Navbar = ({ hideLoginButton }: { hideLoginButton?: boolean }) => {
   const handleLogout = async () => {
     setIsProfileOpen(false);
     await fetch('/api/auth/logout', { method: 'POST' });
-    setUser(null);
-    window.location.reload();
+    router.push('/');
+    router.refresh(); // Forces Next.js to refetch server components
   };
 
   return (
@@ -86,20 +73,6 @@ const Navbar = ({ hideLoginButton }: { hideLoginButton?: boolean }) => {
           />
         </Link>
 
-        {/* Center: Links */}
-        {/* <div className="hidden items-center gap-9 lg:flex">
-          {["Advisor Studio", "Social Intelligence", "Website Studio", "SEO Agent"].map(
-            (item) => (
-              <span
-                key={item}
-                className="font-jost text-[11px] uppercase tracking-[0.18em] text-[#565C6B] transition-colors hover:text-[#14181F] cursor-pointer"
-              >
-                {item}
-              </span>
-            )
-          )}
-        </div> */}
-
         {/* Right Side: Actions */}
         <div className="flex items-center gap-5">
           {/* WhatsApp Action */}
@@ -117,15 +90,11 @@ const Navbar = ({ hideLoginButton }: { hideLoginButton?: boolean }) => {
 
           <BookWalkthroughButton />
 
-          <div className={`h-6 w-px bg-neutral-200 ${hideLoginButton ? "hidden" : ""}`} />
+          <div className={`h-6 w-px bg-neutral-200 ${hideLogin ? "hidden" : ""}`} />
 
-          {/* Authentication Section */}
-          <div className={`relative font-jost ${hideLoginButton ? "hidden" : ""}`} ref={popupRef}>
-            {isLoading ? (
-              <div className="w-8 h-8 flex items-center justify-center">
-                <Loader2 size={16} className="animate-spin text-neutral-400" />
-              </div>
-            ) : user ? (
+          {/* Authentication Section - Zero loading states, strict sizing */}
+          <div className={`relative font-jost flex items-center justify-center min-w-[50px] h-9 ${hideLogin ? "hidden" : ""}`} ref={popupRef}>
+            {user ? (
               <>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -136,7 +105,7 @@ const Navbar = ({ hideLoginButton }: { hideLoginButton?: boolean }) => {
 
                 {/* Profile Popup */}
                 {isProfileOpen && (
-                  <div className="absolute right-0 mt-3 w-56 rounded-2xl border border-neutral-100 bg-white p-2 shadow-xl shadow-black/10">
+                  <div className="absolute right-0 top-12 w-56 rounded-2xl border border-neutral-100 bg-white p-2 shadow-xl shadow-black/10">
                     <div className="px-3 py-3 border-b border-neutral-100">
                       <p className="text-sm font-medium text-neutral-900 truncate">Username: {user.username}</p>
                       <p className="text-xs text-neutral-500 truncate mt-0.5">Email: {user.email}</p>
@@ -156,7 +125,7 @@ const Navbar = ({ hideLoginButton }: { hideLoginButton?: boolean }) => {
             ) : (
               <Link
                 href="/auth/login"
-                className="text-[11px] font-bold uppercase tracking-widest text-[#14181F] hover:text-[#b8924a] transition-colors"
+                className="text-[11px] font-bold uppercase tracking-widest text-[#14181F] hover:text-[#b8924a] transition-colors whitespace-nowrap"
               >
                 Login
               </Link>
@@ -168,4 +137,4 @@ const Navbar = ({ hideLoginButton }: { hideLoginButton?: boolean }) => {
   )
 }
 
-export default Navbar;
+export default NavbarClient;

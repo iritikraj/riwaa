@@ -27,9 +27,10 @@ import { fetchPageSpeedData } from '@/lib/seo-agent/google-tools/page-speed';
 import { DEVELOPERS_REGISTRY } from '@/utils/data/developers';
 import { fetchBrokerData, rewriteBioWithGemini } from '../lib/real-estate-agents/utils';
 import { updateDeveloperAgentInStrapi } from '../lib/real-estate-agents/strapi';
-import { getActiveTemplate, getCreativeAgentById, updateCreativeAgentInStrapi, uploadBufferToStrapi } from '../lib/creative-agent/strapi';
+import { getCreativeAgentById, updateCreativeAgentInStrapi, uploadBufferToStrapi } from '../lib/creative-agent/strapi';
 import { generateCreativeBuffer } from '../lib/creative-agent/satori-engine';
 import { STRAPI_URL } from '@/utils/constants';
+import { createMetaOptimizerWorker } from './meta-optimizer-worker';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -645,7 +646,7 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     try {
       const parsed = JSON.parse(layoutJsonString);
       extractedHeadline = JSON.stringify(parsed).match(/"children":"([^"]+)"/)?.[1] || extractedHeadline;
-    } catch (e) { }
+    } catch (e) { console.log(e) }
 
     const freshData = await getCreativeAgentById(documentId);
     const currentVariations = freshData.generated_creatives?.variations || [];
@@ -681,12 +682,17 @@ const globalForWorkers = globalThis as unknown as {
   contentBriefWorker: Worker;
   developerAgentWorker: Worker;
   creativeAgentWorker: Worker;
+  metaOptimizerWorker: Worker;
 };
 
 if (process.env.NODE_ENV !== 'production') {
   if (globalForWorkers.creativeAgentWorker) {
     console.log('🔄 Turbopack Reload: Closing old Creative Agent Worker...');
     globalForWorkers.creativeAgentWorker.close();
+  }
+  if (globalForWorkers.metaOptimizerWorker) {
+    console.log('🔄 Turbopack Reload: Closing old Meta Optimizer Worker...');
+    globalForWorkers.metaOptimizerWorker.close();
   }
 }
 
@@ -697,6 +703,7 @@ export const complianceWorker = globalForWorkers.complianceWorker || createCompl
 export const contentBriefWorker = globalForWorkers.contentBriefWorker || createContentBriefWorker();
 export const developerAgentWorker = globalForWorkers.developerAgentWorker || createDeveloperAgentWorker();
 export const creativeAgentWorker = createCreativeAgentWorker();
+export const metaOptimizerWorker = globalForWorkers.metaOptimizerWorker || createMetaOptimizerWorker();
 
 if (process.env.NODE_ENV !== 'production') {
   globalForWorkers.aiAuditWorker = aiAuditWorker;
@@ -706,6 +713,7 @@ if (process.env.NODE_ENV !== 'production') {
   globalForWorkers.contentBriefWorker = contentBriefWorker;
   globalForWorkers.developerAgentWorker = developerAgentWorker;
   globalForWorkers.creativeAgentWorker = creativeAgentWorker;
+  globalForWorkers.metaOptimizerWorker = metaOptimizerWorker;
 }
 
 /* 4. OBSERVABILITY LISTENERS */
@@ -753,3 +761,8 @@ creativeAgentWorker.on('active', job => console.log(`🚀 [Creative Queue] Job $
 creativeAgentWorker.on('completed', job => console.log(`✅ [Creative Queue] Job ${job.id} completed successfully`));
 creativeAgentWorker.on('error', (err) => console.error(`❌ [Worker] Critical Redis Error:: ${err.message}`));
 creativeAgentWorker.on('failed', (job, err) => console.error(`❌ Job ${job?.id} failed with error: ${err.message}`));
+
+metaOptimizerWorker.on('ready', () => console.log('✅ Meta Optimizer Worker is ready and listening to Redis...'));
+metaOptimizerWorker.on('completed', job => console.log(`[Meta Optimizer Queue] Job ${job.id} completed successfully`));
+creativeAgentWorker.on('error', (err) => console.error(`❌ [Meta Optimizer Queue] Critical Redis Error:: ${err.message}`));
+metaOptimizerWorker.on('failed', (job, err) => console.error(`❌ [Meta Optimizer Queue] Job ${job?.id} failed with error: ${err.message}`));

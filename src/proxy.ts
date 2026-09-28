@@ -11,12 +11,24 @@ const PROTECTED_ROUTES = new Set([
   '/seo-agent/competitor',
   '/seo-agent/compliance',
   '/real-estate/developer-advisors',
-  '/social-media-agent'
+  '/social-media-agent',
+  '/meta-agent',
+  '/meta-agent/setup',
+  '/meta-agent/reports',
+  '/meta-agent/audit'
 ]);
 
 export function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const token = request.cookies.get('riwaa_session')?.value;
+
+  if (path.startsWith('/api/meta-agent') && !token) {
+    return NextResponse.json({
+      success: false,
+      code: 'FORBIDDEN',
+      error: 'Unauthorized: You do not have permission to access this resource.'
+    }, { status: 401 });
+  }
 
   // 2. Unauthenticated user trying to access a protected route
   if (PROTECTED_ROUTES.has(path) && !token) {
@@ -36,7 +48,7 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Optimize the middleware to ignore static files and API routes
+// Optimize the proxy to ignore static files and API routes
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$).*)'],
 };
