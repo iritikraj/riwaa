@@ -34,10 +34,12 @@ const NavbarClient = ({ initialUser, hideLoginButton, debugError }: { initialUse
     window.location.href = '/'; // 2. Hard redirect to clear all caches
   };
 
+  const showDebugError = process.env.NODE_ENV === 'development' && debugError;
+
   return (
     <>
       {/* 3. DEBUG BANNER: This will only show if the server fails on a hard refresh */}
-      {debugError && (
+      {showDebugError && (
         <div className="fixed top-0 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[11px] font-bold px-4 py-1.5 rounded-b-xl z-100 shadow-lg">
           SERVER DEBUG: {debugError}
         </div>
