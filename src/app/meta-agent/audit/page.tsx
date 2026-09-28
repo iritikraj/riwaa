@@ -3,6 +3,8 @@ import { Footer } from '@/app/(home)/_footer';
 import AuditLogClient from './_client';
 import { headers } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AuditLogPage() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   let initialLogs = [];

@@ -1,4 +1,4 @@
-// riwaa/src/components/navbar/index.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { cookies } from 'next/headers';
 import NavbarClient from './_client';
 
@@ -8,7 +8,7 @@ async function getServerSession() {
   const cookieStore = await cookies();
   const token = cookieStore.get('riwaa_session')?.value;
 
-  if (!token) return null;
+  if (!token) return { user: null, debugError: "NO_COOKIE_SENT_TO_SERVER" };
 
   try {
     const res = await fetch(`${STRAPI_URL}/api/users/me`, {
@@ -16,22 +16,26 @@ async function getServerSession() {
       cache: 'no-store',
     });
 
-    if (!res.ok) return null;
-    return await res.json();
-  } catch (error) {
-    console.error('Failed to fetch server session:', error);
-    return null;
+    if (!res.ok) {
+      return { user: null, debugError: `STRAPI_REJECTED_${res.status}` };
+    }
+
+    const data = await res.json();
+    return { user: data, debugError: null };
+  } catch (error: any) {
+    // If the network fails, or DNS fails, this catches it
+    return { user: null, debugError: `SERVER_FETCH_FAILED: ${error.message}` };
   }
 }
 
 export default async function Navbar({ hideLoginButton }: { hideLoginButton?: boolean }) {
-  const res = await getServerSession();
+  const { user, debugError } = await getServerSession();
 
-  let user = null;
-  if (res) {
-    const { username, email, isAdmin } = res;
-    user = { username, email, isAdmin };
+  let safeUser = null;
+  if (user) {
+    const { username, email, isAdmin } = user;
+    safeUser = { username, email, isAdmin };
   }
 
-  return <NavbarClient initialUser={user} hideLoginButton={hideLoginButton} />;
+  return <NavbarClient initialUser={safeUser} hideLoginButton={hideLoginButton} debugError={debugError} />;
 }

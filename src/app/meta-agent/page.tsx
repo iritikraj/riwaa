@@ -4,6 +4,8 @@ import DashboardClient from './_client';
 import { headers } from 'next/headers';
 import { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.riwaa.com"),
   title: "AI Agents for Real Estate Brokerages in Dubai",
