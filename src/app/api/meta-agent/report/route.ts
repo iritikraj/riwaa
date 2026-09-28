@@ -1,8 +1,10 @@
+// riwaa/src/app/api/meta-agent/report/route.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { MetaClient } from '@/lib/meta-agent/meta-client';
 import { AiAgent } from '@/lib/meta-agent/ai-agent';
 import { createAuditLog, createMetaAdsReport } from '@/lib/meta-agent/strapi';
+import { withLogger } from '@/utils/logs/withLogger';
 
 // Helper to safely parse Meta API string numbers
 function toFloat(v: any) {
@@ -10,17 +12,20 @@ function toFloat(v: any) {
   return isNaN(parsed) ? 0 : parsed;
 }
 
-export async function GET(req: NextRequest) {
+export const GET = withLogger('/api/meta-agent/report', async (req: NextRequest, routeLogger) => {
   try {
     const searchParams = req.nextUrl.searchParams;
     const datePreset = searchParams.get('datePreset') || 'last_30d';
     const clientName = searchParams.get('clientName') || 'Internal Account';
+
+    routeLogger.info({ event: 'report_generation_started', clientName, datePreset }, 'Starting Meta Ads report generation');
 
     const meta = new MetaClient();
     const ai = new AiAgent();
 
     // 1. Fetch raw campaign insights from Facebook
     const insights = await meta.getAccountInsights(datePreset, 'campaign');
+    routeLogger.info({ event: 'meta_insights_fetched', count: insights.length }, 'Successfully fetched campaign insights from Meta');
 
     // 2. Aggregate the metrics
     let totalSpend = 0;
@@ -62,9 +67,10 @@ export async function GET(req: NextRequest) {
     };
 
     // 3. Generate the narrative report using Gemini
+    routeLogger.info({ event: 'ai_narrative_generation_started' }, 'Drafting narrative report with Gemini');
     const reportText = await ai.writeReport(aggregatedMetrics, datePreset, clientName);
+    routeLogger.info({ event: 'ai_narrative_generation_success' }, 'Successfully generated AI narrative');
 
-    // 4. Save the historical report to Strapi via our helper
     // 4. Save the historical report to Strapi via our helper
     await createMetaAdsReport({
       client_name: clientName,
@@ -72,9 +78,11 @@ export async function GET(req: NextRequest) {
       metrics: aggregatedMetrics,
       markdown_content: reportText
     });
+    routeLogger.info({ event: 'report_saved_strapi' }, 'Archived report securely to Strapi');
 
     // 5. Log the generation event in Strapi
     await createAuditLog('report_generated', { datePreset, clientName, metrics: aggregatedMetrics });
+    routeLogger.info({ event: 'report_audit_log_created' }, 'Created audit log entry for report generation');
 
     return NextResponse.json({
       success: true,
@@ -82,7 +90,7 @@ export async function GET(req: NextRequest) {
       metrics: aggregatedMetrics
     });
   } catch (error: any) {
-    console.error('Report Generation Error:', error);
+    routeLogger.error({ err: error, event: 'report_generation_error' }, 'Failed to generate Meta Ads report');
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}
+});
