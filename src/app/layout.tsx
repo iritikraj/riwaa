@@ -33,8 +33,10 @@ export const metadata: Metadata = {
     default: "AI Agents for Real Estate Brokerages in Dubai | RIWAA",
     template: "%s | RIWAA",
   },
-  description:
-    "RIWAA's AI agents for real estate brokerages in Dubai build advisor profiles, answer reviews, audit SEO and ship websites from one console. Book a walkthrough.",
+  description: "RIWAA's AI agents for real estate brokerages in Dubai build advisor profiles, answer reviews, audit SEO and ship websites from one console. Book a walkthrough.",
+  verification: {
+    google: "BUcOn1ekE2XdiC9V3ImpUWERzv4AJVBRD_CE7-PkV84",
+  },
   applicationName: "RIWAA",
   creator: "Ritik Raj",
   publisher: "Solvetude",
