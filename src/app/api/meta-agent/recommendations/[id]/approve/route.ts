@@ -6,20 +6,42 @@ import {
   updateRecommendationStatus,
   createAuditLog
 } from '@/lib/meta-agent/strapi';
+import { getSessionUser, getAuthorizedMetaAccount } from '@/lib/meta-agent/auth-guard';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
   const recId = resolvedParams.id;
-  try {
-    const meta = new MetaClient();
 
-    // 1. Fetch the recommendation from Strapi
+  try {
+    const user = await getSessionUser();
+
+    // 1. Fetch recommendation (ensure getRecommendationById populates 'meta_account')
     const rec = await getRecommendationById(recId);
-    if (!rec || rec.status !== 'pending') throw new Error('Invalid or already processed recommendation');
+    if (!rec || rec.status !== 'pending' || !rec.meta_account) {
+      throw new Error('Invalid recommendation');
+    }
+
+    // 2. Extract the account ID from the recommendation
+    const accountId = rec.meta_account.documentId || rec.meta_account.id;
+
+    // 3. FIXED: Call the updated auth guard which only requires the accountId
+    const metaAccount = await getAuthorizedMetaAccount(accountId);
+
+    // 4. Safely extract Strapi attributes and secure the ID
+    const attr = metaAccount.attributes || metaAccount;
+    const safeAccountId = metaAccount.documentId || metaAccount.id;
+
+    // 5. Initialize the MetaClient with the isolated credentials
+    const meta = new MetaClient({
+      accessToken: attr.access_token,
+      adAccountId: attr.ad_account_id,
+      pageId: attr.page_id,
+      pixelId: attr.pixel_id
+    });
 
     let newValue = null;
 
-    // 2. Execute the action based on the AI's recommendation
+    // 6. Execute the action based on the AI's recommendation
     if (rec.action === 'pause') {
       await meta.setStatus(rec.object_id, rec.level as any, 'PAUSED');
     } else if (rec.action === 'increase_budget' || rec.action === 'decrease_budget') {
@@ -44,9 +66,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       newValue = newBid;
     }
 
-    // 3. Update Strapi
+    // 7. Update Strapi & log the event using the safeAccountId
     await updateRecommendationStatus(recId, 'executed', `new_value=${newValue}`);
-    await createAuditLog('action_executed', { ...rec, new_value: newValue });
+    await createAuditLog('action_executed', { ...rec, new_value: newValue }, safeAccountId, user.id);
 
     return NextResponse.json({ success: true, message: 'Action executed successfully', newValue });
   } catch (error: any) {

@@ -19,41 +19,55 @@ const DEFAULT_INSIGHT_FIELDS = [
   'frequency',
 ];
 
+export interface MetaClientConfig {
+  accessToken: string;
+  adAccountId: string;
+  pageId?: string;
+  pixelId?: string;
+}
+
 export class MetaClient {
   private account: AdAccount;
   private dryRun: boolean;
 
-  constructor(dryRun: boolean = false) {
-    const accessToken = process.env.META_ACCESS_TOKEN;
-    const adAccountId = process.env.META_AD_ACCOUNT_ID;
+  public pageId?: string;
+  public pixelId?: string;
 
-    if (!accessToken || !adAccountId) {
-      throw new Error('Missing Meta API credentials (META_ACCESS_TOKEN or META_AD_ACCOUNT_ID)');
+  constructor(config: MetaClientConfig, dryRun: boolean = false) {
+    if (!config.accessToken || !config.adAccountId) {
+      throw new Error('Missing Meta API credentials in config');
     }
 
     this.dryRun = dryRun;
+    this.pageId = config.pageId;
+    this.pixelId = config.pixelId;
 
-    const api = FacebookAdsApi.init(accessToken);
+    // FIX: Initialize the SDK context for this request lifecycle
+    // This satisfies the internal Cursor object used by getInsights()
+    FacebookAdsApi.init(config.accessToken);
 
-    // Pass the api instance explicitly as the context for the AdAccount
-    this.account = new AdAccount(adAccountId, api as any);
+    const formattedAccountId = config.adAccountId.startsWith('act_')
+      ? config.adAccountId
+      : `act_${config.adAccountId}`;
+
+    // The account now automatically inherits the initialized API context
+    this.account = new AdAccount(formattedAccountId);
   }
 
   // Reads
 
   async getCampaigns(statusFilter?: string[]) {
     const params: any = {};
-    // const params: any = { limit: '1000' };
     if (statusFilter) params.effective_status = statusFilter;
     const fields = ['id', 'name', 'status', 'effective_status', 'daily_budget', 'lifetime_budget', 'objective'];
 
     const campaigns = await this.account.getCampaigns(fields, params);
-    // The Node SDK stores raw JSON inside the ._data property
     return campaigns.map((c: any) => c._data);
   }
 
   async getAdsets(campaignId: string) {
     const fields = ['id', 'name', 'status', 'effective_status', 'daily_budget', 'lifetime_budget', 'bid_amount', 'bid_strategy'];
+
     const campaign = new Campaign(campaignId);
     const adsets = await campaign.getAdSets(fields);
     return adsets.map((a: any) => a._data);
@@ -68,12 +82,11 @@ export class MetaClient {
 
   async getAccountInsights(datePreset: string = 'last_7d', level: string = 'campaign') {
     const params = { date_preset: datePreset, level };
-    // const params = { date_preset: datePreset, level, limit: '1000' };
     const insights = await this.account.getInsights(DEFAULT_INSIGHT_FIELDS, params);
     return insights.map((i: any) => i._data);
   }
 
-  // ates
+  // Creates
 
   async createCampaign(spec: any): Promise<string> {
     const safeSpec = {
@@ -109,8 +122,8 @@ export class MetaClient {
       return;
     }
     const objMap = { campaign: Campaign, adset: AdSet };
+
     const obj = new objMap[level](objectId);
-    // Pass an empty array [] for fields, then the params object
     await obj.update([], { daily_budget: newDailyBudgetMinorUnits });
   }
 
@@ -119,6 +132,7 @@ export class MetaClient {
       console.log(`[DRY RUN] updateBid(adset/${adsetId}) -> ${newBidMinorUnits}`);
       return;
     }
+
     const adset = new AdSet(adsetId);
     await adset.update([], { bid_amount: newBidMinorUnits });
   }
@@ -129,6 +143,7 @@ export class MetaClient {
       return;
     }
     const objMap = { campaign: Campaign, adset: AdSet, ad: Ad };
+
     const obj = new objMap[level](objectId);
     await obj.update([], { status });
   }

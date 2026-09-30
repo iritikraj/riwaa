@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { metaOptimizerQueue } from '@/workers/queue';
+import { getSessionUser, getAuthorizedMetaAccount } from '@/lib/meta-agent/auth-guard';
 import { withLogger } from '@/utils/logs/withLogger';
 
 export const POST = withLogger('/api/meta-agent/optimize', async (req: NextRequest, routeLogger) => {
@@ -9,8 +10,16 @@ export const POST = withLogger('/api/meta-agent/optimize', async (req: NextReque
     routeLogger.info({ event: 'manual_optimization_triggered' }, 'Admin requested manual Meta optimization run');
 
     // Push a job into the BullMQ queue
+    const user = await getSessionUser();
+    const { accountId } = await req.json();
+
+    if (!accountId) return NextResponse.json({ error: 'accountId is required' }, { status: 400 });
+
+    await getAuthorizedMetaAccount(accountId);
+
     await metaOptimizerQueue.add('manual-optimization-run', {
-      triggered_by: 'admin',
+      accountId,
+      triggered_by: user.id,
       timestamp: new Date().toISOString()
     });
 

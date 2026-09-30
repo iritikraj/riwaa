@@ -1,18 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// riwaa/src/app/meta-agent/[accountId]/history/_client.tsx
 'use client';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, PlusCircle, BarChart3, History as HistoryIcon, Clock, CheckCircle2, X, FileText, Target, HelpCircle, ChevronDown } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Clock, CheckCircle2, X, FileText, Target, HelpCircle } from 'lucide-react';
 
 export default function CampaignHistoryClient({ initialCampaigns }: { initialCampaigns: any[] }) {
-  // We initialize our state immediately with the data from the server. No loading needed!
-  const [campaigns, setCampaigns] = useState<any[]>(initialCampaigns);
+  const [campaigns] = useState<any[]>(initialCampaigns);
   const [selectedCampaign, setSelectedCampaign] = useState<any | null>(null);
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const pathname = usePathname();
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -20,144 +16,62 @@ export default function CampaignHistoryClient({ initialCampaigns }: { initialCam
     });
   };
 
-  const navTabs = [
-    { name: 'Dashboard', href: '/meta-agent', icon: LayoutDashboard },
-    { name: 'Campaign Setup', href: '/meta-agent/setup', icon: PlusCircle },
-    { name: 'History', href: '/meta-agent/history', icon: HistoryIcon },
-    { name: 'Reports', href: '/meta-agent/reports', icon: BarChart3 },
-    { name: 'Audit Log', href: '/meta-agent/audit', icon: FileText },
-  ];
-
-  const activeTab = navTabs.find(tab => tab.href === pathname) || navTabs[0];
-
   return (
-    <main className="grow text-[#14181F] antialiased p-6 lg:p-10 min-h-screen">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen">
+      <header className="mb-10">
+        <span className="font-jost text-[11px] uppercase tracking-[0.28em] text-[#9C7A3C]">
+          Library
+        </span>
+        <h1 className="mt-4 text-2xl md:text-3xl font-bold tracking-[0.01em] sm:text-5xl uppercase font-cormorant">
+          Campaign History
+        </h1>
+        <p className="mt-3 text-[15px] text-[#565C6B]">
+          Browse previously generated campaigns and their AI rationales.
+        </p>
+      </header>
 
-        {/* Module Sub-Navigation */}
-        <div className="mb-8 relative z-20">
-
-          {/* Mobile View: Premium Dropdown */}
-          <div className="md:hidden relative">
-            <button
-              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              className="w-full flex items-center justify-between px-5 py-3.5 bg-white border border-[#14181F]/10 rounded-2xl shadow-sm"
-            >
-              <div className="flex items-center gap-3 text-[14px] font-medium text-[#14181F]">
-                <activeTab.icon size={18} className="text-[#9C7A3C]" />
-                {activeTab.name}
-              </div>
-              <ChevronDown size={18} className={`text-[#14181F]/50 transition-transform duration-300 ${isMobileNavOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            <AnimatePresence>
-              {isMobileNavOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#14181F]/10 rounded-2xl shadow-lg overflow-hidden"
-                >
-                  {navTabs.map((tab) => {
-                    const isActive = pathname === tab.href;
-                    return (
-                      <Link
-                        key={tab.href}
-                        href={tab.href}
-                        onClick={() => setIsMobileNavOpen(false)}
-                        className={`flex items-center gap-3 px-5 py-3.5 text-[14px] font-medium transition-colors ${isActive ? 'bg-[#FCFBF8] text-[#14181F] border-l-2 border-[#9C7A3C]' : 'text-[#565C6B] hover:bg-[#14181F]/5 border-l-2 border-transparent'
-                          }`}
-                      >
-                        <tab.icon size={18} className={isActive ? 'text-[#9C7A3C]' : 'opacity-50'} />
-                        {tab.name}
-                      </Link>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Desktop View: Existing Pill Design */}
-          <div className="hidden md:flex overflow-x-auto scrollbar-hide">
-            <div className="flex items-center gap-1.5 p-1.5 bg-white border border-[#14181F]/10 rounded-full shadow-sm">
-              {navTabs.map((tab) => {
-                const isActive = pathname === tab.href;
-                return (
-                  <Link
-                    key={tab.href}
-                    href={tab.href}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-medium transition-all duration-300 ${isActive
-                      ? 'bg-[#14181F] text-[#FCFBF8] shadow-md'
-                      : 'text-[#565C6B] hover:text-[#14181F] hover:bg-[#14181F]/5'
-                      }`}
-                  >
-                    <tab.icon size={16} className={isActive ? 'text-[#9C7A3C]' : 'opacity-70'} />
-                    {tab.name}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
+      {/* Grid List of Campaigns */}
+      {campaigns.length === 0 ? (
+        <div className="text-center py-20 bg-white rounded-2xl border border-[#14181F]/10 text-[#565C6B]">
+          No past campaigns found for this account.
         </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {campaigns.map((log) => {
+            const data = log.attributes || log;
+            const details = data.details;
 
-        <header className="mb-10">
-          <span className="font-jost text-[11px] uppercase tracking-[0.28em] text-[#9C7A3C]">
-            Library
-          </span>
-          <h1 className="mt-4 text-2xl md:text-3xl font-bold tracking-[0.01em] sm:text-5xl uppercase font-cormorant">
-            Campaign History
-          </h1>
-          <p className="mt-3 text-[15px] text-[#565C6B]">
-            Browse previously generated campaigns and their AI rationales.
-          </p>
-        </header>
-
-        {/* Grid List of Campaigns - No loading state needed! */}
-        {campaigns.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl border border-[#14181F]/10 text-[#565C6B]">
-            No past campaigns found.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {campaigns.map((log) => {
-              const data = log.attributes || log;
-              const details = data.details;
-
-              return (
-                <motion.div
-                  key={log.id}
-                  whileHover={{ y: -4 }}
-                  onClick={() => setSelectedCampaign(data)}
-                  className="bg-white border border-[#14181F]/10 p-6 rounded-2xl shadow-sm hover:shadow-md cursor-pointer transition-all group"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-1.5 text-[11px] text-[#565C6B] font-medium uppercase tracking-wider">
-                      <Clock size={14} /> {formatDate(data.createdAt)}
-                    </div>
-                    <CheckCircle2 size={18} className="text-emerald-600" />
+            return (
+              <motion.div
+                key={log.id}
+                whileHover={{ y: -4 }}
+                onClick={() => setSelectedCampaign(data)}
+                className="bg-white border border-[#14181F]/10 p-6 rounded-2xl shadow-sm hover:shadow-md cursor-pointer transition-all group"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#565C6B] font-medium uppercase tracking-wider">
+                    <Clock size={14} /> {formatDate(data.createdAt)}
                   </div>
+                  <CheckCircle2 size={18} className="text-emerald-600" />
+                </div>
 
-                  <h3 className="font-semibold text-[16px] leading-tight mb-2 group-hover:text-[#9C7A3C] transition-colors">
-                    {details.plan?.campaign?.name || 'Untitled Campaign'}
-                  </h3>
+                <h3 className="font-semibold text-[16px] leading-tight mb-2 group-hover:text-[#9C7A3C] transition-colors">
+                  {details.plan?.campaign?.name || 'Untitled Campaign'}
+                </h3>
 
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    <span className="text-[11px] bg-[#FCFBF8] border border-[#14181F]/5 px-2 py-1 rounded text-[#565C6B]">
-                      {details.plan?.ad_sets?.length || 0} Ad Sets
-                    </span>
-                    <span className="text-[11px] bg-emerald-50 border border-emerald-100 px-2 py-1 rounded text-emerald-700">
-                      Deployed
-                    </span>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                <div className="flex flex-wrap gap-2 mt-4">
+                  <span className="text-[11px] bg-[#FCFBF8] border border-[#14181F]/5 px-2 py-1 rounded text-[#565C6B]">
+                    {details.plan?.ad_sets?.length || 0} Ad Sets
+                  </span>
+                  <span className="text-[11px] bg-emerald-50 border border-emerald-100 px-2 py-1 rounded text-emerald-700">
+                    Deployed
+                  </span>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Detail Popup (Modal) */}
       <AnimatePresence>
@@ -278,6 +192,6 @@ export default function CampaignHistoryClient({ initialCampaigns }: { initialCam
           </>
         )}
       </AnimatePresence>
-    </main>
+    </div>
   );
 }

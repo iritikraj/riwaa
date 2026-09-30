@@ -1,3 +1,4 @@
+// riwaa/src/app/page.tsx
 import { Footer } from "./(home)/_footer";
 import RiwaaHomePage from "./(home)/_client";
 import Navbar from "@/components/navbar";
