@@ -73,7 +73,9 @@ export async function createAuditLog(eventType: string, details: Record<string, 
  * Adds a new recommendation from the AI optimizer to the pending queue.
  * UPDATED: Links the recommendation to a specific meta account.
  */
-export async function createRecommendation(recData: any, accountId: string) {
+export async function createRecommendation(recData: any, accountId?: string) {
+  const targetAccountId = accountId || recData.meta_account;
+
   const res = await fetch(`${STRAPI_URL}/api/meta-recommendations`, {
     method: 'POST',
     headers: getHeaders(),
@@ -81,7 +83,7 @@ export async function createRecommendation(recData: any, accountId: string) {
       data: {
         ...recData,
         status: 'pending',
-        meta_account: accountId
+        meta_account: targetAccountId
       },
     }),
   });
@@ -187,7 +189,9 @@ export async function createMetaAdsReport(payload: {
 export async function fetchMetaAccountFromStrapi(requestedAccountId: string) {
   try {
     const query = new URLSearchParams({
-      'filters[ad_account_id][$eq]': requestedAccountId,
+      'filters[$or][0][documentId][$eq]': requestedAccountId,
+      'filters[$or][1][id][$eq]': requestedAccountId,
+      'filters[$or][2][ad_account_id][$eq]': requestedAccountId,
       'populate[assigned_users]': '*',
     }).toString();
 
@@ -209,7 +213,8 @@ export async function fetchMetaAccountFromStrapi(requestedAccountId: string) {
     const attributes = account.attributes || account;
 
     return {
-      id: account.documentId || account.id,
+      id: account.id,
+      documentId: account.documentId || account.id,
       name: attributes.name,
       ad_account_id: attributes.ad_account_id,
       page_id: attributes.page_id,
@@ -217,9 +222,43 @@ export async function fetchMetaAccountFromStrapi(requestedAccountId: string) {
       access_token: attributes.access_token,
       is_active: attributes.is_active,
       assigned_users: attributes.assigned_users?.data || attributes.assigned_users || [],
+      ...attributes
     };
   } catch (error) {
     console.error('Failed to fetch Meta account:', error);
     return null;
   }
+}
+
+export async function getActiveMetaAccounts() {
+  const res = await fetch(`${STRAPI_URL}/api/meta-accounts?populate=*`, {
+    headers: getHeaders(),
+    cache: 'no-store'
+  });
+  if (!res.ok) return [];
+  const json = await res.json();
+  return json.data || [];
+}
+
+export async function getMetaAgentSettingsForAccount(accountId: string) {
+  const res = await fetch(`${STRAPI_URL}/api/meta-agent-settings?filters[meta_account][documentId][$eq]=${accountId}&populate=*`, {
+    headers: getHeaders(),
+    cache: 'no-store'
+  });
+  if (!res.ok) return getDefaultSettings();
+  const json = await res.json();
+  const settings = json.data?.[0]?.attributes || json.data?.[0];
+  return settings || getDefaultSettings();
+}
+
+function getDefaultSettings() {
+  return {
+    min_spend_threshold: 10,
+    min_impressions_threshold: 100,
+    max_budget_change_pct: 20,
+    max_actions_per_run: 10,
+    target_cpa: 25,
+    protected_campaign_ids: [],
+    disallow_pause_actions: false
+  };
 }

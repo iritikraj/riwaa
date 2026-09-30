@@ -3,71 +3,100 @@
 import { Job, Worker } from 'bullmq';
 import { MetaClient } from '@/lib/meta-agent/meta-client';
 import { AiAgent } from '@/lib/meta-agent/ai-agent';
-import { getMetaAgentSettings, createRecommendation } from '@/lib/meta-agent/strapi';
+import { fetchMetaAccountFromStrapi, getMetaAgentSettingsForAccount, getActiveMetaAccounts, createRecommendation } from '@/lib/meta-agent/strapi';
 import { redisOptions } from './queue';
 
 export const createMetaOptimizerWorker = () => new Worker('meta-optimizer-queue', async (job: Job) => {
-  console.log(`🤖 [Meta Optimizer] Waking up for daily analysis...`);
-  const meta = new MetaClient();
-  const ai = new AiAgent();
+  const targetAccountId = job.data?.accountId;
+  console.log(`🤖 [Meta Optimizer] Waking up... Target Account: ${targetAccountId || 'All Accounts (Batch Run)'}`);
 
   try {
-    // 1. Fetch Guardrails from Strapi
-    const guardrails = await getMetaAgentSettings();
+    let accountsToProcess = [];
 
-    // 2. Fetch Account Insights
-    const rawInsights = await meta.getAccountInsights('last_7d', 'adset');
-    // const rawInsights = await meta.getAccountInsights('last_7d', 'campaign');
+    // 1. Determine whether to run for a single targeted account or all active accounts
+    if (targetAccountId) {
+      const singleAccount = await fetchMetaAccountFromStrapi(targetAccountId);
+      if (singleAccount) accountsToProcess = [singleAccount];
+    } else {
+      accountsToProcess = await getActiveMetaAccounts();
+    }
 
-    // 3. Filter out campaigns that don't have enough data to make a smart decision
-    const eligibleInsights = rawInsights.filter((insight: any) => {
-      // NEW: Block protected campaigns
-      const protectedIds = guardrails.protected_campaign_ids || [];
-      if (protectedIds.includes(insight.campaign_id)) return false;
-
-      const spend = parseFloat(insight.spend || '0');
-      const impressions = parseInt(insight.impressions || '0');
-      return spend >= guardrails.min_spend_threshold && impressions >= guardrails.min_impressions_threshold;
-    });
-
-    if (eligibleInsights.length === 0) {
-      console.log('[Meta Optimizer] No campaigns met the spend thresholds today.');
+    if (!accountsToProcess || accountsToProcess.length === 0) {
+      console.log('[Meta Optimizer] No accounts found to optimize.');
       return;
     }
 
-    // 4. Ask Gemini for Recommendations
-    const goals = { target_cpa_usd: 25 }; // Example goal
-    const recommendations = await ai.analyzePerformance(eligibleInsights, goals, guardrails);
+    const ai = new AiAgent();
 
-    // NEW: Slice the array to respect the max actions ceiling
-    const maxActions = guardrails.max_actions_per_run || 10;
-    const limitedRecommendations = recommendations.slice(0, maxActions);
+    // 2. Iterate through accounts
+    for (const account of accountsToProcess) {
+      const attr = account.attributes || account;
+      const accountId = account.documentId || account.id;
+      const accountName = attr.name || 'Unknown Client';
 
-    // 5. Code-Level Enforcement (Never trust the AI completely)
-    // 5. Code-Level Enforcement (Never trust the AI completely)
-    for (const rec of limitedRecommendations) {
-      if (rec.action === 'no_action_but_watch') continue;
+      console.log(`🔍 [Meta Optimizer] Analyzing account: ${accountName} (${accountId})`);
 
-      // NEW: Guardrail against pause actions if disabled
-      if (rec.action === 'pause' && guardrails.disallow_pause_actions) {
-        rec.action = 'no_action_but_watch';
-        rec.rationale += ' [Overridden: pause actions are disabled in guardrails config.]';
+      if (!attr.access_token || !attr.ad_account_id) {
+        console.warn(`[Meta Optimizer] Skipping ${accountName}: Missing Meta credentials.`);
         continue;
       }
 
-      // Clamp budget changes...
-      if (rec.change_pct && Math.abs(rec.change_pct) > guardrails.max_budget_change_pct) {
-        rec.change_pct = rec.change_pct > 0 ? guardrails.max_budget_change_pct : -guardrails.max_budget_change_pct;
-        rec.rationale += ` [Clamped to ${rec.change_pct}% by code guardrails]`;
+      const meta = new MetaClient({
+        accessToken: attr.access_token,
+        adAccountId: attr.ad_account_id,
+        pageId: attr.page_id,
+        pixelId: attr.pixel_id
+      });
+
+      const guardrails = await getMetaAgentSettingsForAccount(accountId);
+      const rawInsights = await meta.getAccountInsights('last_7d', 'adset');
+
+      const eligibleInsights = rawInsights.filter((insight: any) => {
+        const protectedIds = guardrails.protected_campaign_ids || [];
+        if (protectedIds.includes(insight.campaign_id)) return false;
+
+        const spend = parseFloat(insight.spend || '0');
+        const impressions = parseInt(insight.impressions || '0');
+        return spend >= (guardrails.min_spend_threshold || 10) && impressions >= (guardrails.min_impressions_threshold || 100);
+      });
+
+      if (eligibleInsights.length === 0) {
+        console.log(`[Meta Optimizer] No campaigns met spend thresholds for ${accountName}.`);
+        continue;
       }
 
-      // Save to Strapi Approval Queue
-      await createRecommendation(rec);
+      const goals = { target_cpa_usd: guardrails.target_cpa || 25 };
+      const recommendations = await ai.analyzePerformance(eligibleInsights, goals, guardrails);
+
+      const maxActions = guardrails.max_actions_per_run || 10;
+      const limitedRecommendations = recommendations.slice(0, maxActions);
+
+      for (const rec of limitedRecommendations) {
+        if (rec.action === 'no_action_but_watch') continue;
+
+        if (rec.action === 'pause' && guardrails.disallow_pause_actions) {
+          rec.action = 'no_action_but_watch';
+          rec.rationale += ' [Overridden: pause actions are disabled in guardrails config.]';
+          continue;
+        }
+
+        if (rec.change_pct && Math.abs(rec.change_pct) > (guardrails.max_budget_change_pct || 20)) {
+          const limit = guardrails.max_budget_change_pct || 20;
+          rec.change_pct = rec.change_pct > 0 ? limit : -limit;
+          rec.rationale += ` [Clamped to ${rec.change_pct}% by code guardrails]`;
+        }
+
+        await createRecommendation({
+          ...rec,
+          meta_account: accountId
+        }, accountId);
+      }
+
+      console.log(`[Meta Optimizer] Finished ${accountName}. Queued ${limitedRecommendations.length} actions.`);
     }
 
-    console.log(`[Meta Optimizer] Finished analysis. Queued ${recommendations.length} items.`);
   } catch (error: any) {
-    console.error(`[Meta Optimizer] Failed:`, error);
+    console.error(`[Meta Optimizer] Worker Failed:`, error);
     throw error;
   }
 }, {
