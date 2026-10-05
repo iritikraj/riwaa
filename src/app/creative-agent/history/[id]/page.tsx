@@ -1,3 +1,5 @@
+// riwaa/src/app/creative-agent/history/[id]/page.tsx
+
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Download, TextQuote, Tag, LayoutTemplate } from 'lucide-react';

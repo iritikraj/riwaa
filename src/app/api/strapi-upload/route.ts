@@ -1,3 +1,4 @@
+// riwaa/src/app/api/strapi-upload/route.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -58,7 +59,10 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    // Fetch the 100 most recent files from the main media library
+    const { searchParams } = new URL(req.url);
+    const folderId = searchParams.get('folder');
+
+    // 1. Fetch raw assets WITHOUT any folder parameters to bypass the Strapi 5 ValidationError
     const fetchUrl = `${STRAPI_URL}/api/upload/files?sort=createdAt:desc&pagination[limit]=100`;
 
     const response = await fetch(fetchUrl, {
@@ -66,6 +70,7 @@ export async function GET(req: NextRequest) {
       headers: {
         Authorization: `Bearer ${STRAPI_TOKEN}`,
       },
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -74,24 +79,35 @@ export async function GET(req: NextRequest) {
 
     const data = await response.json();
 
-    // Safely filter the array to only return .png, .jpg, and .jpeg
     if (Array.isArray(data)) {
+      // 2. Base filter: Only valid image types
       const allowedExtensions = ['.png', '.jpg', '.jpeg', '.svg'];
-
-      const imageFiles = data.filter((file: any) => {
+      let imageFiles = data.filter((file: any) => {
         if (!file.ext) return false;
         return allowedExtensions.includes(file.ext.toLowerCase());
       });
 
+      // 3. SMART HEURISTIC FILTERING (The Strapi 5 Workaround)
+      // Since Strapi hides folder IDs, we sort assets based on intent
+      if (folderId === '6') {
+        // LOGO LOGIC: Keep only SVGs, or any image with "logo" in the file name
+        imageFiles = imageFiles.filter((f: any) =>
+          f.ext.toLowerCase() === '.svg' || f.name.toLowerCase().includes('logo')
+        );
+      } else {
+        // BACKGROUND LOGIC: Keep standard images, strip out SVGs and explicit logos
+        imageFiles = imageFiles.filter((f: any) =>
+          f.ext.toLowerCase() !== '.svg' && !f.name.toLowerCase().includes('logo')
+        );
+      }
+
       return NextResponse.json(imageFiles);
     }
 
-    // Fallback if data is not an array for some reason
     return NextResponse.json(data);
 
   } catch (error: any) {
     console.error('Fetch Media Proxy Error:', error);
-    // Return an empty array on error so the frontend map() doesn't crash
-    return NextResponse.json([]);
+    return NextResponse.json([]); // Return empty array so UI doesn't crash
   }
 }

@@ -13,53 +13,113 @@ import path from 'path';
  * Bulletproofed to handle both raw LLM outputs and strict AST formats.
  */
 export function buildSatoriTree(element: any): any {
-  // 1. Defensively extract properties whether they are at the root or inside `props`
   const props = element.props || {};
   const style = element.style || props.style || {};
   const children = element.children || props.children;
   const src = element.source || element.src || props.src || '';
-
-  // Try to find text content wherever the LLM might have hidden it
   const textContent = element.content || element.value || element.text || (typeof children === 'string' ? children : '');
 
-  // 2. Handle Images
-  if (element.type === 'image' || element.type === 'img') {
-    return {
-      type: 'img',
-      props: {
-        style: { display: 'flex', ...style },
-        src: src,
-      },
-    };
-  }
+  // 1. DESIGN SYSTEM COMPONENTS (Dynamic Color Injections)
 
-  // 3. Handle Explicit Text Nodes (if Gemini uses them)
-  if (element.type === 'text') {
+  if (element.type === 'GradientScrim') {
+    // LLM provides a raw RGB string (e.g., "0, 0, 0" or "255, 215, 0") based on image mood
+    const rgb = style.scrimRgb || '20, 24, 31';
     return {
       type: 'div',
       props: {
-        style: { display: 'flex', ...style },
-        children: textContent,
-      },
+        style: {
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundImage: style.direction === 'top'
+            ? `linear-gradient(to bottom, rgba(${rgb}, 0.95) 0%, rgba(${rgb}, 0) 70%)`
+            : `linear-gradient(to top, rgba(${rgb}, 0.95) 0%, rgba(${rgb}, 0) 70%)`,
+          ...style
+        },
+        children: Array.isArray(children) ? children.map(buildSatoriTree) : [],
+      }
     };
   }
 
-  // 4. Handle Divs and recursively process children
-  let processedChildren: any = [];
+  if (element.type === 'LuxuryTitle') {
+    return {
+      type: 'div',
+      props: {
+        style: {
+          fontSize: '72px',
+          fontWeight: 700,
+          lineHeight: 1.1,
+          textTransform: 'uppercase',
+          textShadow: '0px 4px 12px rgba(0,0,0,0.3)',
+          color: style.color || '#FFFFFF', // Dynamic LLM Color
+          ...style
+        },
+        children: textContent,
+      }
+    };
+  }
 
+  if (element.type === 'Metadata') {
+    return {
+      type: 'div',
+      props: {
+        style: {
+          fontSize: '18px',
+          fontWeight: 500,
+          letterSpacing: '2px',
+          lineHeight: 1.4,
+          textTransform: 'uppercase',
+          marginBottom: '16px',
+          color: style.color || '#b8924a', // Dynamic LLM Color
+          ...style
+        },
+        children: textContent,
+      }
+    };
+  }
+
+  if (element.type === 'CTA') {
+    return {
+      type: 'div',
+      props: {
+        style: {
+          fontSize: '16px',
+          fontWeight: 700,
+          letterSpacing: '4px',
+          textTransform: 'uppercase',
+          padding: '16px 32px',
+          borderRadius: '2px',
+          marginTop: '24px',
+          color: style.color || '#14181F', // Dynamic LLM Text Color
+          backgroundColor: style.backgroundColor || '#FFFFFF', // Dynamic LLM Button Color
+          ...style
+        },
+        children: textContent,
+      }
+    };
+  }
+
+  // 2. STANDARD HTML FALLBACKS
+  if (element.type === 'image' || element.type === 'img') {
+    return { type: 'img', props: { style: { display: 'flex', ...style }, src: src } };
+  }
+
+  if (element.type === 'text') {
+    return { type: 'div', props: { style: { display: 'flex', ...style }, children: textContent } };
+  }
+
+  let processedChildren: any = [];
   if (Array.isArray(children)) {
-    // If it's an array of child nodes, process each one
     processedChildren = children.map(buildSatoriTree);
   } else if (typeof children === 'string') {
-    // If the child is just a text string, pass it directly
     processedChildren = children;
   } else if (textContent) {
-    // Fallback if the LLM used a "content" key instead of children
     processedChildren = textContent;
   }
 
   return {
-    type: 'div', // Enforce standard div wrapper for layout containers
+    type: 'div',
     props: {
       style: { display: 'flex', ...style },
       children: processedChildren,

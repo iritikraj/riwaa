@@ -1,7 +1,9 @@
+// riwaa/src/app/api/creative-agent/generate/route.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { createCreativeAgentInStrapi } from '@/lib/creative-agent/strapi';
 import { creativeAgentQueue } from '@/workers/queue';
+import { GoogleGenAI } from '@google/genai';
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,22 +25,51 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate a URL-safe, unique slug based on the brand name
-    const generatedSlug = `${brand_name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString(36)}`;
-    // 0. GUARD: Check if any background workers are actually alive and listening
     const activeWorkersCount = await creativeAgentQueue.getWorkersCount();
-    const activeWorkers = await creativeAgentQueue.getActive();
-    const getWaitingCount = await creativeAgentQueue.getWaitingCount();
-    console.log({ activeWorkersCount, activeWorkers, getWaitingCount });
-
     if (activeWorkersCount === 0) {
       return NextResponse.json(
         { error: 'The AI Creative Swarm is currently offline or rebooting. Please try again in a few moments.' },
-        { status: 503 } // 503 Service Unavailable
+        { status: 503 }
       );
     }
 
-    // 1. Create a placeholder record in Strapi to track the job status
+    console.log(`[API] Triggering Copywriter Agent...`);
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+    // THE SMART COPY INTERCEPTOR
+    const copyPrompt = `You are an elite luxury real estate copywriter. Your job is to take raw, unpolished client notes and transform them into premium, eye-catching ad copy for a static image advertisement.
+    
+    RAW CLIENT NOTES:
+    Brand: ${brand_name}
+    Category: ${category}
+    Location: ${campaign_data?.location || 'Not specified'}
+    Starting Price: ${campaign_data?.starting_price || 'Not specified'}
+    USPs: ${usps?.join(', ') || 'Luxury living'}
+
+    TASK: Write a punchy 3-5 word Headline, a persuasive 1-sentence Subheadline (MAXIMUM 10 WORDS), and a short 2-3 word Call to Action (CTA).
+    Return ONLY a valid JSON object with the keys "headline", "subheadline", and "cta".`;
+
+    const copyRes = await ai.models.generateContent({
+      model: 'gemini-3.1-pro-preview', // or gemini-2.5-flash for faster pre-processing
+      contents: [copyPrompt],
+      config: {
+        responseMimeType: "application/json",
+        temperature: 0.2,
+      }
+    });
+
+    let generatedCopy = { headline: "Luxury Living", subheadline: "Discover your dream home today.", cta: "Learn More" };
+    try {
+      const cleanedJson = (copyRes.text || '{}').replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+      generatedCopy = JSON.parse(cleanedJson);
+      console.log(`[API] Copywriter output:`, generatedCopy);
+    } catch (e) {
+      console.error('[API] Failed to parse AI copy, using fallback.', e);
+    }
+
+    const generatedSlug = `${brand_name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString(36)}`;
+
+    // 1. Create record with the pre-generated AI copy
     const record = await createCreativeAgentInStrapi({
       brand_name,
       category,
@@ -49,28 +80,16 @@ export async function POST(req: NextRequest) {
       background_images: background_image_ids,
       report_status: 'processing',
       slug: generatedSlug,
+      ai_copy: generatedCopy // Save it immediately so the UI and worker both have it
     });
 
     const documentId = record.documentId || record.id;
-
     console.log(`[API] Dispatching Swarm for Document ${documentId}...`);
 
-    // 2. DISPATCH THE SWARM: Explicitly add jobs one by one to guarantee Redis delivery
-    const addedJobIds = [];
     for (const imageId of background_image_ids) {
-      const job = await creativeAgentQueue.add('generate-creative', {
-        documentId,
-        imageId
-      });
-      addedJobIds.push(job.id);
-      console.log(`[API] Successfully pushed Job ${job.id} to Redis for Image ${imageId}`);
+      await creativeAgentQueue.add('generate-creative', { documentId, imageId });
     }
 
-    // Check if the jobs actually stuck in Redis
-    const getWaitingCountAfter = await creativeAgentQueue.getWaitingCount();
-    console.log(`[API] Redis confirms ${getWaitingCountAfter} jobs are now waiting in the queue.`);
-
-    // 3. Return the Document ID and the expected count so the frontend knows when polling is finished
     return NextResponse.json({
       success: true,
       documentId,

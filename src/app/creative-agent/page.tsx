@@ -1,3 +1,4 @@
+// riwaa/src/app/creative-agent/page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -9,7 +10,7 @@ import Image from 'next/image';
 import { STRAPI_URL as STRAPI_BASE } from '@/utils/constants';
 
 const BACKGROUND_FOLDER_ID = 4
-const LOGO_FOLDER_ID = 3;
+const LOGO_FOLDER_ID = 6;
 
 export default function CreativeAgentBuilder() {
   // 1. Form State
@@ -121,6 +122,31 @@ export default function CreativeAgentBuilder() {
     }
   };
 
+  const handleResize = async (format: string, label: string) => {
+    if (!finalCreative?.documentId && !finalCreative?.id) return;
+    const targetId = finalCreative.documentId || finalCreative.id;
+
+    try {
+      setIsGenerating(true);
+      setStatusText(`Adapting master creative to ${label}...`);
+
+      const res = await fetch('/api/creative-agent/resize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId: targetId, format })
+      });
+
+      const { expectedCount } = await res.json();
+
+      // Resume polling for the newly added batch
+      pollForCompletion(targetId, expectedCount);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to adapt format.");
+      setIsGenerating(false);
+    }
+  };
+
   const pollForCompletion = (documentId: string, expectedCount: number) => {
     const interval = setInterval(async () => {
       try {
@@ -213,14 +239,27 @@ export default function CreativeAgentBuilder() {
               <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-900 flex items-center gap-2">
                 <LayoutTemplate size={14} className="text-[#b8924a]" /> Additional Parameters
               </h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 block">Location</label>
-                  <input type="text" onChange={(e) => setCampaignData(p => ({ ...p, location: e.target.value }))} placeholder="e.g. Dubai Marina" className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-xs" />
+                  <input type="text" onChange={(e) => handleCampaignDataChange('location', e.target.value)} placeholder="e.g. Dubai Marina" className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-xs" />
                 </div>
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 block">Starting Price</label>
-                  <input type="text" onChange={(e) => setCampaignData(p => ({ ...p, starting_price: e.target.value }))} placeholder="e.g. AED 1.2M" className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-xs" />
+                  <input type="text" onChange={(e) => handleCampaignDataChange('starting_price', e.target.value)} placeholder="e.g. AED 1.2M" className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-xs" />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 block">Ad Format</label>
+                  <select
+                    onChange={(e) => handleCampaignDataChange('format', e.target.value)}
+                    className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-xs appearance-none bg-white focus:outline-none focus:border-[#b8924a]"
+                    defaultValue="1080x1080"
+                  >
+                    <option value="1080x1080">Square (1:1)</option>
+                    <option value="1080x1920">Story / Reel (9:16)</option>
+                    <option value="1080x1350">Portrait (4:5)</option>
+                    <option value="1200x628">Landscape (1.91:1)</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -368,6 +407,20 @@ export default function CreativeAgentBuilder() {
                   <p className="text-[9px] uppercase tracking-widest text-[#b8924a] font-bold mb-3">AI Copywriting Output</p>
                   <p className="text-sm font-semibold text-neutral-900 leading-tight mb-2">&quot;{finalCreative.ai_copy?.headline || 'Analyzing layout for copy...'}&quot;</p>
                 </div>
+
+                {!isGenerating && (
+                  <div className="mb-8 flex flex-wrap justify-center gap-3">
+                    <button onClick={() => handleResize('1080x1920', 'Story (9:16)')} className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 rounded-lg text-xs font-semibold uppercase tracking-widest transition-colors flex items-center gap-2">
+                      <LayoutTemplate size={14} /> Resize to 9:16 Story
+                    </button>
+                    <button onClick={() => handleResize('1080x1350', 'Portrait (4:5)')} className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 rounded-lg text-xs font-semibold uppercase tracking-widest transition-colors flex items-center gap-2">
+                      <LayoutTemplate size={14} /> Resize to 4:5 Portrait
+                    </button>
+                    <button onClick={() => handleResize('1200x628', 'Landscape (1.91:1)')} className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 rounded-lg text-xs font-semibold uppercase tracking-widest transition-colors flex items-center gap-2">
+                      <LayoutTemplate size={14} /> Resize to Landscape
+                    </button>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4 w-full">
                   {finalCreative.generated_creatives.variations.map((url: string, index: number) => (

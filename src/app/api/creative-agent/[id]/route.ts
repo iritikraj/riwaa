@@ -1,3 +1,4 @@
+// riwaa/src/app/api/creative-agent/[id]/route.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { getCreativeAgentById } from '@/lib/creative-agent/strapi';

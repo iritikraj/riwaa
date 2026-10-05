@@ -513,7 +513,7 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
   }
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  const { documentId, imageId } = job.data;
+  const { documentId, imageId, format } = job.data;
 
   // A 1x1 invisible pixel. If Gemini hallucinates a logo when none exists, Satori renders this instead of crashing.
   const TRANSPARENT_PIXEL = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
@@ -565,7 +565,11 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     const campaignData = agentData.campaign_data as any;
     const designInstructions = agentData.campaign_data?.design_instructions || "Use your best judgment for a luxury and aesthetic real estate layout.";
 
-    console.log(`[Creative Agent] Asking Gemini to analyze the image and generate the layout...`);
+    // 1. EXTRACT DYNAMIC DIMENSIONS
+    const targetFormat = format || campaignData?.format || '1080x1080';
+    const [canvasWidth, canvasHeight] = targetFormat.split('x').map(Number);
+
+    console.log(`[Creative Agent] Asking Gemini to analyze the image and generate a ${canvasWidth}x${canvasHeight} layout...`);
 
     const prompt = `You are an elite Print Art Director and Graphic Designer for luxury real estate brands. 
     CRITICAL CONTEXT: Your JSON output will be compiled directly into a flat, static JPEG/PNG image for print and social media advertising. You are designing a flat picture, NOT a webpage.
@@ -574,35 +578,69 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     ${logoInstructions}
     2. NEGATIVE SPACE HUNTING: The main architecture is usually in the center. Anchor typography in the top 20%, bottom 20%, or a clean side margin depending entirely on where the empty sky, water, or dark road is.
     3. ADAPTIVE ALIGNMENT: DO NOT use the exact same layout every time. Adapt your flexbox alignment based on the anchor point. If text is anchored left, left-align it. If anchored bottom-center, center-align it. 
+    4. CANVAS AWARENESS: You are designing for a ${canvasWidth}x${canvasHeight} canvas. Plan your typography sizing accordingly.
     
-    --- CAMPAIGN ASSETS ---
+    --- CAMPAIGN ASSETS (USE THESE EXACT TEXT STRINGS) ---
     Brand: ${agentData.brand_name.toUpperCase()}
-    Location: ${(campaignData?.location || "DUBAI").toUpperCase()}
-    Price: ${campaignData?.starting_price || ""}
-    USPs: ${agentData.usps?.join(', ') || ''}
+    Headline: ${agentData.ai_copy?.headline || "EXCLUSIVE LUXURY LIVING"}
+    Subheadline: ${agentData.ai_copy?.subheadline || "Experience the pinnacle of modern architecture."}
+    CTA: ${agentData.ai_copy?.cta || "REGISTER INTEREST"}
+    Price Tag (Optional): ${campaignData?.starting_price ? `STARTING FROM ${campaignData.starting_price.toUpperCase()}` : ""}
     
     --- USER DESIGN INSTRUCTIONS ---
     "${designInstructions}"
 
-    Task: Generate a completely unique, valid Satori AST JSON object representing a static 1080x1080 advertisement picture.
+    Task: Generate a completely unique, valid Satori AST JSON object representing a static ${canvasWidth}x${canvasHeight} advertisement picture.
     
     SATORI AST JSON RULES (STRICT PARSING REQUIRED):
     - You MUST use the exact React-style AST that Satori expects. Every node has ONLY "type" and "props" keys at the top level.
     - Text MUST be passed inside a "children" key inside "props". Example: { "type": "div", "props": { "style": { "color": "#fff", "fontSize": "40px" }, "children": "LUXURY LIVING" } }
-    - If a div has multiple children, pass them as an array inside "children": { "type": "div", "props": { "style": { "display": "flex" }, "children": [ { "type": "div", "props": { "children": "A" } }, { "type": "div", "props": { "children": "B" } } ] } }
-    - The root node must be exactly: { "type": "div", "props": { "style": { "display": "flex", "width": "1080px", "height": "1080px", "position": "relative" }, "children": [ ... ] } }
-    - The first child MUST be the background: { "type": "img", "props": { "src": "{{background_image}}", "style": { "position": "absolute", "top": 0, "left": 0, "width": "1080px", "height": "1080px", "objectFit": "cover" } } }
+    - If a div has multiple children, pass them as an array inside "children".
+    - The root node must be exactly: { "type": "div", "props": { "style": { "display": "flex", "width": "${canvasWidth}px", "height": "${canvasHeight}px", "position": "relative" }, "children": [ ... ] } }
+    - The first child MUST be the background: { "type": "img", "props": { "src": "{{background_image}}", "style": { "position": "absolute", "top": 0, "left": 0, "width": "${canvasWidth}px", "height": "${canvasHeight}px", "objectFit": "cover" } } }
     - DO NOT use the keys "content", "source", or "text" anywhere in your JSON. Use "type" and "props" ONLY.
-    - BANNED CSS: NEVER use the "zIndex" property. Satori does not support it. Rely entirely on array order for layering (elements later in the children array appear on top).
+    - BANNED CSS: NEVER use the "zIndex" property. Satori does not support it. Rely entirely on array order for layering.
     
-    LUXURY ADVERTISEMENT DESIGN SYSTEM:
-    - Readability Gradients: ALWAYS wrap your typography container in a gradient that fades seamlessly into the image to ensure text is readable. Match the gradient direction to the anchor point.
-    - Dynamic Color Palette: Adapt your typography and accent colors dynamically to complement the tones and lighting of the specific background image.
-    - Extreme Typographic Contrast: Massive bold headlines (60px-80px) paired with tiny, wide-tracked metadata (12px-14px, letterSpacing: "6px"). Use your dynamic palette for text colors.
-    - Call-To-Action (NO BUTTONS!): This is a static image. NEVER generate web-style UI buttons. Instead, create a subtle, elegant text banner or footer (e.g., "REGISTER YOUR INTEREST"). ONLY include a website URL or phone number if it is explicitly provided in the User Design Instructions above.
-    - Architectural Accents: Feel free to use thin elegant lines (e.g., 1px solid) to frame the contact text or separate the metadata.
+    LUXURY ADVERTISEMENT DESIGN SYSTEM & DYNAMIC COLOR:
+    You are a master colorist. You MUST visually analyze the lighting, mood, and prominent colors of the background image. Extract a striking, harmonious color palette and inject those specific Hex/RGB codes into the component props.
     
-    You have full creative freedom to arrange these components based on the image's focal point, but you MUST strictly obey the Satori AST JSON rules. Return ONLY valid JSON. No markdown.`;
+    Available Components:
+    1. "GradientScrim": A container that automatically applies a gradient for text readability. 
+       - Props allowed: { "style": { "direction": "bottom", "scrimRgb": "20, 24, 31", "justifyContent": "flex-end", "padding": "60px", "width": "100%", "height": "100%" } } 
+       - You MUST pass 'scrimRgb' as a raw RGB string (e.g., "0,0,0" for dark shadows, "255,255,255" for bright sky, or a deep accent color extracted from the image).
+    2. "Metadata": Use for the Subheadline, Location, or Price.
+       - Props allowed: { "style": { "color": "#HEXCODE" } } (Choose an elegant accent color that contrasts perfectly with the scrim).
+    3. "LuxuryTitle": Use ONLY for the main Headline.
+       - Props allowed: { "style": { "color": "#HEXCODE" } }
+    4. "CTA": Use for the Call to Action text.
+       - Props allowed: { "style": { "color": "#HEXCODE", "backgroundColor": "#HEXCODE" } } (Ensure high contrast between text and background).
+
+    Example Layout Structure:
+    {
+      "type": "div",
+      "props": {
+        "style": { "display": "flex", "width": "${canvasWidth}px", "height": "${canvasHeight}px", "position": "relative" },
+        "children": [
+          {
+            "type": "img",
+            "props": { "src": "{{background_image}}", "style": { "position": "absolute", "top": 0, "left": 0, "width": "100%", "height": "100%", "objectFit": "cover" } }
+          },
+          {
+            "type": "GradientScrim",
+            "props": {
+              "style": { "direction": "bottom", "scrimRgb": "0, 40, 85", "justifyContent": "flex-end", "padding": "80px", "alignItems": "flex-start" },
+              "children": [
+                { "type": "Metadata", "props": { "children": "DUBAI MARINA", "style": { "color": "#F3E5AB" } } },
+                { "type": "LuxuryTitle", "props": { "children": "WAKE UP TO THE BURJ", "style": { "color": "#FFFFFF" } } },
+                { "type": "CTA", "props": { "children": "REGISTER INTEREST", "style": { "color": "#002855", "backgroundColor": "#F3E5AB" } } }
+              ]
+            }
+          }
+        ]
+      }
+    }
+
+    Return ONLY valid JSON. No markdown.`;
 
     const aiResponse = await ai.models.generateContent({
       model: 'gemini-3.1-pro-preview',
@@ -612,7 +650,7 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
       ],
       config: {
         responseMimeType: "application/json",
-        temperature: 0.2,
+        temperature: 0.1,
       }
     });
 
@@ -630,7 +668,8 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
     layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_dark\s*\}\}/g, logoDarkDataUri || logoLightDataUri || TRANSPARENT_PIXEL);
     layoutJsonString = layoutJsonString.replace(/\{\{\s*logo_image\s*\}\}/g, logoLightDataUri || logoDarkDataUri || TRANSPARENT_PIXEL);
 
-    const pngBuffer = await generateCreativeBuffer(layoutJsonString, {}, 1080, 1080);
+    // 2. PASS DYNAMIC DIMENSIONS TO SATORI
+    const pngBuffer = await generateCreativeBuffer(layoutJsonString, {}, canvasWidth, canvasHeight);
 
     console.log(`[Creative Agent] Uploading finalized variation for image ${imageId}...`);
     const FINAL_FOLDER_ID = 5;
@@ -641,20 +680,13 @@ const createCreativeAgentWorker = () => new Worker('creative-agent-queue', async
       FINAL_FOLDER_ID
     );
 
-    // Extract headline by targeting the new "children" structure
-    let extractedHeadline = "Custom AI Layout";
-    try {
-      const parsed = JSON.parse(layoutJsonString);
-      extractedHeadline = JSON.stringify(parsed).match(/"children":"([^"]+)"/)?.[1] || extractedHeadline;
-    } catch (e) { console.log(e) }
-
     const freshData = await getCreativeAgentById(documentId);
     const currentVariations = freshData.generated_creatives?.variations || [];
     currentVariations.push(uploadedUrl);
 
     await updateCreativeAgentInStrapi(documentId, {
       report_status: 'draft',
-      ai_copy: { headline: extractedHeadline, cta: "See Design" },
+      ai_copy: freshData.ai_copy,
       generated_creatives: { variations: currentVariations }
     });
 
