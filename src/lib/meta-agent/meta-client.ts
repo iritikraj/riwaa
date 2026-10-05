@@ -29,6 +29,7 @@ export interface MetaClientConfig {
 export class MetaClient {
   private account: AdAccount;
   private dryRun: boolean;
+  private accessToken: string;
 
   public pageId?: string;
   public pixelId?: string;
@@ -41,6 +42,7 @@ export class MetaClient {
     this.dryRun = dryRun;
     this.pageId = config.pageId;
     this.pixelId = config.pixelId;
+    this.accessToken = config.accessToken;
 
     // FIX: Initialize the SDK context for this request lifecycle
     // This satisfies the internal Cursor object used by getInsights()
@@ -178,5 +180,32 @@ export class MetaClient {
 
   async activate(objectId: string, level: 'campaign' | 'adset' | 'ad') {
     await this.setStatus(objectId, level, 'ACTIVE');
+  }
+
+  async searchAdLibrary(searchTerms: string, country: string, adType: string = 'POLITICAL_AND_ISSUE_ADS', limit: number = 25) {
+    if (!this.accessToken) throw new Error('Meta Access Token is missing.');
+
+    const fields = 'id,page_id,page_name,ad_snapshot_url,ad_creation_time,ad_delivery_start_time,ad_delivery_stop_time,publisher_platforms,spend,impressions';
+
+    const query = new URLSearchParams({
+      search_terms: searchTerms,
+      ad_reached_countries: JSON.stringify([country]),
+      ad_type: adType,
+      ad_active_status: 'ALL',
+      fields: fields,
+      limit: limit.toString(),
+      access_token: this.accessToken
+    });
+
+    const url = `https://graph.facebook.com/v19.0/ads_archive?${query.toString()}`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(`Meta Ad Library Error: ${data.error?.message || res.statusText}`);
+    }
+
+    return data.data || [];
   }
 }

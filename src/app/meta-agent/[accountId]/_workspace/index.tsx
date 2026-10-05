@@ -20,6 +20,7 @@ export default function WorkspaceHeaderClient({ accounts, activeAccountId }: any
     { name: 'History', href: `/meta-agent/${activeAccountId}/history`, icon: History },
     { name: 'Reports', href: `/meta-agent/${activeAccountId}/reports`, icon: BarChart3 },
     { name: 'Audit Log', href: `/meta-agent/${activeAccountId}/audit`, icon: FileText },
+    { name: 'Competitor Benchmarking', href: `/meta-agent/${activeAccountId}/competitor-benchmarking`, icon: BarChart3 },
   ];
 
   const handleAccountSwitch = (newAccountId: string) => {
