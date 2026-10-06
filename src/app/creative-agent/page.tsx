@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Image as ImageIcon, CheckCircle, Loader2, LayoutTemplate, Clock, Moon, Sun, FolderOpen, Upload } from 'lucide-react';
+import { Sparkles, Image as ImageIcon, CheckCircle, Loader2, LayoutTemplate, Clock, Moon, Sun, FolderOpen, Upload, Eye, X, Download } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { STRAPI_URL as STRAPI_BASE } from '@/utils/constants';
@@ -35,10 +35,11 @@ export default function CreativeAgentBuilder() {
   const [logoDarkFile, setLogoDarkFile] = useState<File | null>(null);
   const [selectedLogoDarkId, setSelectedLogoDarkId] = useState<number | null>(null);
 
-  // 4. System State
+  // 4. System & UI State
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusText, setStatusText] = useState('');
   const [finalCreative, setFinalCreative] = useState<any>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Fetch Strapi Library Assets
   useEffect(() => {
@@ -426,10 +427,25 @@ export default function CreativeAgentBuilder() {
                   {finalCreative.generated_creatives.variations.map((url: string, index: number) => (
                     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} key={index} className="w-full aspect-square bg-white rounded-2xl shadow-lg overflow-hidden border border-neutral-200 relative group">
                       <img src={`${STRAPI_BASE}${url}`} alt={`Variation ${index + 1}`} className="w-full h-full object-contain" />
+
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center backdrop-blur-sm gap-3">
-                        <a href={`${STRAPI_BASE}${url}`} download target="_blank" rel="noopener noreferrer" className="bg-white text-black px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors">
-                          Download
-                        </a>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setPreviewImage(url)}
+                            className="bg-white text-black px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors flex items-center gap-2"
+                          >
+                            <Eye size={12} /> View
+                          </button>
+                          <a
+                            href={`${STRAPI_BASE}${url}`}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-white text-black px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors flex items-center gap-2"
+                          >
+                            <Download size={12} /> Save
+                          </a>
+                        </div>
                       </div>
                     </motion.div>
                   ))}
@@ -445,6 +461,32 @@ export default function CreativeAgentBuilder() {
           </AnimatePresence>
         </div>
       </main>
+
+      {/* Fullscreen Image Preview Modal */}
+      <AnimatePresence>
+        {previewImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setPreviewImage(null)}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8 cursor-zoom-out"
+          >
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute top-6 right-6 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 transition-all"
+            >
+              <X size={24} />
+            </button>
+            <img
+              src={`${STRAPI_BASE}${previewImage}`}
+              alt="Preview"
+              onClick={(e) => e.stopPropagation()}
+              className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl cursor-default"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

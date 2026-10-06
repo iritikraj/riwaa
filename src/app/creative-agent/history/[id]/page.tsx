@@ -2,7 +2,7 @@
 
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Download, TextQuote, Tag, LayoutTemplate } from 'lucide-react';
+import { ArrowLeft, Download, TextQuote, Tag, LayoutTemplate, Eye } from 'lucide-react';
 import { getCreativeAgentBySlug } from '@/lib/creative-agent/strapi';
 import { STRAPI_URL as STRAPI_BASE } from '@/utils/constants';
 
@@ -55,15 +55,26 @@ export default async function CreativeDetail({ params }: { params: Promise<{ id:
                     {/* Hover Overlay */}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center backdrop-blur-sm gap-3">
                       <span className="text-white text-[10px] uppercase tracking-widest font-bold">Variation {idx + 1}</span>
-                      <a
-                        href={`${STRAPI_BASE}${url}`}
-                        download={`${agent.slug}-var-${idx + 1}.png`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 bg-white text-black rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors flex items-center gap-2"
-                      >
-                        <Download size={12} /> Download
-                      </a>
+
+                      <div className="flex gap-2">
+                        <a
+                          href={`${STRAPI_BASE}${url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 bg-white text-black rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors flex items-center gap-2"
+                        >
+                          <Eye size={12} /> View
+                        </a>
+                        <a
+                          href={`${STRAPI_BASE}${url}`}
+                          download={`${agent.slug}-var-${idx + 1}.png`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 bg-white text-black rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[#b8924a] hover:text-white transition-colors flex items-center gap-2"
+                        >
+                          <Download size={12} /> Save
+                        </a>
+                      </div>
                     </div>
                   </div>
                 ))}
