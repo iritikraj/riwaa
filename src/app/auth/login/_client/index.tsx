@@ -85,7 +85,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-[#050505] hover:bg-black text-white rounded-xl py-4 flex items-center justify-center gap-2 font-semibold uppercase tracking-widest text-xs transition-all shadow-xl shadow-black/10 mt-6 disabled:opacity-70"
+          className={`${isLoading ? 'cursor-progress' : 'cursor-pointer'} w-full bg-[#050505] hover:bg-black text-white rounded-xl py-4 flex items-center justify-center gap-2 font-semibold uppercase tracking-widest text-xs transition-all shadow-xl shadow-black/10 mt-6 disabled:opacity-70`}
         >
           {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Lock size={16} className="text-white" />}
           {isLoading ? 'Authenticating...' : 'Secure Access'}

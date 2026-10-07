@@ -7,9 +7,7 @@ import {
 } from "lucide-react";
 import Hero from "../_hero";
 import Roster from "../_roster";
-
-const waNumber = "971581980131";
-const waMessage = encodeURIComponent("Hi, I would like to know more about RIWAA.");
+import Link from "next/link";
 
 const WHY = [
   {
@@ -76,16 +74,14 @@ export default function RiwaaHomePage() {
             A short walkthrough is enough to see whether RIWAA fits your
             brokerage — no setup required to look.
           </p>
-          <a
-            href={`https://wa.me/${waNumber}?text=${waMessage}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href={"/contact"}
             aria-label="Book a walkthrough"
             className="mt-10 inline-flex items-center gap-2.5 rounded-full bg-[#FCFBF8] px-7 py-3.5 text-[13px] font-medium text-[#14181F] transition-opacity hover:opacity-90"
           >
             Book a walkthrough
             <ArrowRight size={15} />
-          </a>
+          </Link>
         </div>
       </section>
     </main>
