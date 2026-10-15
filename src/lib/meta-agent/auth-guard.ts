@@ -1,7 +1,6 @@
 // src/lib/meta-agent/auth-guard.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { cookies } from 'next/headers';
-import { fetchMetaAccountFromStrapi } from "./strapi";
 
 export async function getSessionUser() {
   const cookieStore = await cookies();

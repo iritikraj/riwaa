@@ -142,7 +142,7 @@ export default function DashboardRecommendationsClient({
       </header>
 
       {/* Content Container */}
-      <div className="min-h-[400px]">
+      <div className="min-h-100">
         {recommendations.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}

@@ -53,7 +53,7 @@ export function proxy(request: NextRequest) {
   }
 
   // 4. Check if route requires auth
-  const requiresAuth = PROTECTED_ROUTES.has(path) || path.startsWith('/meta-agent');
+  const requiresAuth = PROTECTED_ROUTES.has(path) || path.startsWith('/meta-agent') || path.startsWith('/google-agent');
 
   // Unauthenticated user trying to access a protected route
   if (requiresAuth && !isValidToken) {

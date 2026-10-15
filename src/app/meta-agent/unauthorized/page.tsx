@@ -38,7 +38,7 @@ export default async function UnauthorizedPage({ searchParams }: { searchParams:
 
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[#14181F] text-[#FCFBF8] rounded-full text-[12px] font-semibold uppercase tracking-[0.1em] hover:bg-[#14181F]/80 transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[#14181F] text-[#FCFBF8] rounded-full text-[12px] font-semibold uppercase tracking-widest hover:bg-[#14181F]/80 transition-colors shadow-sm"
         >
           <ArrowLeft size={16} />
           Return to Homepage

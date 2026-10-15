@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { ArrowRight, ArrowUpRight, Building2, CheckCircle2, FileCheck, LayoutDashboard, MessageCircleMore, Search, Swords, Target, UserCircle, Wand2 } from "lucide-react"
+import { ArrowRight, ArrowUpRight, Building2, CheckCircle2, FileCheck, LayoutDashboard, MessageCircleMore, Search, Swords, Target, UserCircle, Wand2, MousePointerClick } from "lucide-react"
 import Link from "next/link"
 
 const ROSTER = [
@@ -47,6 +47,15 @@ const ROSTER = [
     desc: "Generates high-converting credibility pages featuring off-plan projects, interactive maps, and lead capture for specific master developers.",
     cta: "Open Builder",
     href: "/real-estate/developer-advisors",
+  },
+  {
+    id: "06",
+    icon: MousePointerClick,
+    name: "Google Ads Agent",
+    role: "Automates search campaigns",
+    desc: "Extract live search volumes, generate optimal Ad Groups, draft compliant RSAs, and deploy campaigns directly to Google.",
+    cta: "Launch Agent",
+    href: "/google-agent/accounts",
   },
 ];
 
@@ -397,7 +406,6 @@ const Roster = () => {
           <div className="relative flex h-full flex-col">
             <div className="flex items-center justify-between">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-blue-200 bg-blue-50">
-                {/* Remember to import FileCheck from 'lucide-react' */}
                 <FileCheck size={26} className="text-blue-600" />
               </div>
               <span className="rounded-full border border-blue-200 bg-blue-100 px-3 py-2 text-[10px] uppercase tracking-[0.3em] text-blue-700">
@@ -642,6 +650,70 @@ const Roster = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* GOOGLE ADS AI AGENT MODULE */}
+        <motion.div
+          whileHover={{ y: -8 }}
+          transition={{ duration: 0.35 }}
+          className="group relative flex min-h-117.5 flex-col overflow-hidden rounded-3xl border border-[#14181F]/10 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+        >
+          <div className="absolute right-0 top-0 h-75 w-75 rounded-full bg-amber-500/10 blur-[120px]" />
+
+          <div className="relative flex h-full flex-col">
+            <div className="flex items-center justify-between">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-200 bg-amber-50">
+                <MousePointerClick size={26} className="text-amber-600" />
+              </div>
+              <span className="rounded-full border border-amber-200 bg-amber-100 px-3 py-2 text-[10px] uppercase tracking-[0.3em] text-amber-700">
+                PPC Agent
+              </span>
+            </div>
+
+            <h2 className="mt-8 text-3xl font-medium tracking-tight text-[#14181F]">
+              Google Ads
+              <br />
+              AI Agent
+            </h2>
+
+            <p className="mt-4 text-[14.5px] leading-7 text-[#565C6B]">
+              Extract live search volumes, generate optimal Ad Groups, draft compliant RSAs, and deploy campaigns directly to Google.
+            </p>
+
+            {/* Mini Search Volume Preview */}
+            <div className="mt-8 rounded-2xl border border-[#14181F]/10 bg-[#FCFBF8] p-5">
+              <div className="flex items-center justify-between border-b border-[#14181F]/5 pb-3">
+                <span className="text-[9px] uppercase tracking-[0.3em] text-[#565C6B]">
+                  Keyword Extraction
+                </span>
+                <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+              </div>
+              <div className="mt-4 space-y-3 font-jost">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium text-[#14181F]">property management dubai</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-[#565C6B]">
+                    12.5k / mo
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium text-[#14181F]">landlord services uae</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-[#565C6B]">
+                    8.2k / mo
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-auto pt-8">
+              <Link
+                href="/google-agent/accounts"
+                className="inline-flex items-center gap-3 rounded-full border border-[#14181F]/15 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#14181F] transition-colors hover:border-[#14181F]/30"
+              >
+                Launch Agent
+                <ArrowRight size={15} />
+              </Link>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   )
@@ -656,7 +728,7 @@ export const RosterOld = () => {
             The roster
           </span>
           <h2 className="mt-5 text-4xl font-medium tracking-[-0.01em] sm:text-5xl">
-            Four agents. One login.
+            Multiple agents. One login.
           </h2>
           <p className="mt-5 text-[15px] leading-7 text-[#565C6B]">
             Each one is built to do a single job well, instead of one
