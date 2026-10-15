@@ -4,7 +4,8 @@ import { loadEnvConfig } from '@next/env';
 loadEnvConfig(process.cwd());
 
 import { Job, Worker } from 'bullmq';
-import { redisOptions, setupGoogleAdsCronJobs, spiderQueue } from './queue';
+// import { redisOptions, setupGoogleAdsCronJobs, spiderQueue } from './queue';
+import { redisOptions, spiderQueue } from './queue';
 import { runDomainSpider } from './spider';
 import { scrapeWithPuppeteer } from '../lib/seo-agent/scraper';
 import { analyzeEntities } from '../lib/seo-agent/nlp';
@@ -31,8 +32,8 @@ import { getCreativeAgentById, updateCreativeAgentInStrapi, uploadBufferToStrapi
 import { generateCreativeBuffer } from '../lib/creative-agent/satori-engine';
 import { STRAPI_URL } from '@/utils/constants';
 import { createMetaOptimizerWorker } from './meta-optimizer-worker';
-import { createGoogleAdsLaunchWorker } from '@/lib/google-ads-agent/launch-worker';
-import { createGoogleAdsOptimizationWorker, createGoogleAdsSentinelWorker } from '@/lib/google-ads-agent/cron-workers';
+// import { createGoogleAdsLaunchWorker } from '@/lib/google-ads-agent/launch-worker';
+// import { createGoogleAdsOptimizationWorker, createGoogleAdsSentinelWorker } from '@/lib/google-ads-agent/cron-workers';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -745,9 +746,9 @@ export const contentBriefWorker = globalForWorkers.contentBriefWorker || createC
 export const developerAgentWorker = globalForWorkers.developerAgentWorker || createDeveloperAgentWorker();
 export const creativeAgentWorker = createCreativeAgentWorker();
 export const metaOptimizerWorker = globalForWorkers.metaOptimizerWorker || createMetaOptimizerWorker();
-export const googleAdsLaunchWorker = globalForWorkers.googleAdsLaunchWorker || createGoogleAdsLaunchWorker();
-export const googleAdsOptimizationWorker = globalForWorkers.googleAdsOptimizationWorker || createGoogleAdsOptimizationWorker();
-export const googleAdsSentinelWorker = globalForWorkers.googleAdsSentinelWorker || createGoogleAdsSentinelWorker();
+// export const googleAdsLaunchWorker = globalForWorkers.googleAdsLaunchWorker || createGoogleAdsLaunchWorker();
+// export const googleAdsOptimizationWorker = globalForWorkers.googleAdsOptimizationWorker || createGoogleAdsOptimizationWorker();
+// export const googleAdsSentinelWorker = globalForWorkers.googleAdsSentinelWorker || createGoogleAdsSentinelWorker();
 
 if (process.env.NODE_ENV !== 'production') {
   globalForWorkers.aiAuditWorker = aiAuditWorker;
@@ -758,9 +759,9 @@ if (process.env.NODE_ENV !== 'production') {
   globalForWorkers.developerAgentWorker = developerAgentWorker;
   globalForWorkers.creativeAgentWorker = creativeAgentWorker;
   globalForWorkers.metaOptimizerWorker = metaOptimizerWorker;
-  globalForWorkers.googleAdsLaunchWorker = googleAdsLaunchWorker;
-  globalForWorkers.googleAdsOptimizationWorker = googleAdsOptimizationWorker;
-  globalForWorkers.googleAdsSentinelWorker = googleAdsSentinelWorker;
+  // globalForWorkers.googleAdsLaunchWorker = googleAdsLaunchWorker;
+  // globalForWorkers.googleAdsOptimizationWorker = googleAdsOptimizationWorker;
+  // globalForWorkers.googleAdsSentinelWorker = googleAdsSentinelWorker;
   // Execute the cron registration exactly once when workers boot
   // setupGoogleAdsCronJobs();
 } else {
@@ -820,10 +821,10 @@ metaOptimizerWorker.on('completed', job => console.log(`[Meta Optimizer Queue] J
 creativeAgentWorker.on('error', (err) => console.error(`❌ [Meta Optimizer Queue] Critical Redis Error:: ${err.message}`));
 metaOptimizerWorker.on('failed', (job, err) => console.error(`❌ [Meta Optimizer Queue] Job ${job?.id} failed with error: ${err.message}`));
 
-googleAdsLaunchWorker.on('ready', () => console.log('✅ Google Ads Launch Worker is ready and listening to Redis...'));
-googleAdsLaunchWorker.on('completed', job => console.log(`[Google Ads Queue] Job ${job.id} completed successfully`));
-googleAdsLaunchWorker.on('error', (err) => console.error(`❌ [Google Ads Queue] Critical Redis Error:: ${err.message}`));
-googleAdsLaunchWorker.on('failed', (job, err) => console.error(`❌ [Google Ads Queue] Job ${job?.id} failed with error: ${err.message}`));
+// googleAdsLaunchWorker.on('ready', () => console.log('✅ Google Ads Launch Worker is ready and listening to Redis...'));
+// googleAdsLaunchWorker.on('completed', job => console.log(`[Google Ads Queue] Job ${job.id} completed successfully`));
+// googleAdsLaunchWorker.on('error', (err) => console.error(`❌ [Google Ads Queue] Critical Redis Error:: ${err.message}`));
+// googleAdsLaunchWorker.on('failed', (job, err) => console.error(`❌ [Google Ads Queue] Job ${job?.id} failed with error: ${err.message}`));
 
-googleAdsOptimizationWorker.on('ready', () => console.log('✅ Google Ads Optimization Worker listening to Redis...'));
-googleAdsSentinelWorker.on('ready', () => console.log('✅ Google Ads Sentinel Worker listening to Redis...'));
+// googleAdsOptimizationWorker.on('ready', () => console.log('✅ Google Ads Optimization Worker listening to Redis...'));
+// googleAdsSentinelWorker.on('ready', () => console.log('✅ Google Ads Sentinel Worker listening to Redis...'));

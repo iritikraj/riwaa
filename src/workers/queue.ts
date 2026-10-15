@@ -47,9 +47,9 @@ const globalForQueues = globalThis as unknown as {
   developerAgentQueue: Queue;
   creativeAgentQueue: Queue;
   metaOptimizerQueue: Queue;
-  googleAdsLaunchQueue: Queue;
-  googleAdsOptimizationQueue: Queue;
-  googleAdsSentinelQueue: Queue;
+  // googleAdsLaunchQueue: Queue;
+  // googleAdsOptimizationQueue: Queue;
+  // googleAdsSentinelQueue: Queue;
 };
 
 export const spiderQueue = globalForQueues.spiderQueue || new Queue('domain-spider-queue', { connection: redisOptions });
@@ -60,9 +60,9 @@ export const contentBriefQueue = globalForQueues.contentBriefQueue || new Queue(
 export const developerAgentQueue = globalForQueues.developerAgentQueue || new Queue('developer-agent-queue', { connection: redisOptions });
 export const creativeAgentQueue = globalForQueues.creativeAgentQueue || new Queue('creative-agent-queue', { connection: redisOptions });
 export const metaOptimizerQueue = globalForQueues.metaOptimizerQueue || new Queue('meta-optimizer-queue', { connection: redisOptions });
-export const googleAdsLaunchQueue = globalForQueues.googleAdsLaunchQueue || new Queue('launch-campaign-queue', { connection: redisOptions });
-export const googleAdsOptimizationQueue = globalForQueues.googleAdsOptimizationQueue || new Queue('google-ads-optimization-queue', { connection: redisOptions });
-export const googleAdsSentinelQueue = globalForQueues.googleAdsSentinelQueue || new Queue('google-ads-sentinel-queue', { connection: redisOptions });
+// export const googleAdsLaunchQueue = globalForQueues.googleAdsLaunchQueue || new Queue('launch-campaign-queue', { connection: redisOptions });
+// export const googleAdsOptimizationQueue = globalForQueues.googleAdsOptimizationQueue || new Queue('google-ads-optimization-queue', { connection: redisOptions });
+// export const googleAdsSentinelQueue = globalForQueues.googleAdsSentinelQueue || new Queue('google-ads-sentinel-queue', { connection: redisOptions });
 
 if (process.env.NODE_ENV !== 'production') {
   globalForQueues.spiderQueue = spiderQueue;
@@ -73,27 +73,27 @@ if (process.env.NODE_ENV !== 'production') {
   globalForQueues.developerAgentQueue = developerAgentQueue;
   globalForQueues.creativeAgentQueue = creativeAgentQueue;
   globalForQueues.metaOptimizerQueue = metaOptimizerQueue;
-  globalForQueues.googleAdsLaunchQueue = googleAdsLaunchQueue;
-  globalForQueues.googleAdsOptimizationQueue = googleAdsOptimizationQueue;
-  globalForQueues.googleAdsSentinelQueue = googleAdsSentinelQueue;
+  // globalForQueues.googleAdsLaunchQueue = googleAdsLaunchQueue;
+  // globalForQueues.googleAdsOptimizationQueue = googleAdsOptimizationQueue;
+  // globalForQueues.googleAdsSentinelQueue = googleAdsSentinelQueue;
 }
 
-export async function setupGoogleAdsCronJobs() {
-  try {
-    // Optimization Gatekeeper: Runs every day at 2:00 AM
-    await googleAdsOptimizationQueue.add('daily-optimization', {}, {
-      repeat: { pattern: '0 2 * * *' },
-      jobId: 'daily-google-optimization-job' // Hardcoded ID prevents duplicate cron registrations
-    });
+// export async function setupGoogleAdsCronJobs() {
+//   try {
+//     // Optimization Gatekeeper: Runs every day at 2:00 AM
+//     await googleAdsOptimizationQueue.add('daily-optimization', {}, {
+//       repeat: { pattern: '0 2 * * *' },
+//       jobId: 'daily-google-optimization-job' // Hardcoded ID prevents duplicate cron registrations
+//     });
 
-    // Campaign Sentinel: Runs every 6 hours
-    await googleAdsSentinelQueue.add('six-hour-sentinel', {}, {
-      repeat: { pattern: '0 */6 * * *' },
-      jobId: 'six-hour-google-sentinel-job'
-    });
+//     // Campaign Sentinel: Runs every 6 hours
+//     await googleAdsSentinelQueue.add('six-hour-sentinel', {}, {
+//       repeat: { pattern: '0 */6 * * *' },
+//       jobId: 'six-hour-google-sentinel-job'
+//     });
 
-    console.log('⏰ Google Ads Cron Jobs registered successfully in Redis.');
-  } catch (error) {
-    console.error('Failed to register Google Ads Cron Jobs:', error);
-  }
-}
+//     console.log('⏰ Google Ads Cron Jobs registered successfully in Redis.');
+//   } catch (error) {
+//     console.error('Failed to register Google Ads Cron Jobs:', error);
+//   }
+// }
