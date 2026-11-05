@@ -165,11 +165,17 @@ export default function ListingsMap({
                   {selectedPin.title}
                 </p>
 
-                {/* Property Specs (Beds, Baths, Sqft) */}
+                {/* Property Specs (Beds, Baths, Sqft) - UPDATED TO HANDLE EMPTY STRINGS */}
                 <div className="flex items-center gap-3 text-white/50 text-[10px] mt-1 border-y border-white/10 py-2">
-                  {selectedPin.beds !== "0" && <span className="flex items-center gap-1"><Bed size={12} /> {selectedPin.beds}</span>}
-                  {selectedPin.baths !== "0" && <span className="flex items-center gap-1"><Bath size={12} /> {selectedPin.baths}</span>}
-                  {selectedPin.sqft && <span className="flex items-center gap-1"><Maximize size={12} /> {selectedPin.sqft}</span>}
+                  {selectedPin.beds && selectedPin.beds !== "0" && selectedPin.beds !== "" && (
+                    <span className="flex items-center gap-1"><Bed size={12} /> {selectedPin.beds}</span>
+                  )}
+                  {selectedPin.baths && selectedPin.baths !== "0" && selectedPin.baths !== "" && (
+                    <span className="flex items-center gap-1"><Bath size={12} /> {selectedPin.baths}</span>
+                  )}
+                  {selectedPin.sqft && (
+                    <span className="flex items-center gap-1"><Maximize size={12} /> {selectedPin.sqft}</span>
+                  )}
                 </div>
 
                 <a

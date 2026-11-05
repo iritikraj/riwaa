@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState } from "react";
@@ -28,11 +29,21 @@ export function AgentListings({ data, brokerName }: { data: any[], brokerName: s
     const imageArray = item.images ? item.images.split('|') : [];
     const firstImage = imageArray[0] || "";
 
-    // Safely grab coordinates. Add slight random offsets so multiple listings in same sub_community don't overlap exactly
-    const baseCoords = item.sub_community && DUBAI_COORDINATES[item.sub_community]
-      ? DUBAI_COORDINATES[item.sub_community]
-      : { lat: 25.2048, lng: 55.2708 };
+    // UPDATED: Prioritize exact API coordinates, fallback to dictionary using community
+    let baseCoords = { lat: 25.2048, lng: 55.2708 }; // Default Dubai fallback
+    if (item.location?.lat && item.location?.lng) {
+      baseCoords = {
+        lat: parseFloat(item.location.lat),
+        lng: parseFloat(item.location.lng)
+      };
+    } else {
+      const areaKey = item.community || item.sub_community;
+      if (areaKey && DUBAI_COORDINATES[areaKey]) {
+        baseCoords = DUBAI_COORDINATES[areaKey];
+      }
+    }
 
+    // Add slight random offsets so multiple listings in the same building don't overlap perfectly on the map
     const coords = {
       lat: baseCoords.lat + (Math.random() - 0.5) * 0.005,
       lng: baseCoords.lng + (Math.random() - 0.5) * 0.005
@@ -56,8 +67,11 @@ export function AgentListings({ data, brokerName }: { data: any[], brokerName: s
       else if (priceNum >= 1000) mapPinPrice = `${(priceNum / 1000).toFixed(0)}K`;
     }
 
+    // UPDATED: Fallback sequence since sub_community can be empty
+    const locationName = item.building_name || item.community || item.sub_community || "Dubai";
+
     return {
-      title: `${item.unit_type} in ${item.building_name || item.sub_community}`,
+      title: `${item.unit_type} in ${locationName}`,
       price: formattedPrice,
       mapPinPrice: mapPinPrice === "Price on Request" ? "POR" : `${item.currency || "AED"} ${mapPinPrice}`,
       reference: item.reference_no,
@@ -100,7 +114,7 @@ export function AgentListings({ data, brokerName }: { data: any[], brokerName: s
               <div key={i} className="group border border-white/10 bg-white/5 rounded-2xl overflow-hidden hover:border-[#b8924a]/50 transition-colors flex flex-col">
                 <div className="relative h-64 overflow-hidden">
                   <img src={listing.imageUrl} alt={listing.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
 
                   <div className="absolute top-4 left-4">
                     <span className="bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-[9px] uppercase tracking-widest border border-white/10">
@@ -116,12 +130,12 @@ export function AgentListings({ data, brokerName }: { data: any[], brokerName: s
                   </div>
                 </div>
 
-                <div className="p-6 flex flex-col flex-grow">
+                <div className="p-6 flex flex-col grow">
                   <h3 className="text-sm font-medium text-white/90 mb-4 line-clamp-2">{listing.title}</h3>
 
                   <div className="flex items-center gap-4 text-white/50 text-xs mb-6">
-                    {listing.beds !== "0" && <span className="flex items-center gap-1.5"><Bed size={14} /> {listing.beds}</span>}
-                    {listing.baths !== "0" && <span className="flex items-center gap-1.5"><Bath size={14} /> {listing.baths}</span>}
+                    {listing.beds && listing.beds !== "0" && listing.beds !== "" && <span className="flex items-center gap-1.5"><Bed size={14} /> {listing.beds}</span>}
+                    {listing.baths && listing.baths !== "0" && listing.baths !== "" && <span className="flex items-center gap-1.5"><Bath size={14} /> {listing.baths}</span>}
                     {listing.sqft && <span className="flex items-center gap-1.5"><Maximize size={14} /> {listing.sqft} sqft</span>}
                   </div>
 
@@ -133,8 +147,7 @@ export function AgentListings({ data, brokerName }: { data: any[], brokerName: s
             ))}
           </div>
         ) : (
-          <div className="w-full h-[600px] relative rounded-2xl overflow-hidden border border-white/10">
-            {/* --- NEW: INJECT LEAFLET MAP --- */}
+          <div className="w-full h-150 relative rounded-2xl overflow-hidden border border-white/10">
             <ListingsMap parsedListings={parsedListings} />
           </div>
         )}
