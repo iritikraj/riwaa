@@ -133,11 +133,16 @@ export const POST = withLogger('/api/google-agent/generate', async (req: NextReq
     TASK:
     1. Filter out low-intent junk. Group the winners into 2-3 specific "Ad Groups".
     2. Write EXACTLY 3 distinct Responsive Search Ad (RSA) variations for EACH group, differing in tone and angle. 
-       - Headlines MUST be under 30 characters.
-       - Descriptions MUST be under 90 characters.
+       - Headlines MUST be UNDER 30 characters (including spaces). Be concise.
+       - Descriptions MUST be UNDER 90 characters (including spaces). 
     3. Create 4 account-level Sitelinks highly relevant to "${brief}".
-       - Sitelink Text: max 25 chars.
-       - Sitelink Desc 1 & 2: max 35 chars.
+       - Sitelink Text: MAX 25 characters. 
+       - Sitelink Desc 1 & 2: STRICT MAX 35 characters (including spaces). 
+
+    CRITICAL RULES:
+    - You must manually count the characters before generating.
+    - If a string exceeds the maximum character limit by even 1 character, the API will crash. 
+    - Keep sentences punchy and short.
 
     Return EXACTLY this JSON structure:
     {
@@ -150,27 +155,27 @@ export const POST = withLogger('/api/google-agent/generate', async (req: NextReq
           "ads": [
             {
               "variation_name": "Aggressive Offer",
-              "headlines": ["(max 30)", "(max 30)", "(max 30)"],
-              "descriptions": ["(max 90)", "(max 90)"]
+              "headlines": ["(max 30 chars)", "(max 30 chars)", "(max 30 chars)"],
+              "descriptions": ["(max 90 chars)", "(max 90 chars)"]
             },
             {
               "variation_name": "Trust & Authority",
-              "headlines": ["(max 30)", "(max 30)", "(max 30)"],
-              "descriptions": ["(max 90)", "(max 90)"]
+              "headlines": ["(max 30 chars)", "(max 30 chars)", "(max 30 chars)"],
+              "descriptions": ["(max 90 chars)", "(max 90 chars)"]
             },
             {
               "variation_name": "Feature Focused",
-              "headlines": ["(max 30)", "(max 30)", "(max 30)"],
-              "descriptions": ["(max 90)", "(max 90)"]
+              "headlines": ["(max 30 chars)", "(max 30 chars)", "(max 30 chars)"],
+              "descriptions": ["(max 90 chars)", "(max 90 chars)"]
             }
           ]
         }
       ],
       "sitelinks": [
         {
-          "linkText": "(max 25)",
-          "description1": "(max 35)",
-          "description2": "(max 35)"
+          "linkText": "(max 25 chars)",
+          "description1": "(max 35 chars)",
+          "description2": "(max 35 chars)"
         }
       ]
     }`;

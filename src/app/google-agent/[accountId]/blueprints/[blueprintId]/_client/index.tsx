@@ -2,8 +2,8 @@
 'use client';
 import Link from 'next/link';
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, CheckCircle2, Layers, UploadCloud, Hash, Link as LinkIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, CheckCircle2, Layers, UploadCloud, Hash, Link as LinkIcon, AlertTriangle } from 'lucide-react';
 
 export default function BlueprintStudioClient({
   accountId,
@@ -18,10 +18,13 @@ export default function BlueprintStudioClient({
 }) {
   const [blueprint, setBlueprint] = useState(initialBlueprint);
   const [selectedAdGroupIdx, setSelectedAdGroupIdx] = useState(0);
-  const [selectedAdIdx, setSelectedAdIdx] = useState(0); // Added back the Ad Index state
+  const [selectedAdIdx, setSelectedAdIdx] = useState(0);
   const [isDeploying, setIsDeploying] = useState(false);
   const [deploySuccess, setDeploySuccess] = useState(false);
   const [urlError, setUrlError] = useState(false);
+
+  // NEW: Global deployment error state
+  const [deployError, setDeployError] = useState<string | null>(null);
 
   if (!blueprint) {
     return <div className="p-8 text-center text-[#565C6B]">No active blueprint data provided.</div>;
@@ -29,8 +32,6 @@ export default function BlueprintStudioClient({
 
   const activeAdGroup = blueprint.ad_groups?.[selectedAdGroupIdx] || blueprint.ad_groups?.[0];
   const isAdsArray = Array.isArray(activeAdGroup?.ads);
-
-  // Safely extract the exact ad variation we want to look at
   const activeAd = isAdsArray ? activeAdGroup?.ads?.[selectedAdIdx] : activeAdGroup?.ads;
 
   const handleHeadlineChange = (idx: number, value: string) => {
@@ -59,12 +60,58 @@ export default function BlueprintStudioClient({
   };
 
   const handleDeploy = async () => {
+    setDeployError(null); // Clear previous errors
+
+    // 1. Validate Final URL
     if (!blueprint.final_url || !blueprint.final_url.trim()) {
       setUrlError(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setDeployError("Final URL is required to publish this campaign.");
+      document.getElementById('final-url-input')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
+    // 2. Pre-Validate Character Limits (Forces tab switch if error found)
+    if (blueprint.ad_groups) {
+      for (let gIdx = 0; gIdx < blueprint.ad_groups.length; gIdx++) {
+        const group = blueprint.ad_groups[gIdx];
+        const adsArray = Array.isArray(group.ads) ? group.ads : [group.ads];
+
+        for (let aIdx = 0; aIdx < adsArray.length; aIdx++) {
+          const ad = adsArray[aIdx];
+
+          const hasLongHeadline = ad.headlines?.some((h: string) => h.length > 30);
+          const hasLongDesc = ad.descriptions?.some((d: string) => d.length > 90);
+
+          if (hasLongHeadline || hasLongDesc) {
+            // Automatically switch to the tab containing the error
+            setSelectedAdGroupIdx(gIdx);
+            setSelectedAdIdx(aIdx);
+
+            setDeployError(`Character limit exceeded in Ad Group: "${group.name}" -> Variation: "${ad.variation_name || aIdx + 1}". Please shorten the highlighted red text.`);
+
+            // Allow state to update, then scroll down to the editor
+            setTimeout(() => {
+              document.getElementById('ad-copy-editor')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+            return; // Abort deployment
+          }
+        }
+      }
+    }
+
+    // 3. Pre-Validate Sitelinks
+    if (blueprint.sitelinks) {
+      for (let i = 0; i < blueprint.sitelinks.length; i++) {
+        const link = blueprint.sitelinks[i];
+        if ((link.linkText?.length || 0) > 25 || (link.description1?.length || 0) > 35 || (link.description2?.length || 0) > 35) {
+          setDeployError(`Character limit exceeded in Sitelinks (Extension ${i + 1}).`);
+          document.getElementById('sitelinks-editor')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return; // Abort deployment
+        }
+      }
+    }
+
+    // 4. API Call
     setIsDeploying(true);
     try {
       const res = await fetch(`/api/google-agent/deploy`, {
@@ -72,9 +119,20 @@ export default function BlueprintStudioClient({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ accountId, blueprintId, blueprint }),
       });
-      if (res.ok) setDeploySuccess(true);
-    } catch (err) {
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setDeploySuccess(true);
+      } else {
+        // Expose backend API errors to the UI
+        setDeployError(data.error || 'Google Ads API rejected the campaign. Please check the data and try again.');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch (err: any) {
       console.error('Deployment error:', err);
+      setDeployError(err.message || 'An unexpected error occurred during deployment.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsDeploying(false);
     }
@@ -121,6 +179,26 @@ export default function BlueprintStudioClient({
           )}
         </button>
       </div>
+
+      {/* NEW: Explicit Error Banner */}
+      <AnimatePresence>
+        {deployError && (
+          <motion.div
+            initial={{ opacity: 0, height: 0, y: -10 }}
+            animate={{ opacity: 1, height: 'auto', y: 0 }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 shadow-sm mb-2">
+              <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={18} />
+              <div>
+                <h3 className="text-red-800 text-[13px] font-bold uppercase tracking-wide">Deployment Blocked</h3>
+                <p className="text-red-600 text-[14px] mt-1">{deployError}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Ad Group Selector & SERP Preview */}
@@ -206,7 +284,8 @@ export default function BlueprintStudioClient({
         {/* Right Column: Copy Editor & Keyword Inspector */}
         <div className="lg:col-span-7 space-y-6">
           {/* Campaign Settings (Final URL) */}
-          <div className={`bg-white rounded-3xl border p-6 md:p-8 shadow-sm transition-colors ${urlError ? 'border-red-500/50 bg-red-50/10' : 'border-[#14181F]/10'}`}>
+          {/* ADDED ID for scroll targeting */}
+          <div id="final-url-input" className={`bg-white rounded-3xl border p-6 md:p-8 shadow-sm transition-colors ${urlError ? 'border-red-500/50 bg-red-50/10' : 'border-[#14181F]/10'}`}>
             <h3 className="text-[14px] uppercase tracking-widest font-bold mb-4 flex items-center gap-2">
               <LinkIcon size={16} className={urlError ? 'text-red-500' : 'text-[#9C7A3C]'} />
               Campaign Destination
@@ -233,7 +312,8 @@ export default function BlueprintStudioClient({
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl border border-[#14181F]/10 p-6 md:p-8 shadow-sm">
+          {/* ADDED ID for scroll targeting */}
+          <div id="ad-copy-editor" className="bg-white rounded-3xl border border-[#14181F]/10 p-6 md:p-8 shadow-sm">
             <div className="flex items-center justify-between border-b border-[#14181F]/5 pb-4 mb-6">
               <div>
                 <h3 className="text-[14px] uppercase tracking-widest font-bold">
@@ -335,8 +415,9 @@ export default function BlueprintStudioClient({
           </div>
 
           {/* Sitelinks Extension Manager */}
+          {/* ADDED ID for scroll targeting */}
           {blueprint.sitelinks && blueprint.sitelinks.length > 0 && (
-            <div className="bg-white rounded-3xl border border-[#14181F]/10 p-6 md:p-8 shadow-sm">
+            <div id="sitelinks-editor" className="bg-white rounded-3xl border border-[#14181F]/10 p-6 md:p-8 shadow-sm">
               <h3 className="text-[14px] uppercase tracking-widest font-bold mb-4 flex items-center gap-2">
                 <LinkIcon size={16} className="text-[#9C7A3C]" />
                 Account-Level Sitelinks
