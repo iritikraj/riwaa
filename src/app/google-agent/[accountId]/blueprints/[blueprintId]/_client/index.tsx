@@ -54,6 +54,13 @@ export default function BlueprintStudioClient({
     setBlueprint(updated);
   };
 
+  const handleSitelinkChange = (idx: number, field: string, value: string) => {
+    const updated = { ...blueprint };
+    if (!updated.sitelinks) return;
+    updated.sitelinks[idx][field] = value;
+    setBlueprint(updated);
+  };
+
   const handleFinalUrlChange = (value: string) => {
     setBlueprint({ ...blueprint, final_url: value });
     if (value.trim()) setUrlError(false);
@@ -251,15 +258,78 @@ export default function BlueprintStudioClient({
                 {activeAd?.descriptions?.[0]}
               </p>
 
-              {/* Sitelinks Mockup */}
+              {/* Sitelinks Extension Manager */}
               {blueprint.sitelinks && blueprint.sitelinks.length > 0 && (
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 pt-3 border-t border-gray-200">
-                  {blueprint.sitelinks.slice(0, 4).map((link: any, i: number) => (
-                    <div key={i}>
-                      <a href="#" className="text-[13px] text-[#1A0DAB] hover:underline font-medium">{link.linkText}</a>
-                      <p className="text-[11px] text-[#4D5156]">{link.description1}</p>
-                    </div>
-                  ))}
+                <div id="sitelinks-editor" className="bg-white rounded-3xl border border-[#14181F]/10 p-6 md:p-8 shadow-sm">
+                  <h3 className="text-[14px] uppercase tracking-widest font-bold mb-4 flex items-center gap-2">
+                    <LinkIcon size={16} className="text-[#9C7A3C]" />
+                    Account-Level Sitelinks
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {blueprint.sitelinks.map((link: any, i: number) => {
+                      const textOver = (link.linkText?.length || 0) > 25;
+                      const desc1Over = (link.description1?.length || 0) > 35;
+                      const desc2Over = (link.description2?.length || 0) > 35;
+
+                      return (
+                        <div key={i} className="bg-[#FCFBF8] border border-[#14181F]/5 p-5 rounded-2xl space-y-4">
+
+                          {/* Link Text (Max 25) */}
+                          <div>
+                            <div className="flex justify-between items-center mb-1.5">
+                              <label className="text-[10px] font-bold uppercase tracking-wider text-[#14181F]/60">Link Text</label>
+                              <span className={`text-[10px] font-mono ${textOver ? 'text-red-500 font-bold' : 'text-[#565C6B]'}`}>
+                                {link.linkText?.length || 0}/25
+                              </span>
+                            </div>
+                            <input
+                              type="text"
+                              value={link.linkText || ''}
+                              onChange={(e) => handleSitelinkChange(i, 'linkText', e.target.value)}
+                              className={`w-full bg-white border rounded-xl px-3.5 py-2 text-[13px] outline-none transition-colors ${textOver ? 'border-red-500 bg-red-50/20' : 'border-[#14181F]/10 focus:border-[#9C7A3C]'
+                                }`}
+                            />
+                          </div>
+
+                          {/* Description 1 (Max 35) */}
+                          <div>
+                            <div className="flex justify-between items-center mb-1.5">
+                              <label className="text-[10px] font-bold uppercase tracking-wider text-[#14181F]/60">Description 1</label>
+                              <span className={`text-[10px] font-mono ${desc1Over ? 'text-red-500 font-bold' : 'text-[#565C6B]'}`}>
+                                {link.description1?.length || 0}/35
+                              </span>
+                            </div>
+                            <input
+                              type="text"
+                              value={link.description1 || ''}
+                              onChange={(e) => handleSitelinkChange(i, 'description1', e.target.value)}
+                              className={`w-full bg-white border rounded-xl px-3.5 py-2 text-[13px] outline-none transition-colors ${desc1Over ? 'border-red-500 bg-red-50/20' : 'border-[#14181F]/10 focus:border-[#9C7A3C]'
+                                }`}
+                            />
+                          </div>
+
+                          {/* Description 2 (Max 35) */}
+                          <div>
+                            <div className="flex justify-between items-center mb-1.5">
+                              <label className="text-[10px] font-bold uppercase tracking-wider text-[#14181F]/60">Description 2</label>
+                              <span className={`text-[10px] font-mono ${desc2Over ? 'text-red-500 font-bold' : 'text-[#565C6B]'}`}>
+                                {link.description2?.length || 0}/35
+                              </span>
+                            </div>
+                            <input
+                              type="text"
+                              value={link.description2 || ''}
+                              onChange={(e) => handleSitelinkChange(i, 'description2', e.target.value)}
+                              className={`w-full bg-white border rounded-xl px-3.5 py-2 text-[13px] outline-none transition-colors ${desc2Over ? 'border-red-500 bg-red-50/20' : 'border-[#14181F]/10 focus:border-[#9C7A3C]'
+                                }`}
+                            />
+                          </div>
+
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
