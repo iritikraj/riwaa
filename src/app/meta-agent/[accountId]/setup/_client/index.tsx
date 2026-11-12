@@ -128,7 +128,7 @@ export default function CampaignSetupClientPage({ activeAccountId }: { activeAcc
           {isLoading && (
             <div className="flex-1 flex flex-col items-center justify-center text-[#9C7A3C] z-10 space-y-4">
               <Activity className="animate-pulse mb-2" size={32} />
-              <span className="text-[11px] uppercase tracking-[0.2em] font-medium">Gemini is analyzing the brief...</span>
+              <span className="text-[11px] uppercase tracking-[0.2em] font-medium">Riwaa is analyzing the brief...</span>
             </div>
           )}
 

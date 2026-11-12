@@ -12,9 +12,15 @@ export class AiAgent {
   // campaign setup
   async draftCampaignStructure(brief: Record<string, any>): Promise<any> {
     const prompt = `You are a senior Meta Ads media planner at a performance marketing agency. 
-    Turn client briefs into a sound, conservative campaign structure. Split budget 
-    across a small number of testable ad sets rather than fragmenting spend too thin. 
-    Flag anything ambiguous instead of guessing silently.
+    Turn client briefs into a sound, conservative campaign structure.
+    
+    CRITICAL INSTRUCTION: Based on the brief, you MUST create exactly 3 different types of ad-sets for every campaign:
+    1. "Interest Targeting": Target specific interests (e.g., Real estate investing, Property finder, Luxury goods) and behaviors (e.g., high-value goods preference). Include an age range (e.g., 30-65+).
+    2. "Expats Targeting": Target expats from specific countries (e.g., UK, US, Germany, France, Russia, etc.) who are currently living in the target location, combined with the real estate interests from Ad Set 1.
+    3. "Lookalike Targeting": Target a 1% lookalike audience of a "Premium Audience" customer list.
+    
+    If a target language is mentioned in the brief, apply it to all ad-sets. If no language is mentioned, default to English ('en').
+    Location/country targeting is mandatory. If no location is mentioned in the brief, default the target country to the UAE ('AE').
     
     Brief:
     ${JSON.stringify(brief, null, 2)}`;
@@ -46,15 +52,51 @@ export class AiAgent {
                 type: Type.OBJECT,
                 properties: {
                   name: { type: Type.STRING },
-                  daily_budget_usd: { type: Type.NUMBER },
-                  targeting_summary: {
-                    type: Type.OBJECT,
-                    description: "Human-readable targeting parameters (age range, genders, geos, interests) - translate to exact Meta targeting spec fields before calling the API."
+                  type: {
+                    type: Type.STRING,
+                    enum: ['interest', 'expats', 'lookalike'],
+                    description: "The specific strategy for this ad set."
                   },
-                  meta_countries: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Array of exact 2-letter ISO country codes for the target locations (e.g., ['AE', 'GB', 'US']) based on the brief."
+                  daily_budget_usd: { type: Type.NUMBER },
+                  targeting: {
+                    type: Type.OBJECT,
+                    description: "Detailed targeting parameters. Translate human logic to exact Meta API structures (e.g., interests, behaviors, custom_audiences, locales).",
+                    properties: {
+                      countries: {
+                        type: Type.ARRAY,
+                        items: { type: Type.STRING },
+                        description: "Array of exact 2-letter ISO country codes. MUST be included. Default to ['AE'] if unspecified."
+                      },
+                      locales: {
+                        type: Type.ARRAY,
+                        items: { type: Type.NUMBER },
+                        description: "Meta locale keys. E.g., [24] for English, [62] for Arabic. Default to [24] (English) if unspecified."
+                      },
+                      age_min: { type: Type.NUMBER },
+                      age_max: { type: Type.NUMBER },
+                      flexible_spec: {
+                        type: Type.ARRAY,
+                        description: "Array of detailed targeting (interests/behaviors). Used for Interest and Expat ad sets.",
+                        items: {
+                          type: Type.OBJECT,
+                          properties: {
+                            interests: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { id: { type: Type.STRING }, name: { type: Type.STRING } } } },
+                            behaviors: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { id: { type: Type.STRING }, name: { type: Type.STRING } } } }
+                          }
+                        }
+                      },
+                      expat_countries: {
+                        type: Type.ARRAY,
+                        items: { type: Type.STRING },
+                        description: "For Expat ad sets: Array of country names the user is an expat from (e.g., 'United Kingdom', 'Germany')."
+                      },
+                      custom_audiences: {
+                        type: Type.ARRAY,
+                        items: { type: Type.OBJECT, properties: { name: { type: Type.STRING } } },
+                        description: "For Lookalike ad sets: Identify the audience name, e.g., 'Lookalike (AE, 1%) - Premium Audience'"
+                      }
+                    },
+                    required: ['countries', 'locales']
                   },
                   optimization_goal: { type: Type.STRING },
                   placements: {
@@ -62,17 +104,16 @@ export class AiAgent {
                     items: { type: Type.STRING },
                   },
                 },
-                required: ['name', 'daily_budget_usd', 'targeting_summary', 'optimization_goal', 'placements'],
+                required: ['name', 'type', 'daily_budget_usd', 'targeting', 'optimization_goal', 'placements'],
               },
             },
             rationale: {
               type: Type.STRING,
-              description: "Why this structure (budget split across ad sets, audience choices, placement choices) fits the brief.",
+              description: "Why this structure fits the brief.",
             },
             open_questions: {
               type: Type.ARRAY,
               items: { type: Type.STRING },
-              description: "Anything ambiguous in the brief that a human should confirm before this goes live.",
             },
           },
           required: ['campaign', 'ad_sets', 'rationale'],

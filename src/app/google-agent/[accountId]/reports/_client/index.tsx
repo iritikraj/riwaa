@@ -121,7 +121,7 @@ export default function ReportsClient({
               <Sparkles size={16} />
             </div>
             <span className="text-[11px] uppercase tracking-[0.25em] font-bold text-[#9C7A3C]">
-              Gemini PPC Strategic Brief
+              Riwaa PPC Strategic Brief
             </span>
           </div>
 
@@ -333,7 +333,7 @@ export default function ReportsClient({
                       <td className="py-3.5 pr-4">
                         <div className="flex items-center gap-2">
                           <span className={`h-2 w-2 rounded-full shrink-0 ${camp.status === 'ENABLED' ? 'bg-emerald-500' : 'bg-amber-400'}`} />
-                          <span className="font-semibold text-[#14181F] truncate max-w-[200px]" title={camp.name}>
+                          <span className="font-semibold text-[#14181F] truncate max-w-50" title={camp.name}>
                             {camp.name}
                           </span>
                         </div>

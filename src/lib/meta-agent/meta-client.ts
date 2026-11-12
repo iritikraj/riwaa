@@ -208,4 +208,45 @@ export class MetaClient {
 
     return data.data || [];
   }
+
+  async getCustomAudienceByName(name: string): Promise<string | null> {
+    if (this.dryRun) return 'dryrun_audience_id';
+    // Fetch all custom audiences for the account
+    const audiences = await this.account.getCustomAudiences(['id', 'name']);
+    // Find the one that matches the AI's requested name
+    const match = audiences.find((a: any) => a._data.name.toLowerCase() === name.toLowerCase());
+    return match ? match._data.id : null;
+  }
+
+  async getTargetingIdByName(name: string, type: 'adinterest' | 'adTargetingCategory' = 'adinterest'): Promise<string | null> {
+    if (this.dryRun) return 'dryrun_targeting_id';
+    if (!this.accessToken) throw new Error('Meta Access Token is missing.');
+
+    const queryParams = new URLSearchParams({
+      type: type,
+      q: name,
+      access_token: this.accessToken
+    });
+
+    // Behaviors require an extra 'class' parameter
+    if (type === 'adTargetingCategory') {
+      queryParams.append('class', 'behaviors');
+    }
+
+    const url = `https://graph.facebook.com/v19.0/search?${queryParams.toString()}`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      // Return the ID of the first (most relevant) match from Meta
+      if (data.data && data.data.length > 0) {
+        return data.data[0].id;
+      }
+      return null;
+    } catch (error) {
+      console.error(`Error fetching Meta targeting ID for ${name}:`, error);
+      return null;
+    }
+  }
 }

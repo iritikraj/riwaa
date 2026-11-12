@@ -151,7 +151,7 @@ export default function GoogleCampaignSetupClient({ activeAccountId }: { activeA
           {isLoading && (
             <div className="flex-1 flex flex-col items-center justify-center text-[#9C7A3C] z-10 space-y-4">
               <Activity className="animate-pulse mb-2" size={32} />
-              <span className="text-[11px] uppercase tracking-[0.2em] font-medium text-center">Gemini is fetching search volume<br />and drafting RSA copy...</span>
+              <span className="text-[11px] uppercase tracking-[0.2em] font-medium text-center">Riwaa is fetching search volume<br />and drafting RSA copy...</span>
             </div>
           )}
 
